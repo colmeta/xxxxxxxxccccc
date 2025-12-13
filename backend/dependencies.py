@@ -18,10 +18,12 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     
     supabase: Optional[Client] = get_supabase()
     
-    # If Supabase is not configured (e.g. local dev without env vars), fallback to mock in dev
+    # Production Mode: Fail fast if Supabase is not configured
     if not supabase:
-        print("⚠️ Supabase not connected. Allowing mock user for DEV only.")
-        return {"id": "mock_user_id_from_token", "email": "dev@mock.com"} 
+        raise HTTPException(
+            status_code=503, 
+            detail="Service temporarily unavailable. Database connection required."
+        )
 
     try:
         # REAL AUTHENTICATION

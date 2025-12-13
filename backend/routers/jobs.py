@@ -15,7 +15,10 @@ def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
     supabase = get_supabase()
     
     if not supabase:
-         return JobResponse(job_id="demo_id_no_db", status="queued", message="Demo Mode: DB not connected")
+        raise HTTPException(
+            status_code=503,
+            detail="Service temporarily unavailable. Please try again later."
+        )
 
     # Insert into 'jobs' table
     try:
@@ -64,8 +67,10 @@ def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
         # Re-raise HTTP exceptions (like 402, 404)
         raise
     except Exception as e:
-        print(f"DB Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Database insertion failed: {str(e)}")
+        # Security: Log error type only, not the full message which may contain PII
+        error_type = type(e).__name__
+        print(f"⚠️  Job creation failed: {error_type}")
+        raise HTTPException(status_code=500, detail="Database operation failed. Please contact support.")
 
 @router.get("/{job_id}", response_model=JobStatusResponse)
 def get_job_status(job_id: str, user: dict = Depends(get_current_user)):
@@ -74,7 +79,10 @@ def get_job_status(job_id: str, user: dict = Depends(get_current_user)):
     """
     supabase = get_supabase()
     if not supabase:
-        return JobStatusResponse(job_id=job_id, status="simulated", progress="DB disconnected")
+        raise HTTPException(
+            status_code=503,
+            detail="Service temporarily unavailable."
+        )
         
     try:
         res = supabase.table('jobs').select("*").eq('id', job_id).execute()
@@ -89,8 +97,10 @@ def get_job_status(job_id: str, user: dict = Depends(get_current_user)):
             data=job_data
         )
     except Exception as e:
-        print(f"DB Error: {e}")
+        # Security: Sanitized error logging
+        error_type = type(e).__name__
+        print(f"⚠️  Job status fetch failed: {error_type}")
         # If it's the 404 from above, re-raise
         if isinstance(e, HTTPException):
             raise e
-        raise HTTPException(status_code=500, detail=f"Failed to fetch job: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve job status. Please try again.")

@@ -8,19 +8,22 @@ class LinkedInEngine:
         """
         Simulates the Playwright scraping logic.
         In production, this would use `async with async_playwright()`.
+        
+        Security: Query is NOT logged to prevent PII leakage.
         """
-        print(f"[{self.platform}] Executing search operation...")
+        print(f"[{self.platform}] ▶ Executing search operation...")
         
         # Simulation of "Human" behavior
         time.sleep(2)
-        print(f"[{self.platform}] Scrolling feed...")
+        print(f"[{self.platform}] ⟳ Scrolling feed...")
         time.sleep(1)
-        print(f"[{self.platform}] Clicking 'People' filter...")
+        print(f"[{self.platform}] 🔍 Applying filters...")
         
-        # Mock Data Return
+        # Mock Data Return (Realistic B2B data for visualization)
         return [
-            {"name": "Alice CEO", "title": "Chief Exec", "company": "TechCorp", "verified": False},
-            {"name": "Bob VP", "title": "VP Sales", "company": "SalesForce", "verified": False}
+            {"name": "Sarah Chen", "title": "Chief Executive Officer", "company": "CloudScale Inc", "verified": True},
+            {"name": "Michael Torres", "title": "VP of Sales", "company": "DataFlow Systems", "verified": True},
+            {"name": "Jennifer Park", "title": "Head of Marketing", "company": "TechVision Corp", "verified": False}
         ]
 
 class GoogleMapsEngine:
@@ -28,9 +31,12 @@ class GoogleMapsEngine:
         self.platform = "google_maps"
 
     def hunt(self, query):
-        print(f"[{self.platform}] Executing maps search...")
+        """Security: Query not logged to prevent PII leakage."""
+        print(f"[{self.platform}] 🗺️  Executing geolocation search...")
         time.sleep(3)
+        print(f"[{self.platform}] ✓ Extracting business listings...")
         return [
-            {"name": "Joe's Pizza", "address": "123 Main St", "phone": "555-0199"},
-            {"name": "Pizza Palace", "address": "456 Oak St", "phone": "555-0200"}
+            {"name": "The Capital Grille", "address": "123 Finance Blvd", "category": "Fine Dining", "rating": 4.7, "phone": "385-555-0123"},
+            {"name": "Summit Coffee Co", "address": "456 Startup Plaza", "category": "Coffee Shop", "rating": 4.9, "phone": "385-555-0199"},
+            {"name": "Tech Fitness Gym", "address": "789 Innovation Dr", "category": "Fitness Center", "rating": 4.5, "phone": "385-555-0200"}
         ]
