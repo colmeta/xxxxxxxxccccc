@@ -113,6 +113,63 @@ begin
 end;
 $$ language plpgsql security definer;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+
+-- 5. INDEXES (Performance Optimization)
+create index idx_jobs_status on public.jobs(status);
+create index idx_jobs_user_id on public.jobs(user_id);
+create index idx_results_job_id on public.results(job_id);
+
+-- 6. WORKER PROCEDURES
+
+-- Function for a worker to atomicallly claim a queued job
+create or replace function public.fn_claim_job(worker_id uuid default null)
+returns table (
+  id uuid,
+  target_query text,
+  target_platform text,
+  compliance_mode compliance_level
+) as $$
+declare
+  claimed_job_id uuid;
+begin
+  -- Find a queued job, lock it, and update it to running
+  -- recursive queries or external calls are not allowed inside the locking clause, so we keep it simple
+  
+  with subsequent_job as (
+    select id
+    from public.jobs
+    where status = 'queued'
+    order by created_at asc
+    limit 1
+    for update skip locked
+  )
+  update public.jobs
+  set 
+    status = 'running',
+    started_at = now()
+    -- worker_id could be added to jobs table if we want to track which worker took it
+  from subsequent_job
+  where jobs.id = subsequent_job.id
+  returning jobs.id into claimed_job_id;
+
+  -- Return the job details if one was claimed
+  return query
+  select j.id, j.target_query, j.target_platform, j.compliance_mode
+  from public.jobs j
+  where j.id = claimed_job_id;
+end;
+$$ language plpgsql security definer;
+
+-- Function to safely log provenance data (optional helper, but good for encapsulation)
+create or replace function public.fn_log_provenance(
+  p_result_id uuid,
+  p_source_url text,
+  p_legal_basis text,
+  p_arbiter_verdict text
+)
+returns void as $$
+begin
+  insert into public.provenance_logs (result_id, source_url, legal_basis, arbiter_verdict)
+  values (p_result_id, p_source_url, p_legal_basis, p_arbiter_verdict);
+end;
+$$ language plpgsql security definer;

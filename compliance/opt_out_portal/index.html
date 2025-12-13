@@ -13,6 +13,9 @@
         button { width: 100%; padding: 0.75rem; border-radius: 6px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; transition: background 0.2s; }
         button:hover { background: #0ea5e9; }
         .disclaimer { margin-top: 1rem; font-size: 0.75rem; text-align: center; opacity: 0.7; }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .tab { flex: 1; background: #334155; color: #94a3b8; padding: 0.5rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .tab.active { background: #38bdf8; color: #0f172a; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -20,21 +23,102 @@
         <h1>🛡️ Privacy Shield</h1>
         <p>Clarity Pearl respects your data rights. Enter your email or phone number below to <strong>permanently opt-out</strong> of our commercial intelligence database.</p>
         
+        <div class="tabs">
+            <button type="button" class="tab active" onclick="setMode('email')">Email</button>
+            <button type="button" class="tab" onclick="setMode('phone')">Phone</button>
+        </div>
+
         <form id="optOutForm">
-            <input type="email" id="email" placeholder="name@company.com" required>
-            <button type="submit">Remove My Data</button>
+            <input type="text" id="identifier" placeholder="name@company.com" required>
+            <button type="submit" id="submitBtn">Remove My Data</button>
         </form>
 
-        <p class="disclaimer">Requests are processed instantly via SHA-256 Hashing.</p>
+        <p class="disclaimer">Requests are processed instantly via <strong>SHA-256 Hashing</strong> using your local device. <br>Your raw data never leaves your browser.</p>
+        <div id="status" style="margin-top: 1rem; text-align: center; font-size: 0.8rem; min-height: 1.2rem;"></div>
     </div>
 
     <script>
-        document.getElementById('optOutForm').addEventListener('submit', function(e) {
+        let mode = 'email';
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            document.querySelector(`button[onclick="setMode('${mode}')"]`).classList.add('active');
+            
+            const input = document.getElementById('identifier');
+            if (mode === 'email') {
+                input.placeholder = "name@company.com";
+                input.type = "email";
+            } else {
+                input.placeholder = "+1 (555) 000-0000";
+                input.type = "tel";
+            }
+            input.value = '';
+            input.focus();
+        }
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        document.getElementById('optOutForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            // In a real app, this would POST to our API
-            alert('Request received for: ' + email + '\n\nYour data has been hashed and added to the Global Blocklist.');
-            document.getElementById('email').value = '';
+            const btn = document.getElementById('submitBtn');
+            const status = document.getElementById('status');
+            const rawValue = document.getElementById('identifier').value;
+            
+            if (!rawValue) return;
+
+            // Normalization Logic
+            let cleanValue = rawValue.trim();
+            if (mode === 'email') {
+                cleanValue = cleanValue.toLowerCase();
+            } else {
+                // Remove all non-digits
+                cleanValue = cleanValue.replace(/\D/g, '');
+            }
+
+            if (cleanValue.length < 5) {
+                status.style.color = '#f87171'; // red
+                status.innerText = "Please enter a valid identifier.";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            try {
+                const hash = await sha256(cleanValue);
+                
+                // REAL API CALL
+                const response = await fetch('/api/opt-out', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hash: hash, type: mode })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server error');
+                }
+
+                const result = await response.json();
+                
+                status.style.color = '#4ade80'; // green
+                status.innerText = result.message || "Success! Your hash (" + hash.substring(0, 8) + "...) is blocked.";
+                
+            } catch (err) {
+                console.error(err);
+                status.style.color = '#f87171';
+                status.innerText = "Error processing request.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Remove My Data";
+                document.getElementById('identifier').value = '';
+            }
         });
     </script>
 </body>

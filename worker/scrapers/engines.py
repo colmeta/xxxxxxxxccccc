@@ -9,7 +9,7 @@ class LinkedInEngine:
         Simulates the Playwright scraping logic.
         In production, this would use `async with async_playwright()`.
         """
-        print(f"[{self.platform}] Navigate to: LinkedIn Search -> {query}")
+        print(f"[{self.platform}] Executing search operation...")
         
         # Simulation of "Human" behavior
         time.sleep(2)
@@ -28,7 +28,7 @@ class GoogleMapsEngine:
         self.platform = "google_maps"
 
     def hunt(self, query):
-        print(f"[{self.platform}] Navigate to: Maps -> {query}")
+        print(f"[{self.platform}] Executing maps search...")
         time.sleep(3)
         return [
             {"name": "Joe's Pizza", "address": "123 Main St", "phone": "555-0199"},
