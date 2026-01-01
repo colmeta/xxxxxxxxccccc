@@ -20,7 +20,9 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-          playwright install chromium
+          pip install -r worker/requirements.txt
+          pip install playwright
+          python -m playwright install chromium
 
       - name: Run Hydra
         env:
