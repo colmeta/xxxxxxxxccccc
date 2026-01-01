@@ -184,5 +184,20 @@ class HydraController:
                 await asyncio.sleep(5)
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--timeout", type=int, help="Run for N seconds then exit", default=0)
+    args = parser.parse_args()
+
     hydra = HydraController()
-    asyncio.run(hydra.run_loop())
+    
+    if args.timeout > 0:
+        # Run safely with timeout
+        print(f"[{hydra.worker_id}] Running with timeout: {args.timeout}s")
+        try:
+             asyncio.run(asyncio.wait_for(hydra.run_loop(), timeout=args.timeout))
+        except asyncio.TimeoutError:
+             print(f"[{hydra.worker_id}] Timeout reached ({args.timeout}s). Exiting gracefully.")
+    else:
+        # Run forever
+        asyncio.run(hydra.run_loop())

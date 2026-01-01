@@ -17,9 +17,10 @@ from backend.routers import opt_out
 app.include_router(opt_out.router)
 
 # CRM & Outreach Routers (Production)
-from backend.routers import crm, outreach
+from backend.routers import crm, outreach, bulk
 app.include_router(crm.router)
 app.include_router(outreach.router)
+app.include_router(bulk.router)
 
 # --- ROOT ENDPOINT ---
 @app.get("/")
