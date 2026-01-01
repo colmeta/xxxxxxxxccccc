@@ -33,5 +33,5 @@ jobs:
           WORKER_ID: "github_actions_runner"
         run: |
           cd worker
-          # Run for max 5 minutes to avoid timeouts/detection
-          python hydra_controller.py --timeout 300
+          # Run for max 30 minutes to allow for sustained surveillance
+          python hydra_controller.py --timeout 1800

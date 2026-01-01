@@ -22,8 +22,9 @@ except ImportError:
 load_dotenv()
 
 class HydraController:
-    def __init__(self, worker_id="production_hydra_01"):
-        self.worker_id = worker_id
+    def __init__(self, worker_id=None):
+        # Honor WORKER_ID env var if provided, else use default
+        self.worker_id = worker_id or os.getenv("WORKER_ID") or "production_hydra_01"
         self.url = os.getenv("SUPABASE_URL")
         self.key = os.getenv("SUPABASE_KEY")
         
