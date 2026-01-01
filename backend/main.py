@@ -24,6 +24,7 @@ app.include_router(bulk.router)
 
 # --- ROOT ENDPOINT ---
 @app.get("/")
+@app.head("/")
 def health_check():
     # We can check DB status via the service if we want, but keeping it simple for now
     from backend.services.supabase_client import get_supabase
