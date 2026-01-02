@@ -4,8 +4,10 @@ import json
 import random
 from datetime import datetime
 from dotenv import load_dotenv
+import hashlib
 from utils.arbiter import arbiter
 from scrapers.linkedin_engine import LinkedInEngine
+from utils.proxy_manager import ProxyManager
 
 # Try to import Supabase, but don't fail immediately if missing (allows local dev setup)
 try:
@@ -27,6 +29,7 @@ class HydraController:
     def __init__(self, worker_id=None):
         # Honor WORKER_ID env var if provided, else use default
         self.worker_id = worker_id or os.getenv("WORKER_ID") or "production_hydra_01"
+        self.proxy_manager = ProxyManager(os.getenv("PROXY_LIST_PATH"))
         self.url = os.getenv("SUPABASE_URL")
         self.key = os.getenv("SUPABASE_KEY")
         
@@ -78,8 +81,15 @@ class HydraController:
         is_verified = False
         
         async with async_playwright() as p:
+            # Get next proxy
+            proxy_server = self.proxy_manager.get_proxy()
+            launch_args = {}
+            if proxy_server and proxy_server != "direct":
+                launch_args["proxy"] = {"server": proxy_server}
+                print(f"   🌐 Routing via Proxy: {proxy_server}")
+
             # Launch real browser
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(headless=True, **launch_args)
             context = await browser.new_context(
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             )
@@ -140,15 +150,45 @@ class HydraController:
         clarity_score, verdict = arbiter.score_lead(query, scraped_data)
         print(f"   ⚖️  Arbiter Verdict: {verdict}")
 
-        # 2. Save results
-        self.finalize_job(job_id, scraped_data, is_verified, verdict, page.url, clarity_score)
+        # 2. Save results (Async)
+        await self.finalize_job(job_id, scraped_data, is_verified, verdict, page.url, clarity_score)
 
-    def finalize_job(self, job_id, data, verified, log_msg, source_url, clarity_score=0):
+    async def check_opt_out(self, identifier):
+        """
+        Checks if the given identifier (email/phone) is in the global opt-out registry.
+        """
+        if not self.supabase or not identifier:
+            return False
+            
+        try:
+            # Hash the identifier to match the DB
+            identifier_hash = hashlib.sha256(identifier.lower().strip().encode('utf-8')).hexdigest()
+            
+            res = self.supabase.table('opt_out_registry').select('id').eq('identifier_hash', identifier_hash).execute()
+            return len(res.data) > 0
+        except Exception as e:
+            print(f"⚠️ Compliance check failed: {e}")
+            return False
+
+    async def finalize_job(self, job_id, data, verified, log_msg, source_url, clarity_score=0):
         if not self.supabase:
             print(f"   [Offline] Job {job_id} done. Verified: {verified}")
             return
 
         try:
+            # 0. COMPLIANCE CHECK (The Fortress of Truth)
+            # Find any identifiers in the data and check them
+            potential_identifiers = []
+            if data.get('email'): potential_identifiers.append(data['email'])
+            
+            for ident in potential_identifiers:
+                if await self.check_opt_out(ident):
+                    print(f"   🛡️ Compliance Alert: Lead {ident} has opted out. Scrubbing data.")
+                    data = {"status": "scrubbed", "reason": "User opted out via Compliance Portal"}
+                    verified = False
+                    clarity_score = 0
+                    break
+
             # 1. Insert Result
             result_payload = {
                 "job_id": job_id,
