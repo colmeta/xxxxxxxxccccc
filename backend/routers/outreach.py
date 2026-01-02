@@ -16,7 +16,7 @@ class EmailRequest(BaseModel):
     service_provider: str = "sendgrid" # or 'mailgun', 'smtp'
     api_key: str
 
-@router.post("/send")
+@router.post("/send/")
 async def send_outreach_email(request: EmailRequest):
     """
     Trigger real email outreach via external providers.

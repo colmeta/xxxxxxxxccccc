@@ -31,7 +31,7 @@ export default function ResultsView() {
             const { data: { session: currentSession } } = await supabase.auth.getSession()
             const token = currentSession?.access_token
 
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/outreach/send`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/outreach/send/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

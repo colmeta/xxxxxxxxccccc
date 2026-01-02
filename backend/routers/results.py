@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 
 router = APIRouter(prefix="/api/results", tags=["Results"])
 
-@router.get("/{job_id}")
+@router.get("/{job_id}/")
 def get_job_results(job_id: str, user: dict = Depends(get_current_user)):
     """
     Fetch scraped data for a given job.
