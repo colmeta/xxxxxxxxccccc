@@ -6,7 +6,7 @@ from backend.services.supabase_client import get_supabase
 
 router = APIRouter(prefix="/api/jobs", tags=["Jobs"])
 
-@router.post("/", response_model=JobResponse)
+@router.post("", response_model=JobResponse)
 def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
     """
     Receives a Job from the User/Dashboard and writes to 'jobs' table.
@@ -72,7 +72,7 @@ def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
         print(f"⚠️  Job creation failed: {error_type}")
         raise HTTPException(status_code=500, detail="Database operation failed. Please contact support.")
 
-@router.get("/{job_id}/", response_model=JobStatusResponse)
+@router.get("/{job_id}", response_model=JobStatusResponse)
 def get_job_status(job_id: str, user: dict = Depends(get_current_user)):
     """
     Check the status of a specific job.

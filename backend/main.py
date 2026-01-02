@@ -12,8 +12,8 @@ app = FastAPI(
 # --- CORS CONFIGURATION ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, replace with specific domains
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False, # Must be False if using allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -34,7 +34,6 @@ app.include_router(bulk.router)
 
 # --- ROOT ENDPOINT ---
 @app.get("/")
-@app.head("/")
 def health_check():
     # We can check DB status via the service if we want, but keeping it simple for now
     from backend.services.supabase_client import get_supabase

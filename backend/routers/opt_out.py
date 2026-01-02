@@ -9,7 +9,7 @@ class OptOutRequest(BaseModel):
     hash: str
     type: str = "email"  # Keep for client compatibility (not stored in DB)
 
-@router.post("/")
+@router.post("")
 async def opt_out(fastapi_request: Request, request: OptOutRequest):
     """
     Receives a hashed email/phone from the Opt-Out Portal.

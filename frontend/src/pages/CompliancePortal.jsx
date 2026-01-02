@@ -20,7 +20,7 @@ const CompliancePortal = () => {
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/opt-out/`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/opt-out`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -14,7 +14,7 @@ export default function JobCreator({ session }) {
             const { data: { session: currentSession } } = await supabase.auth.getSession()
             const token = currentSession?.access_token
 
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/jobs/`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/jobs`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
