@@ -88,12 +88,40 @@ class HydraController:
                 launch_args["proxy"] = {"server": proxy_server}
                 print(f"   🌐 Routing via Proxy: {proxy_server}")
 
-            # Launch real browser
-            browser = await p.chromium.launch(headless=True, **launch_args)
+            # Launch real browser with Stealth Args
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox"
+                ],
+                **launch_args
+            )
+            
+            # Rotate User Agents
+            user_agents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15"
+            ]
+            selected_ua = random.choice(user_agents)
+            print(f"   🎭 Stealth Mode: Active | UA: {selected_ua[:30]}...")
+
             context = await browser.new_context(
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                user_agent=selected_ua,
+                viewport={"width": 1280, "height": 720},
+                device_scale_factor=1,
             )
             page = await context.new_page()
+            
+            # Anti-detect script injection
+            await page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                });
+            """)
             
             try:
                 # A/B TESTING LOGIC
