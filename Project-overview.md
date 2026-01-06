@@ -117,7 +117,7 @@ A proprietary AI agent that cross-references data points (e.g., verifying Linked
 ### Critical Threats:
 1.  **Legal/Regulatory:** Handled by our "One-Click Opt-Out" portal and rigorous `robots.txt` respect policy (where applicable).
 2.  **Platform Bans:** Mitigated by the "Hydra Protocol" (multi-network redundancy).
-3.  **Trademark Conflict:** *Requires immediate legal counsel regarding 'Pearl Group' conflict.* (Strategy: Focus brand on "Pearl Data Intelligence" or "Pearl Instinct" to differentiate).
+3.  **Trademark Conflict:** *Requires immediate legal counsel regarding 'Pearl Group' conflict.* (Strategy: Focus brand on "Clarity Pearl" or "Pearl Instinct" to differentiate).
 
 ---
 

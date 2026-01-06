@@ -1,4 +1,4 @@
-# NEXUS DATA INTELLIGENCE - PITCH DECK
+# CLARITY PEARL DATA INTELLIGENCE - PITCH DECK
 
 **Seed Round - Raising $1.5M**
 
@@ -9,12 +9,12 @@
 ```
 ┌────────────────────────────────────────┐
 │                                        │
-│         NEXUS DATA INTELLIGENCE        │
+│           CLARITY PEARL INTELLIGENCE       │
 │                                        │
-│    Turn Any Data Into Enterprise Gold │
+│    Cognitive Lattice & Autonomous intelligence │
 │                                        │
 │                                        │
-│              [Company Logo]            │
+│              ![Logo](logo.png)         │
 │                                        │
 │                                        │
 │    Raising $1.5M Seed at $8M Post     │
@@ -216,7 +216,7 @@ SCALABILITY:
 ```
 WHY WE WIN
 
-                   NEXUS  │ Bright Data │ Apify │ ScraperAPI
+                   CLARITY PEARL  │ Bright Data │ Apify │ ScraperAPI
 ─────────────────────────┼─────────────┼───────┼────────────
 Ease of Use        ⭐⭐⭐⭐⭐│     ⭐⭐     │  ⭐⭐⭐ │    ⭐⭐⭐⭐
 Industry Solutions ⭐⭐⭐⭐⭐│     ⭐⭐     │  ⭐⭐  │     ⭐
@@ -552,7 +552,7 @@ INVESTOR PEDIGREE WE'RE TARGETING:
 │              TOGETHER                  │
 │                                        │
 │                                        │
-│    NEXUS DATA INTELLIGENCE             │
+│    CLARITY PEARL DATA INTELLIGENCE             │
 │    Turn Any Data Into Enterprise Gold  │
 │                                        │
 │                                        │

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import AnalyticsDashboard from './AnalyticsDashboard'
 
 export default function ResultsView() {
     const [results, setResults] = useState([])
@@ -60,123 +61,208 @@ export default function ResultsView() {
     }
 
     return (
-        <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 className="text-gradient" style={{ margin: 0, fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>💎</span> ACQUIRED INTEL
-                </h2>
-                <button
-                    onClick={fetchResults}
-                    className="btn-primary"
-                    disabled={loading}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        fontSize: '0.75rem',
-                        background: 'transparent',
-                        border: '1px solid var(--primary)',
-                        color: 'var(--primary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
-                    }}
-                >
-                    {loading ? <div className="spinner" style={{ width: '10px', height: '10px' }}></div> : 'REFRESH'}
-                </button>
-            </div>
+        <div style={{ marginTop: '2rem' }}>
+            <AnalyticsDashboard />
 
-            <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-                    <thead>
-                        <tr style={{ background: 'rgba(2, 6, 23, 0.5)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
-                            <th style={{ padding: '1rem', fontWeight: 600 }}>SOURCE QUERY</th>
-                            <th style={{ padding: '1rem', fontWeight: 600 }}>PAYLOAD</th>
-                            <th style={{ padding: '1rem', fontWeight: 600 }}>CLARITY SCORE</th>
-                            <th style={{ padding: '1rem', fontWeight: 600 }}>STATUS</th>
-                            <th style={{ padding: '1rem', fontWeight: 600 }}>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {results.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                    {loading ? (
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                            <div className="spinner"></div> Scanning DataVault...
-                                        </div>
-                                    ) : (
-                                        'No intelligence gathered yet.'
-                                    )}
-                                </td>
+            <div className="supreme-glass" style={{ padding: '2.5rem', marginTop: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800 }}>
+                        <span style={{ color: 'hsl(var(--nexus-primary))' }}>💎</span> INTELLIGENCE VAULT
+                    </h2>
+                    <button
+                        onClick={fetchResults}
+                        className="btn-primary"
+                        disabled={loading}
+                        style={{
+                            padding: '0.6rem 1.2rem',
+                            fontSize: '0.75rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.6rem',
+                            borderRadius: '12px'
+                        }}
+                    >
+                        {loading ? <div className="spinner" style={{ width: '12px', height: '12px' }}></div> : 'REFRESH DATA'}
+                    </button>
+                </div>
+
+                <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-xl)', border: '1px solid var(--glass-border)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+                        <thead>
+                            <tr style={{ background: 'rgba(2, 6, 23, 0.8)', color: 'var(--text-muted)', borderBottom: '1px solid var(--glass-border)' }}>
+                                <th style={{ padding: '1.25rem 1rem', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>SOURCE & QUERY</th>
+                                <th style={{ padding: '1.25rem 1rem', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>PAYLOAD</th>
+                                <th style={{ padding: '1.25rem 1rem', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>AI TRUTH SCORE</th>
+                                <th style={{ padding: '1.25rem 1rem', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>ORACLE SIGNAL</th>
+                                <th style={{ padding: '1.25rem 1rem', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>STATUS</th>
+                                <th style={{ padding: '1.25rem 1rem', fontWeight: 700, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '1px' }}>ACTION</th>
                             </tr>
-                        ) : (
-                            results.map((r, i) => (
-                                <tr key={r.id} className="animate-slide-up" style={{
-                                    borderBottom: '1px solid var(--border-subtle)',
-                                    animationDelay: `${i * 0.05}s`,
-                                    background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'
-                                }}>
-                                    <td style={{ padding: '1rem', color: 'var(--secondary)', fontWeight: 500 }}>
-                                        {r.jobs?.target_query || 'Unknown'}
-                                    </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: '0.25rem',
-                                            fontSize: '0.875rem'
-                                        }}>
-                                            <div style={{ fontWeight: 600, color: 'var(--primary)' }}>
-                                                {r.data_payload?.name || 'Unknown'}
+                        </thead>
+                        <tbody>
+                            {results.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                        {loading ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                                                <div className="spinner"></div> ARCHIVING GLOBAL SENSORY FEED...
                                             </div>
-                                            <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                                {r.data_payload?.title || 'No title'} @ {r.data_payload?.company || 'N/A'}
-                                            </div>
-                                            {r.data_payload?.email && (
-                                                <div style={{ color: 'var(--secondary)', fontSize: '0.75rem' }}>
-                                                    📧 {r.data_payload.email}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <div style={{
-                                                width: '40px',
-                                                height: '4px',
-                                                background: 'rgba(255,255,255,0.1)',
-                                                borderRadius: '2px',
-                                                overflow: 'hidden'
-                                            }}>
-                                                <div style={{
-                                                    width: `${r.clarity_score || 0}%`,
-                                                    height: '100%',
-                                                    background: (r.clarity_score || 0) > 70 ? 'var(--primary)' : 'var(--secondary)'
-                                                }}></div>
-                                            </div>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 'bold' }}>{r.clarity_score || 0}%</span>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        {r.verified ? (
-                                            <span className="status-badge status-completed">VERIFIED</span>
                                         ) : (
-                                            <span className="status-badge status-running">PENDING</span>
+                                            'The Vault is empty. Launch a Scout to begin.'
                                         )}
                                     </td>
-                                    <td style={{ padding: '1rem' }}>
-                                        <button
-                                            className="btn-primary"
-                                            style={{ padding: '0.25rem 0.75rem', fontSize: '0.7rem' }}
-                                            onClick={() => handleOutreach(r)}
-                                        >
-                                            OUTREACH
-                                        </button>
-                                    </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                results.map((r, i) => (
+                                    <tr key={r.id} className="animate-slide-up" style={{
+                                        borderBottom: '1px solid var(--glass-border)',
+                                        animationDelay: `${i * 0.05}s`,
+                                        background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'
+                                    }}>
+                                        <td style={{ padding: '1.25rem 1rem' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                <div style={{
+                                                    padding: '4px 8px',
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    borderRadius: '6px',
+                                                    fontSize: '0.65rem',
+                                                    fontWeight: 800,
+                                                    color: 'hsl(var(--nexus-primary))'
+                                                }}>
+                                                    {r.jobs?.target_platform?.toUpperCase() || 'WEB'}
+                                                </div>
+                                                <span style={{ fontWeight: 600 }}>{r.jobs?.target_query || 'Direct Scrape'}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1rem' }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '0.35rem'
+                                            }}>
+                                                <div style={{ fontWeight: 700, color: '#fff', fontSize: '1rem' }}>
+                                                    {r.data_payload?.name || r.data_payload?.title || 'Unknown Asset'}
+                                                </div>
+                                                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    {r.data_payload?.company || r.data_payload?.author || 'No Attribution'}
+                                                    {r.is_high_intent && (
+                                                        <span style={{
+                                                            fontSize: '0.65rem',
+                                                            color: 'hsl(var(--nexus-warning))',
+                                                            fontWeight: 900,
+                                                            background: 'rgba(245, 158, 11, 0.1)',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            border: '1px solid hsla(var(--nexus-warning), 0.3)'
+                                                        }}>
+                                                            🔥 HIGH INTENT
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1rem' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <div style={{
+                                                        flex: 1,
+                                                        height: '6px',
+                                                        background: 'rgba(255,255,255,0.05)',
+                                                        borderRadius: '3px',
+                                                        overflow: 'hidden',
+                                                        minWidth: '100px'
+                                                    }}>
+                                                        <div style={{
+                                                            width: `${r.truth_score || r.clarity_score || 0}%`,
+                                                            height: '100%',
+                                                            background: (r.truth_score || r.clarity_score || 0) > 80
+                                                                ? 'linear-gradient(90deg, hsl(var(--nexus-primary)), hsl(var(--nexus-success)))'
+                                                                : 'linear-gradient(90deg, var(--secondary), var(--primary))',
+                                                            boxShadow: '0 0 10px rgba(6, 182, 212, 0.3)'
+                                                        }}></div>
+                                                    </div>
+                                                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: (r.truth_score || r.clarity_score || 0) > 80 ? 'var(--success)' : '#fff' }}>
+                                                        {r.truth_score || r.clarity_score || 0}%
+                                                    </span>
+                                                </div>
+                                                {r.verdict && (
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontStyle: 'italic', maxWidth: '200px' }}>
+                                                        "{r.verdict}"
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '1.25rem 1rem' }}>
+                                            {r.oracle_signal && r.oracle_signal !== 'Baseline' ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                                    <span style={{
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: 900,
+                                                        color: r.intent_score > 70 ? 'hsl(var(--nexus-primary))' : 'rgba(255,255,255,0.4)',
+                                                        letterSpacing: '0.5px'
+                                                    }}>
+                                                        🔮 {r.oracle_signal.toUpperCase()}
+                                                    </span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                        <div style={{ width: '40px', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                                            <div style={{ width: `${r.intent_score}%`, height: '100%', background: 'hsl(var(--nexus-primary))' }}></div>
+                                                        </div>
+                                                        <span style={{ fontSize: '0.6rem', opacity: 0.5 }}>{r.intent_score}% INTENT</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span style={{ fontSize: '0.7rem', opacity: 0.2 }}>STABLE</span>
+                                            )}
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            {r.verified ? (
+                                                <span className="status-badge status-completed">VERIFIED</span>
+                                            ) : (
+                                                <span className="status-badge status-running">PENDING</span>
+                                            )}
+                                        </td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    className="btn-primary"
+                                                    style={{ padding: '0.25rem 0.75rem', fontSize: '0.7rem' }}
+                                                    onClick={() => handleOutreach(r)}
+                                                >
+                                                    OUTREACH
+                                                </button>
+                                                <button
+                                                    className="btn-ghost"
+                                                    style={{ padding: '0.25rem 0.75rem', fontSize: '0.7rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                                                    onClick={async () => {
+                                                        const { data: { session: currentSession } } = await supabase.auth.getSession()
+                                                        const token = currentSession?.access_token
+                                                        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/outreach/ghostwrite/${r.id}/`, {
+                                                            method: 'POST',
+                                                            headers: { 'Authorization': `Bearer ${token}` }
+                                                        })
+                                                        const data = await res.json()
+                                                        alert(`THE GHOSTWRITER DRAFT:\n\n${data.draft}`)
+                                                    }}
+                                                >
+                                                    ✍️ GHOSTWRITE
+                                                </button>
+                                                <button
+                                                    className="btn-ghost"
+                                                    style={{ padding: '0.25rem 0.75rem', fontSize: '0.7rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                                                    onClick={() => {
+                                                        const url = `${import.meta.env.VITE_BACKEND_URL || ''}/api/results/export/${r.job_id}/`
+                                                        window.open(url, '_blank')
+                                                    }}
+                                                >
+                                                    📁 FORGE
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     )

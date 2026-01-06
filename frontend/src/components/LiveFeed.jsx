@@ -44,39 +44,58 @@ export default function LiveFeed() {
     }
 
     return (
-        <div className="glass-panel" style={{ padding: '2rem', height: '100%', overflowY: 'auto' }}>
-            <h2 className="text-gradient" style={{ marginTop: 0, fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span className="animate-pulse-slow">📡</span> LIVE FEED
-            </h2>
+    return (
+        <div className="supreme-glass" style={{ padding: '2rem', height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ color: 'hsl(var(--nexus-primary))' }}>📡</span> MISSION LOG
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', fontSize: '0.6rem', fontWeight: 700 }}>
+                    <div className="worker-active-pulse" style={{ width: '8px', height: '8px' }}></div>
+                    LIVE
+                </div>
+            </div>
 
             {jobs.length === 0 ? (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ marginBottom: '0.5rem', fontSize: '1.5rem', opacity: 0.5 }}>📶</div>
-                    <p style={{ margin: 0, fontStyle: 'italic' }}>Awaiting signals...</p>
+                <div style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-xl)', border: '1px dashed var(--glass-border)' }}>
+                    <div style={{ marginBottom: '1rem', fontSize: '1.5rem', opacity: 0.3 }}>📶</div>
+                    <p style={{ margin: 0, fontSize: '0.75rem', letterSpacing: '1px' }}>AWAITING SENSORY SIGNALS...</p>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {jobs.map((job) => (
                         <div key={job.id} className="animate-slide-up" style={{
                             display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '1rem',
-                            background: 'rgba(15, 23, 42, 0.4)',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--border-subtle)',
-                            transition: 'all 0.2s'
+                            flexDirection: 'column',
+                            gap: '0.5rem',
+                            padding: '1.25rem',
+                            background: 'rgba(0,0,0,0.25)',
+                            borderRadius: '16px',
+                            border: '1px solid var(--glass-border)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}>
-                            <div>
-                                <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', maxWidth: '180px', lineHeight: '1.4' }}>
                                     {job.target_query}
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-                                    ID: {job.id.slice(0, 8)}
+                                <div style={{
+                                    fontSize: '0.65rem',
+                                    fontWeight: 900,
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    background: job.status === 'completed' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(251, 146, 60, 0.15)',
+                                    color: getStatusColor(job.status)
+                                }}>
+                                    {job.status?.toUpperCase()}
                                 </div>
                             </div>
-                            <div className={`status-badge status-${job.status}`}>
-                                {job.status}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontFamily: 'monospace', letterSpacing: '1px' }}>
+                                    TARGET: {job.target_platform?.toUpperCase()}
+                                </div>
+                                <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)' }}>
+                                    {new Date(job.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
                             </div>
                         </div>
                     ))}

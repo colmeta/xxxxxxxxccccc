@@ -56,6 +56,7 @@ async def upload_csv(file: UploadFile = File(...), user: dict = Depends(get_curr
                 
             jobs_to_insert.append({
                 "user_id": user_id,
+                "org_id": user.get("org_id"),
                 "target_query": target,
                 "target_platform": "generic", # default
                 "compliance_mode": "standard",
@@ -76,6 +77,63 @@ async def upload_csv(file: UploadFile = File(...), user: dict = Depends(get_curr
             "jobs_created": len(jobs_to_insert)
         }
 
+@router.post("/audit")
+async def audit_csv(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    """
+    REALITY CHECK - APOLLO/ZOOMINFO AUDIT
+    Specialized upload for existing lead lists to verify accuracy.
+    """
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="File must be a CSV")
+        
+    content = await file.read()
+    supabase = get_supabase()
+    
+    try:
+        text_content = content.decode('utf-8')
+        f = io.StringIO(text_content)
+        reader = csv.DictReader(f)
+        
+        jobs_to_insert = []
+        user_id = user.get("id")
+        
+        # Apollo standard header is often 'First Name', 'Last Name', 'Company', 'Email'
+        # or exactly 'LinkedIn URL'
+        for row in reader:
+            # Priority 1: LinkedIn URL (Most accurate for verification)
+            # Priority 2: Full Name + Company
+            target = row.get('LinkedIn URL') or row.get('Contact LinkedIn URL')
+            if not target:
+                name = f"{row.get('First Name', '')} {row.get('Last Name', '')}".strip()
+                company = row.get('Company') or row.get('Account Name')
+                if name and company:
+                    target = f"{name} at {company}"
+            
+            if not target:
+                continue
+                
+            jobs_to_insert.append({
+                "user_id": user_id,
+                "org_id": user.get("org_id"),
+                "target_query": target,
+                "target_platform": "linkedin", # Force LinkedIn for audit accuracy
+                "compliance_mode": "strict",
+                "status": "queued",
+                "ab_test_group": "A",
+                "search_metadata": {"audit_mode": True, "original_record": row}
+            })
+            
+        if not jobs_to_insert:
+             raise HTTPException(status_code=400, detail="No valid leads found for audit. Ensure headers like 'LinkedIn URL' or 'First Name' exist.")
+
+        supabase.table('jobs').insert(jobs_to_insert).execute()
+        
+        return {
+            "status": "success", 
+            "message": f"Reality Check Initialized. Auditing {len(jobs_to_insert)} leads.",
+            "leads_audited": len(jobs_to_insert)
+        }
+
     except Exception as e:
-        print(f"❌ Batch upload failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to process CSV: {str(e)}")
+        print(f"❌ Audit upload failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,10 +1,7 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
-import smtplib
-import os
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from worker.utils.gemini_client import gemini_client
+from backend.services.supabase_client import get_supabase
+from backend.dependencies import get_current_user
+from fastapi import APIRouter, HTTPException, Depends
 
 router = APIRouter(prefix="/api/outreach", tags=["Outreach Automation"])
 
@@ -102,3 +99,22 @@ async def send_outreach_email(request: EmailRequest):
         "total_targets": len(request.target_emails),
         "results": results
     }
+@router.post("/ghostwrite/{result_id}/")
+async def ghostwrite_lead(result_id: str, platform: str = "email", user: dict = Depends(get_current_user)):
+    """
+    GHOSTWRITER: Generate a personalized draft for a specific lead.
+    """
+    supabase = get_supabase()
+    res = supabase.table('results').select('*').eq('id', result_id).execute()
+    
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Lead result not found")
+        
+    lead_data = res.data[0]['data_payload']
+    
+    draft = await gemini_client.generate_outreach(lead_data, platform)
+    
+    # Save the draft to the database (optional, for persistence)
+    supabase.table('results').update({"outreach_draft": draft}).eq('id', result_id).execute()
+    
+    return {"draft": draft}

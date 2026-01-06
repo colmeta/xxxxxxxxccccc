@@ -8,12 +8,43 @@ create type compliance_level as enum ('standard', 'strict', 'gdpr');
 
 -- 2. TABLES
 
+-- 1. Organizations (Workspaces)
+create table if not exists public.organizations (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  owner_id uuid references auth.users(id) not null,
+  plan_tier text default 'starter', -- 'starter', 'pro', 'enterprise'
+  credits_monthly int default 1000,
+  credits_used int default 0,
+  slack_webhook text, -- The Invisible Hand (Phase 7)
+  created_at timestamptz default now()
+);
+
+-- 2. Memberships (RBAC)
+create table if not exists public.memberships (
+  id uuid primary key default gen_random_uuid(),
+  org_id uuid references public.organizations(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  role text default 'member', -- 'owner', 'admin', 'member'
+  created_at timestamptz default now(),
+  unique(org_id, user_id)
+);
+
+-- 3. API Keys (Nexus White-Label)
+create table if not exists public.api_keys (
+  id uuid primary key default gen_random_uuid(),
+  org_id uuid references public.organizations(id) on delete cascade not null,
+  key_hash text unique not null,
+  name text,
+  created_at timestamptz default now()
+);
+
 -- USERS (Extends Supabase Auth)
-create table public.profiles (
-  id uuid references auth.users not null primary key,
+create table if not exists public.profiles (
+  id uuid references auth.users on delete cascade primary key,
   email text,
   full_name text,
-  company_name text,
+  active_org_id uuid references public.organizations(id),
   plan_tier text default 'free', -- 'free', 'pro', 'enterprise'
   credits_remaining int default 100,
   created_at timestamptz default now()
@@ -27,6 +58,11 @@ create table public.jobs (
   target_query text not null, -- e.g. "SaaS CEOs in Austin"
   target_platform text not null, -- 'linkedin', 'google_maps'
   compliance_mode compliance_level default 'standard',
+  priority int default 1, -- Higher = faster pickup
+  is_boost_mode boolean default false,
+  ab_test_group text default 'A', -- 'A' or 'B'
+  search_metadata jsonb default '{}', -- For Grid search coords, etc.
+  org_id uuid references public.organizations(id), -- Linked to team workspace
   result_count int default 0,
   error_log text,
   started_at timestamptz,
@@ -40,6 +76,14 @@ create table public.results (
   job_id uuid references public.jobs(id) on delete cascade not null,
   data_payload jsonb not null, -- The scraped data
   verified boolean default false, -- The Arbiter's check
+  truth_score int default 0,
+  verdict text,
+  outreach_draft text, -- GHOSTWRITER DRAFTS
+  alerted_at timestamptz, -- WATCHTOWER STATUS
+  is_high_intent boolean default false,
+  outreach_status text default 'none', -- none, queued, sent, failed
+  intent_score int default 0, -- PREDICTIVE INTENT (0-100)
+  oracle_signal text, -- "Funding Imminent", "Scaling Spike", etc.
   created_at timestamptz default now()
 );
 
@@ -127,39 +171,36 @@ create index idx_results_job_id on public.results(job_id);
 -- 6. WORKER PROCEDURES
 
 -- Function for a worker to atomicallly claim a queued job
-create or replace function public.fn_claim_job(worker_id uuid default null)
+create or replace function public.fn_claim_job(p_worker_id text default 'unknown_hydra')
 returns table (
   id uuid,
   target_query text,
   target_platform text,
-  compliance_mode compliance_level
+  compliance_mode compliance_level,
+  ab_test_group text
 ) as $$
 declare
   claimed_job_id uuid;
 begin
-  -- Find a queued job, lock it, and update it to running
-  -- recursive queries or external calls are not allowed inside the locking clause, so we keep it simple
-  
   with subsequent_job as (
-    select id
-    from public.jobs
-    where status = 'queued'
-    order by created_at asc
+    select j.id
+    from public.jobs j
+    where j.status = 'queued'
+    order by j.priority desc, j.created_at asc
     limit 1
     for update skip locked
   )
   update public.jobs
   set 
     status = 'running',
-    started_at = now()
-    -- worker_id could be added to jobs table if we want to track which worker took it
+    started_at = now(),
+    error_log = 'Claimed by ' || p_worker_id -- Simple tracking in error_log for now
   from subsequent_job
   where jobs.id = subsequent_job.id
   returning jobs.id into claimed_job_id;
 
-  -- Return the job details if one was claimed
   return query
-  select j.id, j.target_query, j.target_platform, j.compliance_mode
+  select j.id, j.target_query, j.target_platform, j.compliance_mode, j.ab_test_group
   from public.jobs j
   where j.id = claimed_job_id;
 end;

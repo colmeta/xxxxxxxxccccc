@@ -29,3 +29,5 @@ class JobStatusResponse(BaseModel):
     status: str
     progress: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
+    truth_score: Optional[int] = None
+    verdict: Optional[str] = None

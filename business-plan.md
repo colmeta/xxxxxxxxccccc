@@ -5,7 +5,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-**Company Name:** Pearl Data Intelligence, Inc. (formerly Nexus)
+**Company Name:** Clarity Pearl, Inc. (formerly Clarity Pearl)
 **Founded:** December 2025
 **Structure:** Delaware C-Corporation
 **Mission:** To provide the **Unstoppable, Verified, and Ethical** stream of commercial intelligence that allows Autonomous AI Agents to function.
@@ -63,7 +63,7 @@ We are not just scraping; we are **verifying**. We build the "Sensory Infrastruc
 ### The "Pearl" Identity
 *   **Challenge:** "Pearl" is a crowded trademark space (Dental AI, Legacy BI).
 *   **Strategy:** We operate distinctly as highly specialized **AI Infrastructure**.
-*   **Mitigation:** We will file for "Pearl Data Intelligence" immediately. If blocked, we pivot to "Pearl Neural" or "Pearl Instinct" to maintain the "Pearl" brand equity while differentiating.
+*   **Mitigation:** We will file for "Clarity Pearl" immediately. If blocked, we pivot to "Pearl Neural" or "Pearl Instinct" to maintain the "Pearl" brand equity while differentiating.
 
 ### The "White Hat" Promise
 *   **Transparency:** We publish our scraping ethics openly.

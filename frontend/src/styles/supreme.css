@@ -1,0 +1,111 @@
+/* 
+  SUPREME UI DESIGN SYSTEM (v2026)
+  Theme: NEXUS AMBIENT GLASS
+  Inspiration: Apple macOS / Airbnb Premium
+*/
+
+:root {
+  /* Core Palette (HSL for harmony) */
+  --pearl-primary: 220 100% 60%;
+  /* Vibrant Blue */
+  --pearl-accent: 280 100% 65%;
+  /* Cyber Purple */
+  --pearl-success: 145 100% 45%;
+  /* Truth Green */
+  --pearl-warning: 35 100% 50%;
+
+  /* Glassmorphism Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: blur(20px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* Layout */
+  --sidebar-width: 280px;
+  --radius-xl: 24px;
+}
+
+.supreme-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-xl);
+}
+
+/* The Pulse Animation (Background Worker Status) */
+@keyframes pulse-pearl {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+}
+
+.worker-active-pulse {
+  width: 12px;
+  height: 12px;
+  background-color: hsl(var(--pearl-primary));
+  border-radius: 50%;
+  animation: pulse-pearl 2s infinite ease-in-out;
+  box-shadow: 0 0 10px hsl(var(--pearl-primary));
+}
+
+/* Platinum Transitions */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Scrollbar Hardening */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Glass Card Hover */
+.supreme-glass:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Truth Badge Glow */
+.truth-badge-high {
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Input Cyber Enhancement */
+.input-cyber:focus {
+  outline: none;
+  border-color: hsl(var(--pearl-primary));
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Button Pulse */
+.btn-primary:active {
+  transform: scale(0.98);
+}

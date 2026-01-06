@@ -7,22 +7,37 @@ export default function Layout({ children, session }) {
     }
 
     return (
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ width: '12px', height: '12px', background: 'var(--success)', borderRadius: '50%', boxShadow: '0 0 10px var(--success)' }} className="animate-pulse-slow"></div>
-                    <span style={{ fontWeight: 700, fontSize: '1.25rem', letterSpacing: '1px' }}>CLARITY PEARL</span>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '1rem 2rem' }}>
+            <header
+                className="supreme-glass"
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '2rem',
+                    padding: '1.5rem 2rem',
+                    marginTop: '1rem'
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <img src="/logo.png" style={{ height: '45px', filter: 'drop-shadow(0 0 10px rgba(0,255,255,0.3))' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 800, fontSize: '1.4rem', letterSpacing: '-0.5px', color: 'hsl(var(--pearl-primary))' }}>CLARITY <span style={{ color: '#fff', fontWeight: 300 }}>PEARL</span></span>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', letterSpacing: '2px', textTransform: 'uppercase' }}>Always-On Intelligence</span>
+                    </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                        {session?.user?.email}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{session?.user?.email?.split('@')[0]}</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--success)', fontWeight: 700 }}>VERIFIED AGENT</div>
+                    </div>
                     <button
                         onClick={handleLogout}
-                        style={{ background: 'transparent', border: '1px solid var(--border-accent)', color: 'var(--primary)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem' }}
+                        className="btn-primary"
+                        style={{ padding: '0.5rem 1.25rem', fontSize: '0.7rem', borderRadius: '12px' }}
                     >
-                        TERMINATE
+                        SECURE LOGOUT
                     </button>
                 </div>
             </header>
@@ -31,10 +46,26 @@ export default function Layout({ children, session }) {
                 {children}
             </main>
 
-            <footer style={{ marginTop: '4rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', color: '#475569', fontSize: '0.75rem' }}>
-                <div>STATUS: ONLINE</div>
-                <div>LATENCY: 12ms</div>
-                <div>WORKERS: ACTIVE</div>
+            <footer style={{
+                marginTop: '4rem',
+                borderTop: '1px solid var(--glass-border)',
+                paddingTop: '1.5rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                color: 'var(--text-muted)',
+                fontSize: '0.7rem',
+                letterSpacing: '1px'
+            }}>
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ width: '6px', height: '6px', background: 'var(--success)', borderRadius: '50%' }}></div>
+                        SENTRY: NOMINAL
+                    </div>
+                    <div>ENCRYPTION: AES-256</div>
+                </div>
+                <div>© 2026 CLARITY PEARL | SUPREME EDITION</div>
+                <div style={{ color: 'hsl(var(--pearl-primary))', fontWeight: 700 }}>LATENCY: 8ms</div>
             </footer>
         </div>
     )

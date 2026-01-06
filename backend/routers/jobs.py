@@ -22,30 +22,35 @@ def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
 
     # Insert into 'jobs' table
     try:
-        # Extract user_id from the user object returned by auth
-        user_id = user.get("id")
+        # 2. Extract Org ID from User
+        org_id = user.get("org_id")
+        if not org_id:
+            raise HTTPException(status_code=400, detail="User is not associated with an organization. Please create or join one.")
+
+        # 3. Check Org-Level Credits
+        org_res = supabase.table('organizations').select('credits_monthly', 'credits_used').eq('id', org_id).execute()
         
-        # Check user credits first
-        profile_res = supabase.table('profiles').select('credits_remaining').eq('id', user_id).execute()
+        if not org_res.data or len(org_res.data) == 0:
+            raise HTTPException(status_code=404, detail="Organization record not found")
         
-        if not profile_res.data or len(profile_res.data) == 0:
-            raise HTTPException(status_code=404, detail="User profile not found")
+        org_data = org_res.data[0]
+        allowance = org_data.get('credits_monthly', 0)
+        used = org_data.get('credits_used', 0)
         
-        credits = profile_res.data[0].get('credits_remaining', 0)
+        if (allowance - used) < 1:
+            raise HTTPException(status_code=402, detail="Organization has exhausted monthly credits. Please upgrade your plan.")
         
-        if credits < 1:
-            raise HTTPException(status_code=402, detail="Insufficient credits. Please upgrade your plan.")
+        # 4. Deduct credit (Record usage)
+        supabase.table('organizations').update({'credits_used': used + 1}).eq('id', org_id).execute()
         
-        # Deduct credit
-        supabase.table('profiles').update({'credits_remaining': credits - 1}).eq('id', user_id).execute()
-        
-        # Create job data
+        # 5. Create job data
         data = {
             "user_id": user_id, 
+            "org_id": org_id,
             "target_query": job.query,
             "target_platform": job.platform,
             "compliance_mode": job.compliance_mode,
-            "status": "queued"  # Fixed: was 'pending', now matches DB enum
+            "status": "queued"
         }
         
         # Insert job
@@ -61,7 +66,7 @@ def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
         return JobResponse(
             job_id=job_id,
             status="queued",
-            message=f"Job accepted: {job.query}. {credits - 1} credits remaining."
+            message=f"Job accepted for workspace. {allowance - used - 1} credits remaining."
         )
     except HTTPException:
         # Re-raise HTTP exceptions (like 402, 404)

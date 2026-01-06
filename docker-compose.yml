@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  hydra-sentry:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - WORKER_ID=docker_node_01
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: always
+    deploy:
+      replicas: 3
+    # Optional: Connect to your residential proxy network
+    # network_mode: "host"

@@ -33,10 +33,26 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         
         # Standardize response: always return dict with 'id' key
         user = user_response.user
+        
+        # 3. Fetch Organization Context
+        profile_res = supabase.table('profiles').select('active_org_id').eq('id', user.id).execute()
+        active_org_id = None
+        if profile_res.data:
+            active_org_id = profile_res.data[0].get('active_org_id')
+        
+        # If no active org, find the first one they belong to
+        if not active_org_id:
+            membership_res = supabase.table('memberships').select('org_id').eq('user_id', user.id).limit(1).execute()
+            if membership_res.data:
+                active_org_id = membership_res.data[0].get('org_id')
+                # Update profile with this org
+                supabase.table('profiles').upsert({"id": user.id, "active_org_id": active_org_id}).execute()
+
         return {
             "id": user.id,
             "email": getattr(user, 'email', None),
-            "raw": user  # Keep original for debugging if needed
+            "org_id": active_org_id,
+            "raw": user
         }
 
     except HTTPException:

@@ -4,10 +4,24 @@ from backend.routers import jobs, results
 import os
 
 app = FastAPI(
-    title="Clarity Pearl API",
-    description="The Sensory Nervous System for the AI Economy",
+    title="CLARITY PEARL API",
+    description="Cognitive Lattice & Autonomous Research Intelligence Data",
     version="1.0.0"
 )
+
+if __name__ == "__main__":
+    import uvicorn
+    # OPTIMIZED FOR RENDER FREE TIER (512MB RAM)
+    # 1 worker, limited concurrency to keep memory < 400MB
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1, limit_concurrency=20)
+
+# --- DIVINE SERVICES (Phase 7) ---
+from backend.services.hive_sentry import hive_sentry
+import asyncio
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(hive_sentry.start())
 
 # --- CORS CONFIGURATION ---
 app.add_middleware(
@@ -27,10 +41,13 @@ from backend.routers import opt_out
 app.include_router(opt_out.router)
 
 # CRM & Outreach Routers (Production)
-from backend.routers import crm, outreach, bulk
+from backend.routers import crm, outreach, bulk, oracle, nexus, slack_relay
 app.include_router(crm.router)
 app.include_router(outreach.router)
 app.include_router(bulk.router)
+app.include_router(oracle.router)
+app.include_router(nexus.router)
+app.include_router(slack_relay.router)
 
 # --- ROOT ENDPOINT ---
 @app.get("/")
