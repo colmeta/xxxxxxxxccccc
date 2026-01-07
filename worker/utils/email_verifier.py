@@ -1,5 +1,10 @@
 import re
-import dns.resolver
+try:
+    import dns.resolver
+    DNS_AVAILABLE = True
+except ImportError:
+    print("⚠️ 'dnspython' not found. Email MX domain verification will be skipped.")
+    DNS_AVAILABLE = False
 import smtplib
 from typing import Dict
 
@@ -51,8 +56,14 @@ class EmailVerifier:
         result["checks"]["disposable"] = "CLEAN"
         
         # 3. MX Record Check
-        try:
-            mx_records = dns.resolver.resolve(domain, 'MX')
+        if not DNS_AVAILABLE:
+            result["checks"]["mx_record"] = "SKIPPED (Missing dnspython)"
+            # Skip to SMTP ping with a best-guess (direct domain), or just fail?
+            # Usually MX is better, but let's just mark it as unknown.
+            mx_host = domain 
+        else:
+            try:
+                mx_records = dns.resolver.resolve(domain, 'MX')
             if not mx_records:
                 result["checks"]["mx_record"] = "FAIL"
                 return result

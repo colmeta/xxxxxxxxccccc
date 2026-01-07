@@ -11,4 +11,4 @@ google-genai
 feedparser
 playwright>=1.40.0
 pytest-asyncio>=0.21.0
-python-multipart>=0.0.12
+dnspython
