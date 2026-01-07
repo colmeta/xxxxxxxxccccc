@@ -98,6 +98,74 @@
   background: rgba(0, 0, 0, 0.4) !important;
 }
 
+/* Mission Log Styling (The Sentry's heartbeat) */
+.mission-log-entry {
+  padding: 0.75rem 1rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.01);
+  transition: all 0.2s;
+}
+
+.mission-log-entry:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-left-color: hsl(var(--pearl-primary));
+  color: #fff;
+}
+
+/* Lead Result Glass Card (The Vault View) */
+.lead-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.lead-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transition: 0.5s;
+}
+
+.lead-card:hover::after {
+  left: 100%;
+}
+
+.lead-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Oracle Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.oracle-thinking {
+  background: linear-gradient(90deg,
+      rgba(59, 130, 246, 0.1),
+      rgba(59, 130, 246, 0.4),
+      rgba(59, 130, 246, 0.1));
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 8px;
+}
+
 /* Button Pulse */
 .btn-primary:active {
   transform: scale(0.98);

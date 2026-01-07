@@ -84,6 +84,7 @@ async def audit_csv(file: UploadFile = File(...), user: dict = Depends(get_curre
     """
     REALITY CHECK - CLARITY PEARL AUDIT
     Specialized upload for existing lead lists to verify accuracy.
+    Now with intelligent delimiter sniffing and header mapping.
     """
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="File must be a CSV")
@@ -92,38 +93,72 @@ async def audit_csv(file: UploadFile = File(...), user: dict = Depends(get_curre
     supabase = get_supabase()
     
     try:
+        # Detect delimiter
         text_content = content.decode('utf-8')
+        sniffer = csv.Sniffer()
+        try:
+            dialect = sniffer.sniff(text_content[:2048])
+        except Exception:
+            dialect = 'excel' # Fallback
+            
         f = io.StringIO(text_content)
-        reader = csv.DictReader(f)
+        reader = csv.DictReader(f, dialect=dialect)
         
         jobs_to_insert = []
         user_id = user.get("id")
+        org_id = user.get("org_id")
         
         for row in reader:
-            target = row.get('LinkedIn URL') or row.get('Contact LinkedIn URL')
+            # Flexible Header Mapping
+            target = (
+                row.get('LinkedIn URL') or 
+                row.get('Contact LinkedIn URL') or 
+                row.get('linkedin_url') or 
+                row.get('url')
+            )
+            
             if not target:
-                name = f"{row.get('First Name', '')} {row.get('Last Name', '')}".strip()
-                company = row.get('Company') or row.get('Account Name')
+                # Try Name + Company combination
+                first = row.get('First Name') or row.get('first_name') or row.get('FirstName') or ''
+                last = row.get('Last Name') or row.get('last_name') or row.get('LastName') or ''
+                name = f"{first} {last}".strip()
+                
+                company = (
+                    row.get('Company') or 
+                    row.get('Account Name') or 
+                    row.get('company_name') or 
+                    row.get('Organization')
+                )
+                
                 if name and company:
                     target = f"{name} at {company}"
+                elif company:
+                    target = company
+                elif name:
+                    target = name
             
             if not target:
                 continue
                 
             jobs_to_insert.append({
                 "user_id": user_id,
-                "org_id": user.get("org_id"),
+                "org_id": org_id,
                 "target_query": target,
-                "target_platform": "linkedin", 
+                "target_platform": "linkedin" if "linkedin.com" in str(target) else "generic", 
                 "compliance_mode": "strict",
                 "status": "queued",
                 "ab_test_group": "A",
-                "search_metadata": {"audit_mode": True, "original_record": row}
+                "search_metadata": {
+                    "audit_mode": True, 
+                    "original_record": row,
+                    "source": "reality_check_v2"
+                }
             })
             
         if not jobs_to_insert:
-             raise HTTPException(status_code=400, detail="No valid leads found for audit.")
+             raise HTTPException(status_code=400, detail="No valid leads found for audit. Please ensure headers like 'LinkedIn URL' or 'First Name', 'Last Name', and 'Company' are present.")
 
+        # Batch insert for performance
         supabase.table('jobs').insert(jobs_to_insert).execute()
         
         return {
@@ -134,4 +169,4 @@ async def audit_csv(file: UploadFile = File(...), user: dict = Depends(get_curre
 
     except Exception as e:
         print(f"❌ Audit upload failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Audit Process Failed: {str(e)}")

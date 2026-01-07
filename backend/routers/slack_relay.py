@@ -25,21 +25,77 @@ async def setup_slack(
     
     return {"status": "success", "message": "Slack Relay Activated."}
 
-async def send_oracle_alert(org_id, result_id, signal_text, intent_score):
+async def send_oracle_alert(org_id, result_id, signal_text, intent_score, lead_data=None):
     """
-    The Invisible Hand in action: Relays high-value Oracle signals to Slack.
+    The Invisible Hand in action: Relays high-value Oracle signals to Slack with rich formatting.
     """
     supabase = get_supabase()
-    org_res = supabase.table('organizations').select('slack_webhook').eq('id', org_id).execute()
+    org_res = supabase.table('organizations').select('slack_webhook', 'name').eq('id', org_id).execute()
     
     if not org_res.data or not org_res.data[0].get('slack_webhook'):
          return
 
     webhook_url = org_res.data[0]['slack_webhook']
+    org_name = org_res.data[0].get('name', 'Your Lab')
     
+    # Extract lead details
+    name = lead_data.get('name') or lead_data.get('full_name') or "Unknown Lead"
+    company = lead_data.get('company') or lead_data.get('organization') or "Unknown Entity"
+    title = lead_data.get('title') or lead_data.get('position') or "N/A"
+    
+    # Progress bar for intent
+    filled = int(intent_score / 10)
+    bar = "🔵" * filled + "⚪" * (10 - filled)
+
     payload = {
-        "text": f"🔮 *ORACLE SIGNAL DETECTED*\n*Signal:* {signal_text}\n*Intent:* {intent_score}%\n*Lead:* <https://datavault.app/results/{result_id}|View in Vault>"
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "🔮 ORACLE SIGNAL DETECTED",
+                    "emoji": True
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"*Signal:* _{signal_text}_\n*Intent:* `{intent_score}%` {bar}\n*Entity:* *{name}* @ *{company}* ({title})"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "View in DataVault",
+                            "emoji": True
+                        },
+                        "url": f"https://datavault.app/results/{result_id}",
+                        "style": "primary"
+                    }
+                ]
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": f"🛡️ *Vault:* {org_name} | *Status:* Stealth Active"
+                    }
+                ]
+            }
+        ]
     }
     
-    async with httpx.AsyncClient() as client:
-        await client.post(webhook_url, json=payload)
+    try:
+        async with httpx.AsyncClient() as client:
+            await client.post(webhook_url, json=payload)
+    except Exception as e:
+        print(f"⚠️ Slack Relay Failed: {e}")

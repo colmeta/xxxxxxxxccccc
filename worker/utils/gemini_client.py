@@ -115,28 +115,37 @@ class GeminiClient:
             
         prompt = f"""
         You are THE ORACLE, the supreme intelligence of the CLARITY PEARL.
+        CURRENT TIME: {datetime.now().strftime('%Y-%m-%d')}
         USER PROMPT: "{user_prompt}"
         
         TASK:
-        Decompose this prompt into a search MISSION.
-        Each mission can have multiple JOBS.
+        Decompose this prompt into a search MISSION. A perfect mission uses multiple platforms 
+        in synergy to verify and enrich data.
+        
+        SYNERGY RULES:
+        1. For B2B/People: Start with 'linkedin', verify with 'google_news'.
+        2. For Local/Physical: Start with 'google_maps', enrich with 'facebook' or 'tiktok'.
+        3. For Technical: Use 'reddit' and 'generic'.
+        
         Supported Platforms: linkedin, google_news, amazon, real_estate, job_scout, reddit, tiktok, facebook, google_maps, generic.
-        Supported Compliance Modes: standard, strict.
+        Supported Compliance Modes: standard, strict, gdpr.
         
         RETURN ONLY A JSON LIST OF JOBS:
         [
             {{
-                "query": "string",
-                "platform": "string",
-                "compliance_mode": "string",
-                "boost": boolean
+                "query": "Full search query for this step",
+                "platform": "platform_name",
+                "compliance_mode": "standard|strict|gdpr",
+                "boost": boolean (true for high priority/initial steps),
+                "reasoning": "Briefly why this platform was chosen"
             }}
         ]
         
-        Example: "Find me 5 AI startups in London and check their news"
+        Mission Example: "Researching autonomous drone companies in SF"
         -> [
-            {{"query": "AI startups London", "platform": "generic", "compliance_mode": "standard", "boost": false}},
-            {{"query": "AI startups London news", "platform": "google_news", "compliance_mode": "strict", "boost": true}}
+            {{"query": "autonomous drone startups San Francisco", "platform": "generic", "compliance_mode": "standard", "boost": true, "reasoning": "Broad discovery"}},
+            {{"query": "autonomous drone startups San Francisco hiring", "platform": "job_scout", "compliance_mode": "standard", "boost": false, "reasoning": "Verify scaling"}},
+            {{"query": "drone startup founders San Francisco", "platform": "linkedin", "compliance_mode": "strict", "boost": false, "reasoning": "Target identification"}}
         ]
         """
         try:

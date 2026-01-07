@@ -62,7 +62,6 @@ class HydraController:
 
         print(f"[{self.worker_id}] Online and Ready. 🐉")
         self.last_mesh_pulse = datetime.now()
-        self._start_heartbeat()
 
     def _start_heartbeat(self):
         """Launches a background heartbeat task."""
@@ -412,7 +411,8 @@ class HydraController:
                         org_id=job_data.get('org_id'),
                         result_id=result_id,
                         signal_text=intent_data.get('oracle_signal'),
-                        intent_score=intent_data.get('intent_score')
+                        intent_score=intent_data.get('intent_score'),
+                        lead_data=data
                     ))
 
                 print(f"💾 Data vaulted. Result ID: {result_id}")
@@ -424,6 +424,7 @@ class HydraController:
 
     async def run_loop(self):
         print(f"[{self.worker_id}] Entering continuous surveillance loop...")
+        self._start_heartbeat()
         while True:
             job = await self.poll_and_claim()
             if job:
@@ -506,23 +507,3 @@ if __name__ == "__main__":
     else:
         # Run forever
         asyncio.run(hydra.run_loop())
-
-    async def mesh_pulse(self):
-        """
-        THE DIVINE MESH: Peer-to-Peer stealth coordination.
-        Workers share which proxies are 'burned' and which User-Agents are currently 100% undetected.
-        """
-        if not self.supabase: return
-        print("🛰️ Divine Mesh: Pulsing coordination data...")
-        
-        # Share some mock 'stealth data' to the worker_status table
-        pulse_data = {
-            "worker_id": self.worker_id,
-            "stealth_health": 98.5,
-            "best_user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X)",
-            "last_pulse": datetime.now().isoformat()
-        }
-        try:
-             self.supabase.table('worker_status').upsert(pulse_data).execute()
-        except Exception as e:
-             print(f"⚠️ Mesh Pulse Failure: {e}")
