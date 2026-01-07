@@ -96,32 +96,45 @@ class ArbiterAgent:
 
     async def predict_intent(self, lead_data):
         """
-        THE PREDICTIVE ENGINE: Identify future-looking intent signals.
-        Returns an 'Intent Score' (0-100) and an 'Oracle Signal'.
+        THE ORACLE ENGINE: Identify future-looking intent and growth signals.
+        Analyzes data for 'Velocity' and 'Scaling' indicators.
         """
         try:
             prompt = f"""
-            Analyze this verified lead data for PREDICTIVE INTENT.
+            Analyze this lead data for PREDICTIVE AGITATORS (signals of future change).
             LEAD DATA: {lead_data}
             
-            Identify hidden patterns:
-            - Is the company scaling? (Recent hiring, repo spikes, office expansion)
-            - Are they likely to fund soon?
-            - Are they exploring new markets?
+            SCORING CRITERIA:
+            1. Intent Score (0-100): Immediate need for outreach.
+            2. Predictive Growth Score (0-100): Likelihood of massive scaling, hiring, or funding in next 6 months.
+            
+            LOOK FOR:
+            - Growth hiring (e.g., 'We are hiring', 'Team expansion')
+            - New product launches or expansion markers.
+            - Funding rumors or recent rounds.
+            - Tech stack upgrades or adoption of mature tools.
             
             Return ONLY a JSON object: 
             {{
-                "intent_score": int, 
-                "oracle_signal": "string (e.g., 'Expansion Imminent', 'Funding Signal')",
-                "confidence": float
+                "intent_score": int,
+                "predictive_growth_score": int,
+                "oracle_signal": "string (The narrative signal, e.g., 'Viral Growth Spike')",
+                "confidence": float,
+                "reasoning": "string (Why did you give these scores?)"
             }}
             """
             ai_response = await gemini_client.model.generate_content(prompt)
             clean_json = re.sub(r'```json\n?|\n?```', '', ai_response.text).strip()
             return json.loads(clean_json)
         except Exception as e:
-            print(f"❌ Predictive Error: {e}")
-            return {"intent_score": 0, "oracle_signal": "Baseline Intelligence", "confidence": 0.5}
+            print(f"❌ Oracle Predictive Error: {e}")
+            return {
+                "intent_score": 0, 
+                "predictive_growth_score": 0, 
+                "oracle_signal": "Baseline Intelligence", 
+                "confidence": 0.5,
+                "reasoning": "Error in predictive analysis"
+            }
 
     async def recursive_verdict(self, lead_data):
         """

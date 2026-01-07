@@ -1,14 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from backend.services.supabase_client import get_supabase
 from backend.dependencies import get_current_user
 from worker.utils.gemini_client import gemini_client
+from pydantic import BaseModel, Field, validator
 import json
 
 router = APIRouter(prefix="/api/oracle", tags=["The Oracle"])
 
+class OracleRequest(BaseModel):
+    prompt: str = Field(..., min_length=3, max_length=2000, description="Mission prompt")
+    
+    @validator('prompt')
+    def sanitize_prompt(cls, v):
+        # Basic sanitization to prevent obvious injection attempts
+        dangerous_patterns = ['DROP', 'DELETE', 'UPDATE', 'INSERT', '<script>', 'javascript:']
+        v_upper = v.upper()
+        for pattern in dangerous_patterns:
+            if pattern in v_upper:
+                raise ValueError(f"Potentially dangerous pattern detected: {pattern}")
+        return v.strip()
+
 @router.post("/dispatch")
 async def dispatch_mission(
-    prompt: str = Body(..., embed=True), 
+    request: Request,
+    req: OracleRequest,
     user: dict = Depends(get_current_user)
 ):
     """

@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "The Invisible Hand (Clarity Pearl)",
+    "version": "1.0",
+    "description": "Launch intelligence missions directly from your browser context menu.",
+    "permissions": [
+        "contextMenus",
+        "activeTab"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_title": "Send to Vault"
+    },
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    }
+}

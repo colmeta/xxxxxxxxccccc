@@ -49,6 +49,10 @@ app.include_router(oracle.router)
 app.include_router(clarity_pearl.router)
 app.include_router(slack_relay.router)
 
+# White-Label API (Phase 6)
+from backend.routers import v1
+app.include_router(v1.router)
+
 # --- ROOT ENDPOINT ---
 @app.get("/")
 @app.head("/")

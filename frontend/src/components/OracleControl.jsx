@@ -83,9 +83,41 @@ export default function OracleControl() {
                             {h.content}
                         </div>
                         {h.details && (
-                            <div style={{ marginTop: '0.5rem', paddingLeft: '1rem', borderLeft: '2px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>
+                            <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                                 {h.details.map((d, index) => (
-                                    <div key={index}>⚡ STEP ${index + 1}: {d.query} on {d.platform.toUpperCase()}</div>
+                                    <div key={index} className="mission-log-entry" style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <span>
+                                            <span style={{ color: 'hsl(var(--pearl-primary))', marginRight: '0.5rem' }}>[{index + 1}]</span>
+                                            {d.query}
+                                        </span>
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                            <span style={{
+                                                fontSize: '0.6rem',
+                                                background: 'rgba(255,255,255,0.1)',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px'
+                                            }}>
+                                                {d.platform.toUpperCase()}
+                                            </span>
+                                            {d.reasoning && (
+                                                <span style={{
+                                                    fontSize: '0.6rem',
+                                                    color: 'rgba(255,255,255,0.4)',
+                                                    fontStyle: 'italic',
+                                                    maxWidth: '200px',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis'
+                                                }}>
+                                                    // {d.reasoning}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         )}
