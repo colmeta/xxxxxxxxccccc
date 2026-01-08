@@ -98,7 +98,7 @@ class HydraController:
 
         try:
             # RPC call to the postgres function
-            response = self.supabase.rpc('fn_claim_job', {'worker_id': self.worker_id}).execute()
+            response = self.supabase.rpc('fn_claim_job', {'p_worker_id': self.worker_id}).execute()
             
             if response.data and len(response.data) > 0:
                 print(f"⚡ Job Claimed: {response.data[0]['id']}")
