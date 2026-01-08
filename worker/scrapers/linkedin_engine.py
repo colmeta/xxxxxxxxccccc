@@ -1,6 +1,7 @@
 import asyncio
 import random
 import urllib.parse
+import re
 from playwright.async_api import TimeoutError
 from utils.humanizer import Humanizer
 
@@ -84,13 +85,19 @@ class LinkedInEngine:
                     job = parts[1].strip() if len(parts) > 1 else "Professional"
                     company = parts[2].strip() if len(parts) > 2 else "LinkedIn"
                     
+                    # Extraction: Hunt for Email/DM patterns in snippet
+                    email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', clean_text)
+                    email = email_match.group(0) if email_match else None
+                    
                     results.append({
                         "name": name,
                         "title": job,
                         "company": company,
+                        "email": email,
                         "source_url": href,
                         "verified": True,
-                        "snippet": f"Via Google Unshakable | {clean_text}"
+                        "snippet": f"Via Google Unshakable | {clean_text}",
+                        "channel_priority": ["email", "dm"]
                     })
                 except Exception:
                     continue

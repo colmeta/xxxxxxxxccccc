@@ -10,6 +10,7 @@ class JobRequest(BaseModel):
     compliance_mode: Literal["standard", "strict", "gdpr"] = Field(default="standard", description="Compliance level")
     priority: int = Field(default=1, ge=1, le=10, description="Job priority (1-10)")
     ab_test_group: Literal["A", "B", "C"] = Field(default="A", description="A/B Testing Group (A=Google, B=Direct, C=Mobile Swarm)")
+    channel_priority: Optional[List[Literal["email", "dm", "call"]]] = Field(default=["email", "dm"], description="Preferred contact channels")
     search_metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional search context")
     
     @validator('query')
