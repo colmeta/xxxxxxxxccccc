@@ -57,7 +57,7 @@ app.include_router(diagnostics.router)
 from backend.routers import v1, extension_bridge, flutterwave_router
 app.include_router(v1.router)
 app.include_router(extension_bridge.router)
-app.include_router(flutterwave_router.router)
+# app.include_router(flutterwave_router.router) # Disconnected per directive until verification
 
 # --- ROOT ENDPOINT ---
 @app.get("/")
