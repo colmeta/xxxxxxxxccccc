@@ -9,6 +9,11 @@ import AnalyticsLab from './components/AnalyticsLab'
 import OracleControl from './components/OracleControl'
 import SettingsView from './components/SettingsView'
 import SovereignHub from './components/SovereignHub'
+import BulkMissionControl from './components/BulkMissionControl'
+import IntelligenceView from './components/IntelligenceView'
+import SwarmObservatory from './components/SwarmObservatory'
+import CRMHub from './components/CRMHub'
+import OnboardingWizard from './components/OnboardingWizard'
 import CompliancePortal from './pages/CompliancePortal'
 import './styles/supreme.css'
 
@@ -19,6 +24,7 @@ function App() {
     const [loading, setLoading] = useState(true)
     const [showAdvanced, setShowAdvanced] = useState(false)
     const [orgSetupDone, setOrgSetupDone] = useState(false)
+    const [showOnboarding, setShowOnboarding] = useState(false)
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -42,6 +48,17 @@ function App() {
 
         return () => subscription.unsubscribe()
     }, [])
+
+    // Check if user needs onboarding (after org setup)
+    useEffect(() => {
+        if (session && orgSetupDone) {
+            const onboardingCompleted = localStorage.getItem('onboarding_completed')
+            if (onboardingCompleted !== 'true') {
+                // Small delay to let the UI render first
+                setTimeout(() => setShowOnboarding(true), 500)
+            }
+        }
+    }, [session, orgSetupDone])
 
     const checkAndSetupOrganization = async (session) => {
         if (!session || orgSetupDone) return
@@ -80,33 +97,69 @@ function App() {
 
     return (
         <Layout session={session}>
-            <div style={{ marginBottom: '2rem', display: 'flex', gap: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }} className="tab-navigation">
+            <div style={{ marginBottom: '2rem', display: 'flex', gap: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', overflowX: 'auto' }} className="tab-navigation">
                 <button
                     onClick={() => setView('sovereign')}
                     style={{
                         background: 'none', border: 'none', padding: '1rem 0', color: view === 'sovereign' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
-                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'sovereign' ? '2px solid hsl(var(--pearl-primary))' : 'none'
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'sovereign' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
                     }}
                 >
-                    🛰️ SOVEREIGN NETWORK
+                    🛰️ SOVEREIGN
                 </button>
                 <button
                     onClick={() => setView('vault')}
                     style={{
                         background: 'none', border: 'none', padding: '1rem 0', color: view === 'vault' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
-                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'vault' ? '2px solid hsl(var(--pearl-primary))' : 'none'
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'vault' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
                     }}
                 >
-                    💎 SALES VAULT
+                    💎 VAULT
+                </button>
+                <button
+                    onClick={() => setView('intelligence')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'intelligence' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'intelligence' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    🧠 INTELLIGENCE
+                </button>
+                <button
+                    onClick={() => setView('swarm')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'swarm' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'swarm' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    🛸 SWARM
+                </button>
+                <button
+                    onClick={() => setView('crm')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'crm' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'crm' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    🔗 CRM
+                </button>
+                <button
+                    onClick={() => setView('bulk')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'bulk' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'bulk' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    ⚡ BULK
                 </button>
                 <button
                     onClick={() => setView('settings')}
                     style={{
                         background: 'none', border: 'none', padding: '1rem 0', color: view === 'settings' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
-                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'settings' ? '2px solid hsl(var(--pearl-primary))' : 'none'
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'settings' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
                     }}
                 >
-                    ⚙️ COMMAND CENTER
+                    ⚙️ SETTINGS
                 </button>
             </div>
 
@@ -226,8 +279,28 @@ function App() {
                         <LiveFeed />
                     </div>
                 </div>
+            ) : view === 'intelligence' ? (
+                <IntelligenceView session={session} />
+            ) : view === 'swarm' ? (
+                <SwarmObservatory />
+            ) : view === 'crm' ? (
+                <div style={{ display: 'grid', gap: '2rem' }}>
+                    <CRMHub session={session} orgId={session.user.user_metadata?.active_org_id} />
+                </div>
+            ) : view === 'bulk' ? (
+                <div style={{ display: 'grid', gap: '2rem' }}>
+                    <BulkMissionControl session={session} />
+                </div>
             ) : (
                 <SettingsView session={session} />
+            )}
+
+            {/* Onboarding Wizard Overlay */}
+            {showOnboarding && (
+                <OnboardingWizard
+                    session={session}
+                    onComplete={() => setShowOnboarding(false)}
+                />
             )}
             <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                 <a href="/compliance" style={{ color: 'inherit', textDecoration: 'none' }}>COMPLIANCE & OPT-OUT</a>

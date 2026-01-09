@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            width: 350px;
+            height: 500px;
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #050a14;
+            color: #fff;
+        }
+
+        .container {
+            padding: 1.5rem;
+            background: rgba(13, 22, 38, 0.95);
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(to right, #00c6ff, #9933ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: rgba(0, 198, 255, 0.15);
+            border: 1px solid #00c6ff;
+            color: #00c6ff;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #00c6ff 0%, #9933ff 100%);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .recent-list {
+            margin-top: 1.5rem;
+        }
+
+        .recent-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recent-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .recent-score {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .score-high {
+            color: #00ff64;
+        }
+
+        .score-med {
+            color: #ffc800;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Pearl Intelligence</h1>
+        <div class="badge">CONNECTED</div>
+
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">High-Intent Leads</div>
+                <div class="stat-value">12</div>
+            </div>
+            <div style="font-size: 1.5rem">🔥</div>
+        </div>
+
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Active Missions</div>
+                <div class="stat-value">3</div>
+            </div>
+            <div style="font-size: 1.5rem">🛸</div>
+        </div>
+
+        <div class="recent-list">
+            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem;">RECENTLY DISCOVERED
+            </div>
+
+            <div class="recent-item">
+                <span class="recent-name">John Doe (CEO)</span>
+                <span class="recent-score score-high">92</span>
+            </div>
+            <div class="recent-item">
+                <span class="recent-name">Jane Smith (CTO)</span>
+                <span class="recent-score score-high">88</span>
+            </div>
+            <div class="recent-item">
+                <span class="recent-name">Acme Corp</span>
+                <span class="recent-score score-med">75</span>
+            </div>
+        </div>
+
+        <button class="btn" id="openDashboard">Open Dashboard</button>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

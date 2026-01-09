@@ -1,0 +1,98 @@
+/* PEARL OVERLAY CSS */
+.pearl-overlay-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: rgba(13, 22, 38, 0.95);
+    border: 1px solid rgba(0, 198, 255, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 250px;
+    animation: pearlSlideUp 0.5s ease-out;
+}
+
+.pearl-overlay-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 198, 255, 0.2);
+}
+
+.pearl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.pearl-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    background: linear-gradient(to right, #00c6ff, #9933ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.pearl-score {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #00ff64;
+}
+
+.pearl-label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pearl-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.pearl-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.pearl-btn-primary {
+    background: linear-gradient(135deg, #00c6ff 0%, #9933ff 100%);
+    color: white;
+}
+
+.pearl-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pearl-btn:hover {
+    opacity: 0.9;
+}
+
+@keyframes pearlSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
