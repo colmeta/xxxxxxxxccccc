@@ -28,7 +28,6 @@ async def create_organization(req: CreateOrgRequest, user: dict = Depends(get_cu
         org_data = {
             "id": str(uuid.uuid4()),
             "name": req.name,
-            "description": req.description,
             "owner_id": user_id,
             "credits_monthly": 1000,  # Default credits
             "credits_used": 0
@@ -95,7 +94,6 @@ async def auto_setup_organization(user: dict = Depends(get_current_user)):
         org_data = {
             "id": str(uuid.uuid4()),
             "name": org_name,
-            "description": "Personal workspace",
             "owner_id": user_id,
             "credits_monthly": 1000,
             "credits_used": 0
