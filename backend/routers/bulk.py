@@ -79,6 +79,56 @@ async def upload_csv(file: UploadFile = File(...), user: dict = Depends(get_curr
         print(f"❌ CSV upload failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/create")
+async def create_bulk_jobs(
+    queries: list[str],
+    platform: str = "linkedin",
+    user: dict = Depends(get_current_user)
+):
+    """
+    Create multiple jobs from a list of queries (for BulkMissionControl paste input).
+    Accepts JSON body with array of query strings.
+    """
+    supabase = get_supabase()
+    if not supabase:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    
+    if not queries or len(queries) == 0:
+        raise HTTPException(status_code=400, detail="No queries provided")
+    
+    jobs_to_insert = []
+    user_id = user.get("id")
+    org_id = user.get("org_id")
+    
+    for query in queries:
+        if not query or not query.strip():
+            continue
+            
+        jobs_to_insert.append({
+            "user_id": user_id,
+            "org_id": org_id,
+            "target_query": query.strip(),
+            "target_platform": platform,
+            "compliance_mode": "standard",
+            "status": "queued",
+            "ab_test_group": "A"
+        })
+    
+    if not jobs_to_insert:
+        raise HTTPException(status_code=400, detail="No valid queries provided")
+    
+    try:
+        res = supabase.table('jobs').insert(jobs_to_insert).execute()
+        
+        return {
+            "status": "success",
+            "message": f"Created {len(jobs_to_insert)} missions",
+            "count": len(jobs_to_insert)
+        }
+    except Exception as e:
+        print(f"❌ Bulk create failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/audit")
 async def audit_csv(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
     """

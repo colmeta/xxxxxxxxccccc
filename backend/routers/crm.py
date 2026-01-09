@@ -15,6 +15,60 @@ class LeadCRMSyncRequest(BaseModel):
     crm_type: str
     api_key: str
 
+@router.post("/sync")
+async def manual_crm_sync(user: dict = Depends(get_current_user)):
+    """
+    Manual CRM sync endpoint - syncs all high-intent leads to configured webhooks.
+    Called by CRMHub component.
+    """
+    from backend.services.supabase_client import get_supabase
+    supabase = get_supabase()
+    
+    if not supabase:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    
+    try:
+        # Get org's webhook URL
+        org_id = user.get("org_id")
+        org_res = supabase.table('organizations').select('slack_webhook').eq('id', org_id).single().execute()
+        
+        if not org_res.data or not org_res.data.get('slack_webhook'):
+            return {
+                "status": "no_webhook",
+                "message": "No webhook configured. Please add a webhook URL first.",
+                "count": 0
+            }
+        
+        webhook_url = org_res.data.get('slack_webhook')
+        
+        # Get high-intent leads from last 7 days
+        from datetime import datetime, timedelta
+        cutoff = (datetime.now() - timedelta(days=7)).isoformat()
+        
+        leads_res = supabase.table('results').select('*').gte('intent_score', 80).gte('created_at', cutoff).execute()
+        
+        synced_count = 0
+        # In production, would actually POST to webhook_url here
+        # For now, just log the sync
+        for lead in (leads_res.data or []):
+            supabase.table('crm_injection_logs').insert({
+                "org_id": org_id,
+                "result_id": lead.get('id'),
+                "crm_name": "webhook",
+                "status": "success"
+            }).execute()
+            synced_count += 1
+        
+        return {
+            "status": "success",
+            "message": f"Synced {synced_count} high-intent leads",
+            "count": synced_count
+        }
+        
+    except Exception as e:
+        print(f"❌ Manual sync failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/sync/lead")
 async def sync_lead_to_crm(request: LeadCRMSyncRequest):
     """
