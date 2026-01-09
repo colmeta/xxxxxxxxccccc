@@ -67,7 +67,7 @@ async def dispatch_mission(
             "compliance_mode": job_info.get("compliance_mode", "standard"),
             "priority": 10 if job_info.get("boost") else 1,
             "status": "queued",
-            "search_metadata": {"oracle_origin": True, "master_prompt": prompt}
+            "search_metadata": {"oracle_origin": True, "master_prompt": req.prompt}
         }
         res = supabase.table('jobs').insert(payload).execute()
         if res.data:

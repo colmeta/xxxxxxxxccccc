@@ -132,6 +132,48 @@ export default function OracleControl() {
 
             <form onSubmit={dispatchMission} style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
+                    type="file"
+                    id="bulk-upload"
+                    style={{ display: 'none' }}
+                    accept=".csv"
+                    onChange={async (e) => {
+                        const file = e.target.files[0]
+                        if (!file) return
+
+                        setLoading(true)
+                        setHistory(prev => [...prev, { role: 'user', content: `Uploading Bulk Mission: ${file.name}` }])
+
+                        try {
+                            const formData = new FormData()
+                            formData.append('file', file)
+
+                            const { data: { session } } = await supabase.auth.getSession()
+                            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/bulk/upload`, {
+                                method: 'POST',
+                                headers: { 'Authorization': `Bearer ${session?.access_token}` },
+                                body: formData
+                            })
+
+                            if (!res.ok) throw new Error("Bulk Mission Rejected.")
+                            const data = await res.json()
+                            setHistory(prev => [...prev, { role: 'oracle', content: `Bulk Forge Initialized: ${data.jobs_created} missions queued.` }])
+                        } catch (err) {
+                            setHistory(prev => [...prev, { role: 'oracle', content: `Error: ${err.message}`, isError: true }])
+                        } finally {
+                            setLoading(false)
+                        }
+                    }}
+                />
+                <button
+                    type="button"
+                    className="btn-ghost"
+                    onClick={() => document.getElementById('bulk-upload').click()}
+                    style={{ padding: '0 1rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    title="Bulk Mission (CSV)"
+                >
+                    📁
+                </button>
+                <input
                     type="text"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}

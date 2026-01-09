@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator, Field
-from typing import Optional, Any, Dict, Literal
+from typing import Optional, Any, Dict, Literal, List
 
 class JobRequest(BaseModel):
     query: str = Field(..., min_length=3, max_length=500, description="Search query (3-500 characters)")

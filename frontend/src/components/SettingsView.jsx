@@ -140,7 +140,27 @@ export default function SettingsView({ session }) {
                 </div>
             </div>
 
-            <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.05)', margin: '3rem 0' }} />
+            {/* The Sovereign Extension */}
+            <div style={{ marginBottom: '3rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    🧩 THE SOVEREIGN EXTENSION (LEGACY BRIDGE)
+                    <span style={{ fontSize: '0.6rem', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', padding: '2px 8px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }}>MV3 COMPLIANT</span>
+                </h3>
+                <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '1.5rem' }}>Inject the Sovereign HUD directly into LinkedIn and Twitter profiles to see intelligence without leaving your workflow.</p>
+
+                <div className="supreme-glass" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                        BRIDGE STATUS: <span style={{ color: 'hsl(var(--pearl-primary))' }}>LISTENING ON PORT 8000</span>
+                    </div>
+                    <button
+                        onClick={() => alert("EXTENSION SETUP:\n1. Open Chrome Extensions\n2. Enable Developer Mode\n3. Click 'Load Unpacked'\n4. Select the 'extension/' directory in your Data Intelligence folder.")}
+                        className="btn-ghost"
+                        style={{ fontSize: '0.7rem' }}
+                    >
+                        SETUP INSTRUCTIONS
+                    </button>
+                </div>
+            </div>
 
             <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.05)', margin: '3rem 0' }} />
 
@@ -148,7 +168,7 @@ export default function SettingsView({ session }) {
                 {/* AUTO-WARMER CONTROL */}
                 <div>
                     <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem' }}>🔥 THE ARCHITECT'S FORGE (AUTO-WARMING)</h3>
-                    <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '1.5rem' }}>Pearl automatically drafts outbound scripts when viral growth (>50%) is detected.</p>
+                    <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '1.5rem' }}>Pearl automatically drafts outbound scripts when viral growth ({">"}50%) is detected.</p>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{

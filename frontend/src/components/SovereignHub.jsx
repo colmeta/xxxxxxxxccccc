@@ -156,12 +156,44 @@ export default function SovereignHub() {
                                 </div>
                             )}
 
-                            <button style={{
-                                marginTop: '1rem', width: '100%', background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)',
-                                padding: '0.5rem', fontSize: '0.65rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700
-                            }}>
-                                VIEW SOVEREIGN ID: {p.sovereign_id?.substring(0, 8)}...
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                                <button
+                                    onClick={async () => {
+                                        if (window.confirm(`Inject ${p.full_name} into your connected CRM?`)) {
+                                            try {
+                                                const { data: { session } } = await supabase.auth.getSession()
+                                                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/crm/sync/lead`, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'Authorization': `Bearer ${session?.access_token}`
+                                                    },
+                                                    body: JSON.stringify({
+                                                        vault_id: p.id,
+                                                        crm_type: 'hubspot', // Default
+                                                        api_key: 'DEMO_KEY'
+                                                    })
+                                                })
+                                                if (res.ok) alert("Injection Successful: Intelligence synced to CRM.")
+                                                else alert("CRM Sync Error: Check your settings.")
+                                            } catch (e) { alert("Sync Failed.") }
+                                        }
+                                    }}
+                                    style={{
+                                        flex: 2, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+                                        padding: '0.5rem', fontSize: '0.65rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem'
+                                    }}
+                                >
+                                    📥 SYNC TO CRM
+                                </button>
+                                <button style={{
+                                    flex: 1, background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)',
+                                    padding: '0.5rem', fontSize: '0.65rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700
+                                }}>
+                                    ID: {p.sovereign_id?.substring(0, 8)}
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

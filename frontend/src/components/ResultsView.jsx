@@ -60,7 +60,7 @@ export default function ResultsView() {
             <div className="supreme-glass" style={{ padding: '2.5rem', marginTop: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <h2 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800 }}>
-                        <span style={{ color: 'hsl(var(--pearl-primary))' }}>💎</span> INTELLIGENCE VAULT
+                        <span style={{ color: 'hsl(var(--pearl-primary))' }}>💎</span> SALES INTELLIGENCE VAULT
                     </h2>
                     <button
                         onClick={fetchResults}
@@ -264,6 +264,21 @@ export default function ResultsView() {
                                                     }}
                                                 >
                                                     📁 FORGE
+                                                </button>
+                                                <button
+                                                    className="btn-ghost"
+                                                    style={{ padding: '0.25rem 0.75rem', fontSize: '0.7rem', color: 'hsl(var(--pearl-primary))', background: 'rgba(6, 182, 212, 0.05)', border: '1px solid rgba(6, 182, 212, 0.1)' }}
+                                                    onClick={async () => {
+                                                        const { data: { session } } = await supabase.auth.getSession()
+                                                        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/crm/sync/lead`, {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+                                                            body: JSON.stringify({ vault_id: r.id, crm_type: 'hubspot', api_key: 'DEMO' })
+                                                        })
+                                                        if (res.ok) alert("Injection Successful: Intelligence synced to CRM.")
+                                                    }}
+                                                >
+                                                    🎯 CRM
                                                 </button>
                                             </div>
                                         </td>

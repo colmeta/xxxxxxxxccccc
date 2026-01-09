@@ -88,7 +88,7 @@ function App() {
                         fontWeight: 900, cursor: 'pointer', borderBottom: view === 'sovereign' ? '2px solid hsl(var(--pearl-primary))' : 'none'
                     }}
                 >
-                    🧠 SOVEREIGN HUB
+                    🛰️ SOVEREIGN NETWORK
                 </button>
                 <button
                     onClick={() => setView('vault')}
@@ -97,7 +97,7 @@ function App() {
                         fontWeight: 900, cursor: 'pointer', borderBottom: view === 'vault' ? '2px solid hsl(var(--pearl-primary))' : 'none'
                     }}
                 >
-                    💎 THE VAULT
+                    💎 SALES VAULT
                 </button>
                 <button
                     onClick={() => setView('settings')}
@@ -113,6 +113,24 @@ function App() {
             {view === 'sovereign' ? (
                 <div style={{ display: 'grid', gap: '2rem' }} className="main-grid">
                     <div className="main-content">
+                        {/* THE ORACLE - TOP LEVEL COMMAND */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h1 style={{
+                                fontSize: '1.2rem',
+                                fontWeight: 900,
+                                color: 'rgba(255,255,255,0.7)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '2px',
+                                marginBottom: '0.25rem'
+                            }}>
+                                🔮 THE ORACLE
+                            </h1>
+                            <p style={{ fontSize: '0.7rem', color: 'hsl(var(--pearl-primary))', fontWeight: 700, letterSpacing: '1px', marginBottom: '1.5rem' }}>
+                                POWERED BY DATAFORGE™ AUTOMATION
+                            </p>
+                            <OracleControl />
+                        </div>
+
                         <SovereignHub />
                     </div>
                     <div className="sidebar">
