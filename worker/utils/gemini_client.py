@@ -103,6 +103,13 @@ class GeminiClient:
             return json.loads(self._clean_json(resp))
         except: return []
 
+    async def generate_content(self, prompt):
+        """
+        Compatibility method for ArbiterAgent.
+        Returns the text content directly.
+        """
+        return await self._smart_call(prompt)
+
     def _clean_json(self, text):
         if not text: return None
         clean = text.strip().replace('```json', '').replace('```', '')
