@@ -394,34 +394,34 @@ class HydraController:
                     break
 
             # 1. Insert Result
-                # --- PHASE 10: THE SOVEREIGN MIND (Velocity & Displacement) ---
-                velocity_data = {"scaling_signal": "Stable", "growth_rate_pct": 0}
-                displacement_data = {}
-                
-                result_payload = None
-                try:
-                    # Look for previous snapshot for velocity
-                    prev_res = self.supabase.table('data_vault').select("*").eq('email', data.get('email')).limit(1).execute()
-                    if prev_res.data:
-                        velocity_data = velocity_engine.calculate_velocity(prev_res.data[0], data)
-                        
-                        # Generate Displacement Script if we have growth/competitors
-                        displacement_data = await arbiter.generate_sovereign_displacement(data, velocity_data)
-                except Exception as vel_err:
-                    print(f"   ⚠️ Velocity/Displacement calculation failed: {vel_err}")
+            # --- PHASE 10: THE SOVEREIGN MIND (Velocity & Displacement) ---
+            velocity_data = {"scaling_signal": "Stable", "growth_rate_pct": 0}
+            displacement_data = {}
+            
+            result_payload = None
+            try:
+                # Look for previous snapshot for velocity
+                prev_res = self.supabase.table('data_vault').select("*").eq('email', data.get('email')).limit(1).execute()
+                if prev_res.data:
+                    velocity_data = velocity_engine.calculate_velocity(prev_res.data[0], data)
+                    
+                    # Generate Displacement Script if we have growth/competitors
+                    displacement_data = await arbiter.generate_sovereign_displacement(data, velocity_data)
+            except Exception as vel_err:
+                print(f"   ⚠️ Velocity/Displacement calculation failed: {vel_err}")
 
-                result_payload = {
-                    "job_id": job_id,
-                    "data_payload": data,
-                    "verified": verified,
-                    "clarity_score": clarity_score,
-                    "intent_score": intent_data.get('intent_score', 0) if intent_data else 0,
-                    "oracle_signal": intent_data.get('oracle_signal', 'Baseline') if intent_data else 'Baseline',
-                    "predictive_growth_score": intent_data.get('predictive_growth_score', 0) if intent_data else 0,
-                    "reasoning": intent_data.get('reasoning', '') if intent_data else '',
-                    "velocity_data": velocity_data,
-                    "displacement_data": displacement_data
-                }
+            result_payload = {
+                "job_id": job_id,
+                "data_payload": data,
+                "verified": verified,
+                "clarity_score": clarity_score,
+                "intent_score": intent_data.get('intent_score', 0) if intent_data else 0,
+                "oracle_signal": intent_data.get('oracle_signal', 'Baseline') if intent_data else 'Baseline',
+                "predictive_growth_score": intent_data.get('predictive_growth_score', 0) if intent_data else 0,
+                "reasoning": intent_data.get('reasoning', '') if intent_data else '',
+                "velocity_data": velocity_data,
+                "displacement_data": displacement_data
+            }
             
             if result_payload:
                 try:
