@@ -398,6 +398,7 @@ class HydraController:
                 velocity_data = {"scaling_signal": "Stable", "growth_rate_pct": 0}
                 displacement_data = {}
                 
+                result_payload = None
                 try:
                     # Look for previous snapshot for velocity
                     prev_res = self.supabase.table('data_vault').select("*").eq('email', data.get('email')).limit(1).execute()
@@ -421,9 +422,22 @@ class HydraController:
                     "velocity_data": velocity_data,
                     "displacement_data": displacement_data
                 }
-            res_insert = self.supabase.table('results').insert(result_payload).execute()
             
-            if res_insert.data:
+            if result_payload:
+                try:
+                    res_insert = self.supabase.table('results').insert(result_payload).execute()
+                except Exception as insert_err:
+                    print(f"   ⚠️ Full insert failed (likely schema mismatch). Trying minimal insert... Error: {insert_err}")
+                    # Fallback to minimal payload
+                    min_payload = {
+                        "job_id": job_id,
+                        "data_payload": data,
+                        "verified": verified,
+                        "clarity_score": clarity_score
+                    }
+                    res_insert = self.supabase.table('results').insert(min_payload).execute()
+            
+            if result_payload and res_insert.data:
                 result_id = res_insert.data[0]['id']
                 
                 # 1a. INNOVATION: Real-Time Email Verification

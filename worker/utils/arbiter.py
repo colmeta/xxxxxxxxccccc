@@ -119,8 +119,8 @@ class ArbiterAgent:
                 "reasoning": "string (Why did you give these scores?)"
             }}
             """
-            ai_response = await gemini_client.model.generate_content(prompt)
-            clean_json = re.sub(r'```json\n?|\n?```', '', ai_response.text).strip()
+            ai_response_text = await gemini_client.generate_content(prompt)
+            clean_json = re.sub(r'```json\n?|\n?```', '', ai_response_text).strip()
             return json.loads(clean_json)
         except Exception as e:
             print(f"❌ Oracle Predictive Error: {e}")
@@ -146,8 +146,8 @@ class ArbiterAgent:
         Return ONLY the query string.
         """
         try:
-             response = await gemini_client.model.generate_content(prompt)
-             return response.text.strip()
+             response_text = await gemini_client.generate_content(prompt)
+             return response_text.strip()
         except:
              return f"verify {lead_data.get('name')} {lead_data.get('company')}"
 
@@ -170,8 +170,8 @@ class ArbiterAgent:
         Return ONLY your bulleted critique.
         """
         try:
-            critic_res = await gemini_client.model.generate_content(critic_prompt)
-            critique = critic_res.text.strip()
+            critic_res_text = await gemini_client.generate_content(critic_prompt)
+            critique = critic_res_text.strip()
             print(f"🧐 Critic Signal: {critique[:100]}...")
 
             refinement_prompt = f"""
@@ -188,8 +188,8 @@ class ArbiterAgent:
             
             Return ONLY the final refined script.
             """
-            final_res = await gemini_client.model.generate_content(refinement_prompt)
-            return final_res.text.strip()
+            final_res_text = await gemini_client.generate_content(refinement_prompt)
+            return final_res_text.strip()
         except Exception as e:
             print(f"⚠️ Pearl-01 Debate Interrupted: {e}")
             return initial_script
@@ -236,8 +236,8 @@ class ArbiterAgent:
         }}
         """
         try:
-            response = await gemini_client.model.generate_content(prompt)
-            clean_json = re.sub(r'```json\n?|\n?```', '', response.text).strip()
+            response_text = await gemini_client.generate_content(prompt)
+            clean_json = re.sub(r'```json\n?|\n?```', '', response_text).strip()
             data = json.loads(clean_json)
             
             # PEARL-01 DEBATE: Refine the script

@@ -55,6 +55,37 @@ class StealthContextV2:
             Object.defineProperty(navigator, 'vendor', { get: () => 'Google Inc.' });
         """)
 
+        # 4. CRITICAL: Mask Navigator.webdriver (The #1 Bot Tell)
+        await page.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+        """)
+
+        # 5. Mock Chrome Runtime (To look like a real headed Chrome)
+        await page.add_init_script("""
+            window.chrome = {
+                runtime: {}
+            };
+        """)
+
+        # 6. Permissions API Mock
+        await page.add_init_script("""
+            const originalQuery = window.navigator.permissions.query;
+            window.navigator.permissions.query = (parameters) => (
+                parameters.name === 'notifications' ?
+                Promise.resolve({ state: Notification.permission }) :
+                originalQuery(parameters)
+            );
+        """)
+
+        # 7. Plugin Entropy
+        await page.add_init_script("""
+            Object.defineProperty(navigator, 'plugins', {
+                get: () => [1, 2, 3, 4, 5],
+            });
+        """)
+
     @staticmethod
     async def enact_human_behavior(page):
         """
