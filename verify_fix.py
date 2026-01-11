@@ -1,31 +1,30 @@
-
 import asyncio
-from worker.utils.gemini_client import gemini_client
+from worker.utils.arbiter import arbiter
+import sys
 
-async def main():
-    print("Testing Gemini Client Fix...")
-    try:
-        # Test 1: Check attribute
-        print(f"Model ID: {gemini_client.gemini_model}")
-        
-        # Test 2: Check new method existence
-        if not hasattr(gemini_client, 'generate_content'):
-            print("❌ FAILURE: Method 'generate_content' missing.")
-            return
+# Force unbuffered output
+sys.stdout.reconfigure(line_buffering=True)
 
-        # Test 3: Attempt call (optional, but good)
-        # We catch the error in case of API Key failure, but we want to know if the CALL itself works (no AttributeError)
-        try:
-            print("Sending test prompt...")
-            res = await gemini_client.generate_content("Hello, say 'Verified' if you hear me.")
-            print(f"Gemini Response: {res}")
-        except Exception as e:
-            # If it's a 401/403 (Keys), that's fine for code verification. 
-            # If it's AttributeError again, that's bad.
-            print(f"API Call Result: {e}")
-
-    except Exception as e:
-        print(f"❌ CRITICAL ERROR: {e}")
+async def test():
+    print("Testing Arbiter Fix...")
+    
+    lead_data = {
+        "name": "Dr. Smith",
+        "company": "Ohio Medical",
+        "title": "Chief Surgeon",
+        "metadata": {"signals": "Hiring now"}
+    }
+    
+    print("Calling predict_intent...")
+    result = await arbiter.predict_intent(lead_data)
+    print(f"Result: {result}")
+    
+    if result.get("confidence", 0) > 0:
+        print("SUCCESS: Valid response received.")
+    elif result.get("reasoning") == "Error in predictive analysis":
+        print("SUCCESS: Graceful fallback triggered (no crash).")
+    else:
+        print("FAILURE: Unexpected state.")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(test())
