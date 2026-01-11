@@ -18,10 +18,10 @@ class GeminiClient:
         self.groq_key = os.getenv("GROQ_API_KEY")
         
         if not self.gemini_key and not self.groq_key:
-            print("⚠️ Warning: Neither GEMINI_API_KEY nor GROQ_API_KEY found.")
+            print("Warning: Neither GEMINI_API_KEY nor GROQ_API_KEY found.")
         
         # Models
-        self.gemini_model = 'gemini-1.5-flash'
+        self.gemini_model = 'gemini-1.5-flash-8b'
         self.groq_model = 'llama-3.1-8b-instant' # Faster and more reliable
         
         self.gemini_url = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -48,7 +48,7 @@ class GeminiClient:
             resp.raise_for_status()
             return resp.json()['candidates'][0]['content']['parts'][0]['text']
         except Exception as e:
-            print(f"❌ Gemini Error: {e}")
+            print(f"[X] Gemini Error: {e}")
             return None
 
     def _call_groq(self, prompt):
@@ -64,10 +64,12 @@ class GeminiClient:
         }
         try:
             resp = requests.post(self.groq_url, headers=headers, json=payload, timeout=20)
+            if resp.status_code != 200:
+                 print(f"[X] Groq Status: {resp.status_code} | {resp.text[:200]}")
             resp.raise_for_status()
             return resp.json()['choices'][0]['message']['content']
         except Exception as e:
-            print(f"❌ Groq Error: {e}")
+            print(f"[X] Groq Error: {e}")
             return None
 
     def _smart_call(self, prompt, image_path=None):

@@ -120,10 +120,13 @@ class ArbiterAgent:
             }}
             """
             ai_response_text = await gemini_client.generate_content(prompt)
+            if not ai_response_text:
+                raise ValueError("Empty response from AI")
+            
             clean_json = re.sub(r'```json\n?|\n?```', '', ai_response_text).strip()
             return json.loads(clean_json)
         except Exception as e:
-            print(f"❌ Oracle Predictive Error: {e}")
+            print(f"[X] Oracle Predictive Error: {e}")
             return {
                 "intent_score": 0, 
                 "predictive_growth_score": 0, 
@@ -237,6 +240,9 @@ class ArbiterAgent:
         """
         try:
             response_text = await gemini_client.generate_content(prompt)
+            if not response_text:
+                return {"status": "error", "message": "No AI response"}
+
             clean_json = re.sub(r'```json\n?|\n?```', '', response_text).strip()
             data = json.loads(clean_json)
             
@@ -246,7 +252,7 @@ class ArbiterAgent:
             
             return data
         except Exception as e:
-            print(f"❌ Sovereign Displacement Error: {e}")
+            print(f"[X] Sovereign Displacement Error: {e}")
             return {"status": "error", "message": str(e)}
 
 arbiter = ArbiterAgent()
