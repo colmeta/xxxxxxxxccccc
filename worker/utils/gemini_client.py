@@ -12,21 +12,32 @@ class GeminiClient:
     """
     CLARITY PEARL ARBITER - MULTI-AI INTEGRATION
     Optimized for modern Google GenAI SDK and Groq.
-    Now with persistent model fallback.
+    Now with persistent model fallback and detailed logging.
     """
     
     def __init__(self):
         self.gemini_key = os.getenv("GEMINI_API_KEY")
         self.groq_key = os.getenv("GROQ_API_KEY")
         
+        print(f"DEBUG: GeminiClient Init - Gemini Key: {bool(self.gemini_key)}, Groq Key: {bool(self.groq_key)}")
+        
         if not self.gemini_key and not self.groq_key:
             print("Warning: Neither GEMINI_API_KEY nor GROQ_API_KEY found.")
         
         if self.gemini_key:
-            self.client = genai.Client(api_key=self.gemini_key)
-            # We'll try these in order
-            self.model_candidates = ['gemini-1.5-flash-8b', 'gemini-1.5-flash', 'gemini-2.0-flash-exp']
-            self.model_id = self.model_candidates[0]
+            try:
+                self.client = genai.Client(api_key=self.gemini_key)
+                # Try these names exactly as standard
+                self.model_candidates = [
+                    'gemini-1.5-flash-8b', 
+                    'gemini-1.5-flash', 
+                    'gemini-1.5-pro',
+                    'gemini-2.0-flash-exp'
+                ]
+                self.model_id = self.model_candidates[0]
+            except Exception as e:
+                print(f"❌ Gemini SDK Init Error: {e}")
+                self.gemini_key = None
         
         # Groq Fallback
         self.groq_model = 'llama-3.1-8b-instant'
@@ -35,7 +46,6 @@ class GeminiClient:
     def _call_gemini(self, prompt, image_path=None):
         if not self.gemini_key: return None
         
-        # Try candidates until success
         for model in self.model_candidates:
             try:
                 if image_path and os.path.exists(image_path):
@@ -55,22 +65,28 @@ class GeminiClient:
                         contents=prompt
                     )
                 
-                # If we succeeded, we can potentially remember this model_id
-                self.model_id = model
-                return response.text
+                if response and response.text:
+                    self.model_id = model
+                    return response.text
+                continue
             except Exception as e:
-                # If it's a 404 or unsupported, try next
-                if "404" in str(e) or "not found" in str(e).lower():
-                    print(f"⚠️ Gemini Model '{model}' not found. Trying fallback...")
-                    continue
-                print(f"[X] Gemini SDK Error ({model}): {e}")
-                # For other errors, we might still want to try fallback or just break
+                err_str = str(e).lower()
+                if "404" in err_str or "not found" in err_str:
+                    print(f"⚠️ Gemini '{model}' not found (404).")
+                elif "429" in err_str or "quota" in err_str:
+                    print(f"⚠️ Gemini '{model}' quota exceeded (429).")
+                else:
+                    print(f"[X] Gemini SDK Error ({model}): {e}")
                 continue
         
         return None
 
     def _call_groq(self, prompt):
-        if not self.groq_key: return None
+        if not self.groq_key: 
+            print("DEBUG: Groq Key missing, skipping Groq.")
+            return None
+            
+        print(f"DEBUG: Attempting Groq call with model {self.groq_model}...")
         headers = {
             "Authorization": f"Bearer {self.groq_key}",
             "Content-Type": "application/json"
@@ -84,7 +100,7 @@ class GeminiClient:
             resp = requests.post(self.groq_url, headers=headers, json=payload, timeout=20)
             if resp.status_code != 200:
                  print(f"[X] Groq Status: {resp.status_code} | {resp.text[:200]}")
-            resp.raise_for_status()
+                 return None
             return resp.json()['choices'][0]['message']['content']
         except Exception as e:
             print(f"[X] Groq Error: {e}")
@@ -100,6 +116,7 @@ class GeminiClient:
             res = self._call_groq(prompt)
             if res: return res
         
+        # If Groq fails or no key, try Gemini
         return self._call_gemini(prompt)
 
     async def analyze_visuals(self, query, image_path):
