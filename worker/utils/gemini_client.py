@@ -1,7 +1,8 @@
 import os
-import requests
 import json
 import base64
+import requests
+from google import genai
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -10,7 +11,7 @@ load_dotenv()
 class GeminiClient:
     """
     CLARITY PEARL ARBITER - MULTI-AI INTEGRATION
-    Optimized for Gemini and Groq to maintain near-zero costs and low RAM (Render 512MB).
+    Optimized for modern Google GenAI SDK and Groq.
     """
     
     def __init__(self):
@@ -20,35 +21,37 @@ class GeminiClient:
         if not self.gemini_key and not self.groq_key:
             print("Warning: Neither GEMINI_API_KEY nor GROQ_API_KEY found.")
         
-        # Models
-        self.gemini_model = 'gemini-1.5-flash-8b'
-        self.groq_model = 'llama-3.1-8b-instant' # Faster and more reliable
+        if self.gemini_key:
+            self.client = genai.Client(api_key=self.gemini_key)
+            self.model_id = 'gemini-1.5-flash'
         
-        self.gemini_url = "https://generativelanguage.googleapis.com/v1beta/models"
+        # Groq Fallback
+        self.groq_model = 'llama-3.1-8b-instant'
         self.groq_url = "https://api.groq.com/openai/v1/chat/completions"
 
     def _call_gemini(self, prompt, image_path=None):
         if not self.gemini_key: return None
-        url = f"{self.gemini_url}/{self.gemini_model}:generateContent?key={self.gemini_key}"
-        headers = {"Content-Type": "application/json"}
-        parts = [{"text": prompt}]
-        if image_path and os.path.exists(image_path):
-            try:
-                with open(image_path, "rb") as f:
-                    parts.append({
-                        "inline_data": {
-                            "mime_type": "image/png",
-                            "data": base64.b64encode(f.read()).decode('utf-8')
-                        }
-                    })
-            except: pass
-        payload = {"contents": [{"parts": parts}]}
         try:
-            resp = requests.post(url, headers=headers, json=payload, timeout=20)
-            resp.raise_for_status()
-            return resp.json()['candidates'][0]['content']['parts'][0]['text']
+            if image_path and os.path.exists(image_path):
+                with open(image_path, "rb") as f:
+                    image_data = f.read()
+                
+                response = self.client.models.generate_content(
+                    model=self.model_id,
+                    contents=[
+                        prompt,
+                        {"mime_type": "image/png", "data": base64.b64encode(image_data).decode('utf-8')}
+                    ]
+                )
+            else:
+                response = self.client.models.generate_content(
+                    model=self.model_id,
+                    contents=prompt
+                )
+            
+            return response.text
         except Exception as e:
-            print(f"[X] Gemini Error: {e}")
+            print(f"[X] Gemini SDK Error: {e}")
             return None
 
     def _call_groq(self, prompt):
@@ -77,9 +80,10 @@ class GeminiClient:
         if image_path:
             return self._call_gemini(prompt, image_path)
         
-        # If no image, Groq is often faster/more reliable on free tier
-        res = self._call_groq(prompt)
-        if res: return res
+        # Try Groq first for text if key exists (often faster/more reliable free tier)
+        if self.groq_key:
+            res = self._call_groq(prompt)
+            if res: return res
         
         return self._call_gemini(prompt)
 
@@ -116,6 +120,5 @@ class GeminiClient:
         if not text: return None
         clean = text.strip().replace('```json', '').replace('```', '')
         return clean.strip()
-
 
 gemini_client = GeminiClient()
