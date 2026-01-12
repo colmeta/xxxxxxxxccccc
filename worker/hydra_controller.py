@@ -655,6 +655,7 @@ class HydraController:
         }
         
         # DEFENSIVE PULSE: Only send what the DB supports
+        safe_payload = {}
         if not self.supported_columns:
             # Lazy discovery if first run
             await self._discover_supported_columns()
