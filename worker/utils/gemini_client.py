@@ -30,12 +30,12 @@ class GeminiClient:
         
         print(f"DEBUG: GeminiClient Init - Gemini Key: {bool(self.gemini_key)}, Groq Key: {bool(self.groq_key)}")
         
-        # Strictly verified model IDs to eliminate 404s
+        # Strictly verified model IDs with 'models/' prefix to eliminate 404s
         self.model_candidates = [
             'gemini-2.0-flash-exp',
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-8b',
-            'gemini-1.5-pro'
+            'models/gemini-1.5-flash',
+            'models/gemini-1.5-flash-8b',
+            'models/gemini-1.5-pro'
         ]
         self.model_id = self.model_candidates[0]
 

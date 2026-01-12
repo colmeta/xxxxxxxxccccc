@@ -15,7 +15,7 @@ class GoogleMapsEngine:
         url = f"https://www.google.com/maps/search/{encoded_query}"
         
         try:
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            await self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
             await Humanizer.random_sleep(3, 5)
             
             # Check for "Accept Cookies" - Harder look
@@ -37,9 +37,9 @@ class GoogleMapsEngine:
             # 2. Identify the Feed
             feed_selector = "div[role='feed']"
             try:
-                await self.page.wait_for_selector(feed_selector, timeout=15000)
+                await self.page.wait_for_selector(feed_selector, timeout=20000)
             except:
-                print(f"[{self.platform}] ⚠️ Feed not found. Checking for single result...")
+                print(f"[{self.platform}] ⚠️ Feed selector not found. Checking for single result or alternate layout...")
                 return await self._scrape_single_result()
 
             # 3. Scroll to load more (Limited for speed)
@@ -50,9 +50,14 @@ class GoogleMapsEngine:
 
             # 4. Extract
             results = []
+            # More specific selectors for current Google Maps layout
             feed_children = await self.page.query_selector_all("div[role='article']")
             if not feed_children:
                 feed_children = await self.page.query_selector_all("a[href*='/maps/place/']")
+            
+            # If still nothing, try to find any link inside the feed
+            if not feed_children:
+                 feed_children = await self.page.query_selector_all(f"{feed_selector} a[href*='/maps/place/']")
 
             print(f"[{self.platform}] 🧐 Extracting up to 10 listings...")
 
