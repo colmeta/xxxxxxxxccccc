@@ -126,13 +126,30 @@ class ArbiterAgent:
             return json.loads(clean_json)
         except Exception as e:
             print(f"[X] Oracle Predictive Error: {e}")
-            return {
-                "intent_score": 0, 
-                "predictive_growth_score": 0, 
-                "oracle_signal": "Baseline Intelligence", 
-                "confidence": 0.5,
-                "reasoning": "Error in predictive analysis"
-            }
+            return self._calculate_heuristic_intent(lead_data)
+
+    def _calculate_heuristic_intent(self, lead_data):
+        """Baseline intent prediction when AI is offline."""
+        snippet = str(lead_data).lower()
+        intent_score = 50
+        growth_score = 40
+        
+        # High intent keywords
+        if any(w in snippet for m, w in [("hire", "hiring"), ("expansion", "expanding"), ("new", "launch")]):
+            intent_score += 20
+            growth_score += 20
+        
+        # Seniority boost
+        if any(r in snippet for r in ["ceo", "founder", "director", "cto"]):
+            intent_score += 15
+        
+        return {
+            "intent_score": min(intent_score, 100), 
+            "predictive_growth_score": min(growth_score, 100), 
+            "oracle_signal": "Heuristic Intent (Baseline)", 
+            "confidence": 0.6,
+            "reasoning": "Heuristic fallback analysis performed due to AI downtime."
+        }
 
     async def recursive_verdict(self, lead_data):
         """
@@ -149,9 +166,12 @@ class ArbiterAgent:
         """
         try:
              response_text = await gemini_client.generate_content(prompt)
+             if not response_text: raise ValueError("Empty response")
              return response_text.strip()
         except:
-             return f"verify {lead_data.get('name')} {lead_data.get('company')}"
+             name = lead_data.get('name', 'Company')
+             company = lead_data.get('company', '')
+             return f"recent news {name} {company}".strip()
 
     async def _pearl_01_debate(self, context_prompt: str, initial_script: str) -> str:
         """
@@ -252,6 +272,13 @@ class ArbiterAgent:
             return data
         except Exception as e:
             print(f"[X] Sovereign Displacement Error: {e}")
-            return {"status": "error", "message": str(e)}
+            # Baseline Displacement (Heuristic)
+            target = competitors[0] if competitors else "Stack"
+            return {
+                "displacement_target": target,
+                "friction_point": "Scaling friction and manual overhead.",
+                "sovereign_script": f"Hi {lead_data.get('name', 'there')}, saw your growth at {lead_data.get('company', 'your firm')}. Most teams hit a wall with {target} at this stage. Worth a quick look at how we automate that friction away?",
+                "status": "baseline_fallback"
+            }
 
 arbiter = ArbiterAgent()
