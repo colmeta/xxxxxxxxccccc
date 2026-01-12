@@ -118,10 +118,18 @@ class GeminiClient:
         if not self.groq_key: 
             print("DEBUG: Groq Key missing, skipping Groq.")
             return None
-            
+        headers = {
+            "Authorization": f"Bearer {self.groq_key}",
+            "Content-Type": "application/json"
+        }
+        
         for model in self.groq_candidates:
             print(f"DEBUG: Attempting Groq call with model {model}...")
-            payload["model"] = model
+            payload = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.1
+            }
             try:
                 resp = requests.post(self.groq_url, headers=headers, json=payload, timeout=20)
                 if resp.status_code != 200:
