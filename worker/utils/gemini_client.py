@@ -33,9 +33,13 @@ class GeminiClient:
         # Comprehensive Matrix: covers all known variants to eliminate 404s
         self.model_candidates = [
             'gemini-2.0-flash-exp',
+            'gemini-1.5-flash-latest',
             'gemini-1.5-flash',
+            'gemini-1.5-flash-001',
+            'gemini-1.5-flash-002',
             'gemini-1.5-flash-8b',
             'gemini-2.0-flash',
+            'gemini-1.5-pro-latest',
             'gemini-1.5-pro'
         ]
         self.model_id = self.model_candidates[0]
