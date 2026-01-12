@@ -10,20 +10,10 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 import hashlib
+# Avoid top-level engine imports to prevent dependency-related load failures
+# Scrapers are now imported lazily within processing methods
+
 from utils.arbiter import arbiter
-from scrapers.linkedin_engine import LinkedInEngine
-from scrapers.google_maps_engine import GoogleMapsEngine
-from scrapers.social_radar import TwitterEngine, InstagramEngine
-from scrapers.startup_radar import CrunchbaseEngine, ProductHuntEngine, RedditEngine, YCombinatorEngine
-from scrapers.tiktok_engine import TikTokEngine
-from scrapers.facebook_engine_v2 import FacebookEngineV2
-from scrapers.google_maps_grid_engine import GoogleMapsGridEngine
-from scrapers.news_pulse_engine import NewsPulseEngine
-from scrapers.commerce_watch_engine import CommerceWatchEngine
-from scrapers.real_estate_engine import RealEstateEngine
-from scrapers.job_scout_engine import JobScoutEngine
-from scrapers.reddit_pulse_engine import RedditPulseEngine
-from scrapers.omni_scout_engine import OmniScoutEngine
 from utils.enrichment_bridge import EnrichmentBridge
 from utils.proxy_manager import ProxyManager
 from utils.stealth_v2 import stealth_v2
@@ -37,15 +27,13 @@ from utils.velocity_engine import velocity_engine
 try:
     from supabase import create_client, Client
 except ImportError:
-    print("❌ 'supabase' library not found. Please install it: pip install supabase")
-    exit(1)
+    pass # Handled in __init__ if needed
 
 # Import Playwright
 try:
     from playwright.async_api import async_playwright
 except ImportError:
-    print("❌ 'playwright' library not found. Please install it: pip install playwright && playwright install")
-    exit(1)
+    pass # Handled in process_job_with_browser
 
 load_dotenv()
 
@@ -53,25 +41,44 @@ class HydraController:
     def __init__(self, worker_id=None):
         # Honor WORKER_ID env var if provided, else use default
         self.worker_id = worker_id or os.getenv("WORKER_ID") or "production_hydra_01"
-        self.proxy_manager = ProxyManager(os.getenv("PROXY_LIST_PATH"))
-        self.url = os.getenv("SUPABASE_URL")
-        self.key = os.getenv("SUPABASE_KEY")
+        self.supabase = None
+        self.supported_columns = [] # Dynamic schema discovery
         
-        if not self.url or not self.key:
-            print("❌ Critical Error: SUPABASE_URL or SUPABASE_KEY not set.")
-            # For robustness in testing environment without keys, we might want to warn instead of exit
-            # but for production code, exit is correct.
-            # exit(1) 
+        # Initialize Supabase
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+        if url and key:
+            try:
+                self.supabase = create_client(url, key)
+                print(f"[{self.worker_id}] Supabase Connection Active.")
+                # Schema discovery will happen lazily in mesh_pulse or heartbeat
+            except Exception as e:
+                print(f"[{self.worker_id}] Supabase Connection Failed: {e}")
+        
+        self.proxy_manager = stealth_v2 
+        self.humanizer = Humanizer()
+        self.email_verifier = email_verifier
+        self.prioritizer = lead_prioritizer
+        self.active_missions = 0
+        self.start_time = datetime.now()
+        self.last_mesh_pulse = datetime.min
 
-        print(f"[{self.worker_id}] Connecting to DataVault...")
-        if self.url and self.key:
-            self.supabase: Client = create_client(self.url, self.key)
-        else:
-            self.supabase = None
-            print("⚠️ Running in OFFLINE mode (Simulated DB connection)")
-
-        print(f"[{self.worker_id}] Online and Ready. 🐉")
-        self.last_mesh_pulse = datetime.now()
+    async def _discover_supported_columns(self):
+        """Discovers which columns exist in worker_status to avoid SQL errors."""
+        if not self.supabase: return
+        try:
+            # Fetch 1 record to see available keys
+            res = self.supabase.table('worker_status').select('*').limit(1).execute()
+            if res.data and len(res.data) > 0:
+                self.supported_columns = list(res.data[0].keys())
+                print(f"🛰️ Schema Discovery: Found {len(self.supported_columns)} supported columns.")
+            else:
+                # If table is empty, we default to the legacy set to be safe
+                self.supported_columns = ["worker_id", "status", "last_pulse"]
+                print("⚠️ Schema Discovery: Table empty, using legacy fallback columns.")
+        except Exception as e:
+            print(f"⚠️ Schema Discovery Failed: {e}")
+            self.supported_columns = ["worker_id", "status", "last_pulse"]
 
     def _start_heartbeat(self):
         """Launches a background heartbeat task."""
@@ -81,12 +88,12 @@ class HydraController:
         while True:
             try:
                 if self.supabase:
-                    # Update a 'workers' table with our current status
-                    self.supabase.table('worker_status').upsert({
-                        "worker_id": self.worker_id,
-                        "status": "active",
-                        "last_pulse": datetime.now().isoformat()
-                    }).execute()
+                    # Defensive heartbeat: only send supported columns
+                    payload = {"worker_id": self.worker_id}
+                    if "status" in self.supported_columns: payload["status"] = "active"
+                    if "last_pulse" in self.supported_columns: payload["last_pulse"] = datetime.now().isoformat()
+                    
+                    self.supabase.table('worker_status').upsert(payload).execute()
             except Exception as e:
                 print(f"[{self.worker_id}] Heartbeat Warning: {e}")
             await asyncio.sleep(30)
@@ -620,6 +627,8 @@ class HydraController:
         THE DIVINE MESH: Peer-to-Peer stealth coordination.
         Now enhanced with Phase 11 Global Swarm Metadata.
         """
+        import random
+        from datetime import datetime
         if not self.supabase: return
         
         # 1. Discover identity if not already found
@@ -630,24 +639,39 @@ class HydraController:
         
         health = 98.0 + (random.random() * 2) 
         
-        pulse_data = {
+        # ALL POSSIBLE COLUMNS
+        full_payload = {
             "worker_id": self.worker_id,
             "stealth_health": round(health, 2),
             "best_user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "active_missions": 1,
+            "active_missions": self.active_missions,
             "last_pulse": datetime.now().isoformat(),
             "burned_proxies": self.proxy_manager.banned_proxies if hasattr(self.proxy_manager, 'banned_proxies') else [],
-            # Phase 11 Swarm Data
             "node_type": "residential",
             "public_ip": self.node_geo.get("public_ip"),
             "geo_city": self.node_geo.get("geo_city"),
             "geo_country": self.node_geo.get("geo_country"),
             "ip_authority_score": self.node_geo.get("ip_authority")
         }
+        
+        # DEFENSIVE PULSE: Only send what the DB supports
+        if not self.supported_columns:
+            # Lazy discovery if first run
+            await self._discover_supported_columns()
+            
+        if not self.supported_columns:
+            # Fallback if discovery still blank: send absolute minimum
+             safe_payload = {"worker_id": self.worker_id, "last_pulse": full_payload["last_pulse"]}
+        else:
+            for k, v in full_payload.items():
+                if k in self.supported_columns:
+                    safe_payload[k] = v
+
         try:
-             self.supabase.table('worker_status').upsert(pulse_data).execute()
+             self.supabase.table('worker_status').upsert(safe_payload).execute()
         except Exception as e:
              print(f"⚠️ Mesh Pulse Failure: {e}")
+
 
 if __name__ == "__main__":
     import argparse

@@ -19,34 +19,53 @@ class GeminiClient:
         self.gemini_key = os.getenv("GEMINI_API_KEY")
         self.groq_key = os.getenv("GROQ_API_KEY")
         
+        # MODEL HEALTH MAP (Dynamic failure tracking)
+        self.health_map = {} # {model_id: {"last_fail": timestamp, "fail_type": "429"|"404"|"error"}}
+        self.cooldown_period = 300 # 5 minutes for 429s
+        
         print(f"DEBUG: GeminiClient Init - Gemini Key: {bool(self.gemini_key)}, Groq Key: {bool(self.groq_key)}")
         
-        if not self.gemini_key and not self.groq_key:
-            print("Warning: Neither GEMINI_API_KEY nor GROQ_API_KEY found.")
-        
+        # Comprehensive Matrix: covers all known variants to eliminate 404s
+        self.model_candidates = [
+            'gemini-1.5-flash-latest',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-002',
+            'gemini-1.5-flash-8b',
+            'gemini-2.0-flash-exp',
+            'gemini-1.5-pro'
+        ]
+        self.model_id = self.model_candidates[0]
+
         if self.gemini_key:
             try:
                 self.client = genai.Client(api_key=self.gemini_key)
-                # Try these names exactly as standard
-                self.model_candidates = [
-                    'gemini-1.5-flash-8b', 
-                    'gemini-1.5-flash', 
-                    'gemini-1.5-pro',
-                    'gemini-2.0-flash-exp'
-                ]
-                self.model_id = self.model_candidates[0]
             except Exception as e:
                 print(f"❌ Gemini SDK Init Error: {e}")
                 self.gemini_key = None
         
-        # Groq Fallback
+        # Groq Fallback (High Reliability Tier)
         self.groq_model = 'llama-3.1-8b-instant'
         self.groq_url = "https://api.groq.com/openai/v1/chat/completions"
+
+    def _is_healthy(self, model):
+        """Checks if a model is currently in cooldown."""
+        if model not in self.health_map: return True
+        fail_data = self.health_map[model]
+        if fail_data['fail_type'] == "404": return False # Permanent failure for this session
+        
+        seconds_since = (datetime.now() - fail_data['last_fail']).total_seconds()
+        if fail_data['fail_type'] == "429" and seconds_since < self.cooldown_period:
+            return False
+        return True
 
     def _call_gemini(self, prompt, image_path=None):
         if not self.gemini_key: return None
         
+        # Try models in order, skipping unhealthy ones
         for model in self.model_candidates:
+            if not self._is_healthy(model):
+                continue
+
             try:
                 if image_path and os.path.exists(image_path):
                     with open(image_path, "rb") as f:
@@ -66,17 +85,24 @@ class GeminiClient:
                     )
                 
                 if response and response.text:
+                    # Successful call clears health record
+                    if model in self.health_map: del self.health_map[model]
                     self.model_id = model
                     return response.text
                 continue
             except Exception as e:
                 err_str = str(e).lower()
+                fail_type = "error"
                 if "404" in err_str or "not found" in err_str:
-                    print(f"⚠️ Gemini '{model}' not found (404).")
+                    print(f"⚠️ Gemini '{model}' fallback: 404 Not Found.")
+                    fail_type = "404"
                 elif "429" in err_str or "quota" in err_str:
-                    print(f"⚠️ Gemini '{model}' quota exceeded (429).")
+                    print(f"⚠️ Gemini '{model}' fallback: 429 Quota Exceeded.")
+                    fail_type = "429"
                 else:
                     print(f"[X] Gemini SDK Error ({model}): {e}")
+                
+                self.health_map[model] = {"last_fail": datetime.now(), "fail_type": fail_type}
                 continue
         
         return None

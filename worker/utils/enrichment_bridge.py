@@ -1,5 +1,5 @@
 import asyncio
-from scrapers.linkedin_engine import LinkedInEngine
+# from scrapers.linkedin_engine import LinkedInEngine # Lazy-loaded in __init__
 from utils.email_verifier import email_verifier
 
 class EnrichmentBridge:
@@ -8,6 +8,7 @@ class EnrichmentBridge:
     Logic to pivot from a business (entity) to a person (lead).
     """
     def __init__(self, page):
+        from scrapers.linkedin_engine import LinkedInEngine
         self.page = page
         self.linkedin = LinkedInEngine(page)
 
