@@ -30,12 +30,12 @@ class GeminiClient:
         
         print(f"DEBUG: GeminiClient Init - Gemini Key: {bool(self.gemini_key)}, Groq Key: {bool(self.groq_key)}")
         
-        # Strictly verified model IDs with 'models/' prefix to eliminate 404s
+        # Correct Gemini model IDs (as backup only)
         self.model_candidates = [
-            'gemini-2.0-flash-exp',
-            'models/gemini-1.5-flash',
-            'models/gemini-1.5-flash-8b',
-            'models/gemini-1.5-pro'
+            'gemini-1.5-flash-latest',
+            'gemini-1.5-flash-001',
+            'gemini-1.5-pro-latest',
+            'gemini-2.0-flash-exp'
         ]
         self.model_id = self.model_candidates[0]
 
@@ -114,7 +114,7 @@ class GeminiClient:
                 self.health_map[model] = {"last_fail": datetime.now(), "fail_type": fail_type}
                 continue
         
-        print("DEBUG: Gemini call failed for all models. Engaging Internal Intelligence.")
+        print("DEBUG: All Gemini models failed. Engaging Heuristic Intelligence.")
         return None
 
     def _call_groq(self, prompt):
@@ -149,16 +149,23 @@ class GeminiClient:
         return None
 
     def _smart_call(self, prompt, image_path=None):
-        """Attempts Gemini first (if image), then Groq, then Gemini (if no image)."""
+        """PRIMARY: Groq (faster, better free tier). BACKUP: Gemini."""
+        # Images MUST use Gemini (Groq doesn't support vision)
         if image_path:
             return self._call_gemini(prompt, image_path)
         
-        # Try Groq first for text if key exists (often faster/more reliable free tier)
+        # Text: Try Groq FIRST (Primary AI)
         if self.groq_key:
+            print("DEBUG: Attempting Groq (Primary AI)...")
             res = self._call_groq(prompt)
-            if res: return res
+            if res: 
+                print("DEBUG: Groq succeeded, skipping Gemini")
+                return res
+            print("DEBUG: Groq failed, falling back to Gemini...")
+        else:
+            print("DEBUG: No Groq key, using Gemini directly...")
         
-        # If Groq fails or no key, try Gemini
+        # Fallback to Gemini only if Groq unavailable/failed
         return self._call_gemini(prompt)
 
     async def analyze_visuals(self, query, image_path):
