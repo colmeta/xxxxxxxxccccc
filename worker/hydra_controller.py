@@ -372,10 +372,11 @@ class HydraController:
         # CRITICAL: Skip vaulting if no data was found to prevent junk results
         if not scraped_data:
             print(f"   ⚠️ No data found for mission {job_id}. Skipping vault.")
-            # Mark job as completed with 0 results or failed
+            # Mark job as completed with 0 results
             if self.supabase:
                 self.supabase.table('jobs').update({
-                    'status': 'no_results_found',
+                    'status': 'completed',
+                    'result_count': 0,
                     'completed_at': datetime.now().isoformat()
                 }).eq('id', job_id).execute()
             return
