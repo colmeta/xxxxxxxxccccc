@@ -65,12 +65,13 @@ export default function OracleControl() {
                     overflowY: 'auto',
                     marginBottom: '1rem',
                     padding: '1rem',
-                    background: 'rgba(0,0,0,0.6)', // Much darker background for white text contrast
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(0,0,0,0.8)', // High contrast black
+                    border: '1px solid rgba(255,255,255,0.15)',
                     borderRadius: '12px',
                     fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: '0.85rem',
-                    color: '#ffffff' // Pure white text
+                    fontSize: '0.9rem', // Slightly larger for readability
+                    color: '#ffffff',
+                    boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5)'
                 }}
             >
                 {history.length === 0 && (
@@ -107,14 +108,15 @@ export default function OracleControl() {
                                             </span>
                                             {d.reasoning && (
                                                 <span style={{
-                                                    fontSize: '0.6rem',
-                                                    color: 'rgba(255,255,255,0.4)',
-                                                    fontStyle: 'italic',
-                                                    maxWidth: '200px',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis'
-                                                }}>
+                                                < span style={{
+                                                        fontSize: '0.75rem', // Larger text
+                                                        color: 'rgba(255,255,255,0.9)', // High visibility white
+                                                        fontStyle: 'italic',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        fontWeight: 500
+                                                    }}>
                                                     // {d.reasoning}
                                                 </span>
                                             )}

@@ -31,11 +31,13 @@ class GeminiClient:
         print(f"DEBUG: GeminiClient Init - Gemini Key: {bool(self.gemini_key)}, Groq Key: {bool(self.groq_key)}")
         
         # Correct Gemini model IDs (as backup only)
+        # Correct Gemini model IDs (Updated for 2026/Stable)
         self.model_candidates = [
-            'gemini-1.5-flash-latest',
-            'gemini-1.5-flash-001',
-            'gemini-1.5-pro-latest',
-            'gemini-2.0-flash-exp'
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-8b',
+            'gemini-1.5-pro',
+            'gemini-2.0-flash-exp',
+            'gemini-pro' # Legacy fallback
         ]
         self.model_id = self.model_candidates[0]
 

@@ -155,8 +155,10 @@ class HydraController:
         print(f"📡 Vault Search: Scanning local intelligence for '{query}'...")
         try:
             # Simple keyword match on title/company or name
+            # SANITIZATION: Remove commas to prevent breaking the PostgREST 'or_' syntax
+            safe_query = query.replace(",", " ")
             vault_res = self.supabase.table('data_vault').select("*").or_(
-                f"full_name.ilike.%{query}%,title.ilike.%{query}%,company.ilike.%{query}%"
+                f"full_name.ilike.%{safe_query}%,title.ilike.%{safe_query}%,company.ilike.%{safe_query}%"
             ).order('last_verified_at', desc=True).limit(20).execute()
             
             if vault_res.data:

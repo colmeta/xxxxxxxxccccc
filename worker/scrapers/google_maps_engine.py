@@ -15,7 +15,12 @@ class GoogleMapsEngine:
         url = f"https://www.google.com/maps/search/{encoded_query}"
         
         try:
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
+            # 1. Navigate (Hardened against timeouts)
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            except Exception as nav_err:
+                print(f"[{self.platform}] ⚠️ Navigation timeout (partial load). Attempting extraction anyway...")
+            
             await Humanizer.random_sleep(3, 5)
             
             # Check for "Accept Cookies" - Harder look
