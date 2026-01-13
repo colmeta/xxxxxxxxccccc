@@ -8,14 +8,15 @@
   /* Core Palette Hardened (Inherited from index.css) */
 
   /* Glassmorphism Tokens - Supreme Refinement */
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: blur(25px);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  /* Significantly more opaque for readability */
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(16px);
+  --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.6);
 
   /* Layout */
   --sidebar-width: 300px;
-  --radius-xl: 32px;
+  --radius-xl: 24px;
 }
 
 .supreme-glass {

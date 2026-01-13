@@ -65,12 +65,12 @@ export default function OracleControl() {
                     overflowY: 'auto',
                     marginBottom: '1rem',
                     padding: '1rem',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(0,0,0,0.6)', // Much darker background for white text contrast
+                    border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '12px',
                     fontFamily: '"JetBrains Mono", monospace',
                     fontSize: '0.85rem',
-                    color: 'rgba(255,255,255,0.9)'
+                    color: '#ffffff' // Pure white text
                 }}
             >
                 {history.length === 0 && (
@@ -183,10 +183,13 @@ export default function OracleControl() {
                     className="input-cyber"
                     style={{
                         flex: 1,
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        background: 'rgba(0,0,0,0.5)', // Darker input background
+                        border: '1px solid hsl(var(--pearl-primary))', // Highlighted border color
+                        boxShadow: '0 0 10px rgba(6, 182, 212, 0.2)', // Subtle glow
                         padding: '0.75rem 1rem',
-                        borderRadius: '8px'
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontWeight: '600'
                     }}
                 />
                 <button

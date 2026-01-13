@@ -48,7 +48,12 @@ export default function ResultsView() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                body: JSON.stringify({
+                    platform: 'email',
+                    draft_id: 'default', // Force default template on backend
+                    custom_message: "Hi there, I noticed your profile and wanted to connect." // Fallback message
+                })
             })
 
             const data = await response.json()
