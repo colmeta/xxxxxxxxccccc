@@ -47,9 +47,9 @@ class GoogleMapsEngine:
                 print(f"[{self.platform}] ⚠️ Feed selector not found. Checking for single result or alternate layout...")
                 return await self._scrape_single_result()
 
-            # 3. Scroll to load more (Limited for speed)
+            # 3. Scroll to load more (Deep Scoping)
             print(f"[{self.platform}] 📜 Scrolling feed...")
-            for _ in range(2): 
+            for _ in range(15): 
                 await self.page.evaluate(f'document.querySelector("{feed_selector}").scrollTop = 10000')
                 await Humanizer.random_sleep(2, 3)
 
@@ -64,9 +64,9 @@ class GoogleMapsEngine:
             if not feed_children:
                  feed_children = await self.page.query_selector_all(f"{feed_selector} a[href*='/maps/place/']")
 
-            print(f"[{self.platform}] 🧐 Extracting up to 10 listings...")
+            print(f"[{self.platform}] 🧐 Extracting all loaded listings...")
 
-            for item in feed_children[:10]:
+            for item in feed_children:
                 try:
                     text_content = await item.inner_text()
                     href = await item.get_attribute("href")

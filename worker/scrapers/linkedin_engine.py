@@ -40,7 +40,7 @@ class LinkedInEngine:
         try:
             # Dorking query
             encoded_query = urllib.parse.quote(f"site:linkedin.com/in/ {query}")
-            url = f"https://www.google.com/search?q={encoded_query}&num=10"
+            url = f"https://www.google.com/search?q={encoded_query}&num=100"
             
             print(f"[{self.platform}] 📡 Google: {url}")
             await self.page.goto(url, wait_until="domcontentloaded", timeout=30000)
