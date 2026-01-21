@@ -1,0 +1,4 @@
+Python is running!
+CWD: C:\Users\LENOVO\Desktop\Pearl_data_intelligence
+Sys Path: ['C:\\Users\\LENOVO\\Desktop\\Pearl_data_intelligence', 'C:\\Users\\LENOVO\\AppData\\Local\\Python\\pythoncore-3.14-64\\python314.zip', 'C:\\Users\\LENOVO\\AppData\\Local\\Python\\pythoncore-3.14-64\\DLLs', 'C:\\Users\\LENOVO\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib', 'C:\\Users\\LENOVO\\AppData\\Local\\Python\\pythoncore-3.14-64', 'C:\\Users\\LENOVO\\Desktop\\Pearl_data_intelligence\\.venv', 'C:\\Users\\LENOVO\\Desktop\\Pearl_data_intelligence\\.venv\\Lib\\site-packages']
+Playwright missing: No module named 'playwright'

@@ -38,6 +38,39 @@ export default function ResultsView() {
         setExpandedRows(newExpanded)
     }
 
+    const downloadResultsAsCSV = () => {
+        if (results.length === 0) return
+
+        const headers = ["Name", "Title", "Company", "Email", "Clarity Score", "Intent Score", "LinkedIn", "Status"]
+        const csvRows = [headers.join(",")]
+
+        results.forEach(res => {
+            const data = res.data_payload || {}
+            const row = [
+                `"${(data.name || "").replace(/"/g, '""')}"`,
+                `"${(data.title || "").replace(/"/g, '""')}"`,
+                `"${(data.company || "").replace(/"/g, '""')}"`,
+                `"${data.email || ""}"`,
+                res.clarity_score || 0,
+                res.intent_score || 0,
+                `"${data.source_url || ""}"`,
+                res.verified ? "Verified" : "Partial"
+            ]
+            csvRows.push(row.join(","))
+        })
+
+        const csvContent = csvRows.join("\n")
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.setAttribute("href", url)
+        link.setAttribute("download", `clarity_pearl_export_${new Date().toISOString().split('T')[0]}.csv`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
     const handleOutreach = async (lead) => {
         try {
             const { data: { session: currentSession } } = await supabase.auth.getSession()
@@ -78,21 +111,39 @@ export default function ResultsView() {
                     <h2 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800 }}>
                         <span style={{ color: 'hsl(var(--pearl-primary))' }}>💎</span> SALES INTELLIGENCE VAULT
                     </h2>
-                    <button
-                        onClick={fetchResults}
-                        className="btn-primary"
-                        disabled={loading}
-                        style={{
-                            padding: '0.6rem 1.2rem',
-                            fontSize: '0.75rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.6rem',
-                            borderRadius: '12px'
-                        }}
-                    >
-                        {loading ? <div className="spinner" style={{ width: '12px', height: '12px' }}></div> : 'REFRESH DATA'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.8rem' }}>
+                        <button
+                            onClick={downloadResultsAsCSV}
+                            className="btn-secondary"
+                            style={{
+                                padding: '0.6rem 1.2rem',
+                                fontSize: '0.75rem',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                color: 'rgba(255,255,255,0.6)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                fontWeight: 600
+                            }}
+                        >
+                            DOWNLOAD CSV
+                        </button>
+                        <button
+                            onClick={fetchResults}
+                            className="btn-primary"
+                            disabled={loading}
+                            style={{
+                                padding: '0.6rem 1.2rem',
+                                fontSize: '0.75rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.6rem',
+                                borderRadius: '12px'
+                            }}
+                        >
+                            {loading ? <div className="spinner" style={{ width: '12px', height: '12px' }}></div> : 'REFRESH DATA'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Desktop View */}
@@ -129,16 +180,57 @@ export default function ResultsView() {
                                             background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent'
                                         }}>
                                             <td style={{ padding: '1.25rem 1rem' }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                    <div style={{ fontWeight: 800, color: '#fff', fontSize: '1.05rem' }}>
-                                                        {r.data_payload?.name || r.data_payload?.full_name || 'Unknown'}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                    <div style={{ position: 'relative' }}>
+                                                        {r.data_payload?.avatar_url ? (
+                                                            <img 
+                                                                src={r.data_payload.avatar_url} 
+                                                                alt={r.data_payload.name} 
+                                                                style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--glass-border)' }}
+                                                            />
+                                                        ) : (
+                                                            <div style={{ 
+                                                                width: '36px', 
+                                                                height: '36px', 
+                                                                borderRadius: '8px', 
+                                                                background: 'linear-gradient(135deg, hsl(var(--pearl-primary)), hsl(var(--pearl-accent)))',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 900,
+                                                                color: '#000'
+                                                            }}>
+                                                                {(r.data_payload?.name || "U")[0].toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                        {r.data_payload?.logo_url && (
+                                                            <img 
+                                                                src={r.data_payload.logo_url} 
+                                                                alt="Company"
+                                                                style={{ 
+                                                                    position: 'absolute', 
+                                                                    bottom: '-3px', 
+                                                                    right: '-3px', 
+                                                                    width: '14px', 
+                                                                    height: '14px', 
+                                                                    borderRadius: '3px', 
+                                                                    background: '#fff',
+                                                                    border: '1px solid var(--glass-border)',
+                                                                    padding: '1px'
+                                                                }}
+                                                            />
+                                                        )}
                                                     </div>
-                                                    <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
-                                                        {r.data_payload?.title || 'No Title'}
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <div style={{ fontWeight: 800, color: '#fff', fontSize: '1rem' }}>
+                                                            {r.data_payload?.name || r.data_payload?.full_name || 'Unknown'}
+                                                        </div>
+                                                        <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
+                                                            {r.data_payload?.title || 'No Title'}
+                                                        </div>
                                                     </div>
-                                                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                                                        {r.data_payload?.company || 'No Company'}
-                                                    </div>
+                                                </div>
                                                     {r.is_high_intent && (
                                                         <span style={{
                                                             fontSize: '0.65rem',
@@ -330,6 +422,50 @@ export default function ResultsView() {
                                 {/* Scores */}
                                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                                     <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+                                            <div style={{ position: 'relative' }}>
+                                                {r.data_payload?.avatar_url ? (
+                                                    <img
+                                                        src={r.data_payload.avatar_url}
+                                                        alt={r.data_payload.name}
+                                                        style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover', border: '1px solid var(--glass-border)' }}
+                                                    />
+                                                ) : (
+                                                    <div style={{
+                                                        width: '40px',
+                                                        height: '40px',
+                                                        borderRadius: '10px',
+                                                        background: 'linear-gradient(135deg, hsl(var(--pearl-primary)), hsl(var(--pearl-accent)))',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: 900,
+                                                        color: '#000'
+                                                    }}>
+                                                        {(r.data_payload?.name || "U")[0].toUpperCase()}
+                                                    </div>
+                                                )}
+                                                {r.data_payload?.logo_url && (
+                                                    <img
+                                                        src={r.data_payload.logo_url}
+                                                        alt="Company Logo"
+                                                        style={{
+                                                            position: 'absolute',
+                                                            bottom: '-5px',
+                                                            right: '-5px',
+                                                            width: '18px',
+                                                            height: '18px',
+                                                            borderRadius: '4px',
+                                                            background: '#fff',
+                                                            border: '1px solid var(--glass-border)',
+                                                            padding: '1px'
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+                                            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-bright)' }}>{r.data_payload?.name || 'Unknown Lead'}</div>
+                                        </div>
                                         <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.3rem' }}>AI SCORE</div>
                                         <div style={{ fontSize: '1.2rem', fontWeight: 800, color: (r.clarity_score || 0) > 80 ? 'var(--success)' : '#fff' }}>
                                             {r.clarity_score || 0}%
@@ -386,6 +522,6 @@ export default function ResultsView() {
                     .mobile-cards { display: flex !important; }
                 }
             `}</style>
-        </div>
+        </div >
     )
 }

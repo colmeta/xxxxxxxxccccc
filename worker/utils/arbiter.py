@@ -88,6 +88,53 @@ class ArbiterAgent:
         verdict = f"H-Score {final_score}/100 (Fallback) | {', '.join(rules_applied)}"
         return final_score, verdict
 
+    def polish_lead(self, lead_data):
+        """
+        CLARITY PEARL: DATA POLISHER
+        Standardizes names, titles, and companies for a 'Pure' outreach experience.
+        """
+        cleaned = lead_data.copy()
+        
+        # 1. Clean Person Name
+        if cleaned.get('name'):
+            name = cleaned['name'].strip()
+            # Remove emojis and special chars
+            name = re.sub(r'[^\w\s-]', '', name)
+            cleaned['name'] = name.title()
+            
+        # 2. Clean Company Name (The 'Pearl' Polish)
+        if cleaned.get('company'):
+            comp = cleaned['company'].strip()
+            # Common junk suffixes that ruin outreach logic
+            suffixes = [
+                r'\bL\.?L\.?C\.?\b', r'\bInc\.?\b', r'\bCorp\.?(\b|oration)', 
+                r'\bLtd\.?\b', r'\bGmbH\b', r'\bS\.?A\.?S\.?\b', r'\bPty\b'
+            ]
+            for suffix in suffixes:
+                comp = re.sub(suffix, '', comp, flags=re.IGNORECASE).strip()
+            
+            # Remove trailing commas/dashes
+            comp = re.sub(r'[,\-]$', '', comp).strip()
+            cleaned['company'] = comp.title()
+            
+        # 3. Clean Job Title
+        if cleaned.get('title'):
+            title = cleaned['title'].strip()
+            # Standardize common acronyms
+            mappings = {
+                "Chief Executive Officer": "CEO",
+                "Chief Technology Officer": "CTO",
+                "Chief Operating Officer": "COO",
+                "Chief Marketing Officer": "CMO",
+                "Founder and CEO": "Founder & CEO"
+            }
+            for full, short in mappings.items():
+                title = title.replace(full, short)
+            
+            cleaned['title'] = title.title() if len(title) > 5 else title # Keep acronyms short
+            
+        return cleaned
+
 
     async def predict_intent(self, lead_data):
         """

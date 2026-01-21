@@ -103,7 +103,7 @@ class HydraController:
         """
         Sub-routine to bridge from entity (business) to person (lead).
         """
-        if platform in ["google_maps", "google_maps_grid", "directory"]:
+        if platform in ["google_maps", "google_maps_grid", "directory", "generic", "website", "linkedin"]:
             bridge = EnrichmentBridge(page)
             # Flatten data if it's in a nested list from grid engine
             flat_leads = []
@@ -137,7 +137,12 @@ class HydraController:
             print(f"⚠️ Error polling for work: {e}")
             return None
 
-    async def process_job_with_browser(self, job_id, query, platform='generic', compliance=None, launch_args=None, stealth_profile='stealth'):
+    async def process_job_with_browser(self, job_data, launch_args=None, stealth_profile='stealth'):
+        job_id = job_data.get('id')
+        query = job_data.get('target_query')
+        platform = job_data.get('target_platform', 'generic')
+        compliance = job_data.get('compliance', {})
+        
         print(f"⚔️ Engaging Target: {query} [{platform}]")
         
         # --- INITIALIZATION SAFETY ---
@@ -181,200 +186,155 @@ class HydraController:
                 # For now, we continue to append new results to the vault hits
         except Exception as vault_err:
             print(f"⚠️ Vault Lookup Failed: {vault_err}")
-
-        async with async_playwright() as p:
-            # Get next proxy from manager
-            proxy_url = self.proxy_manager.get_proxy()
-            proxy = None
-            
-            # Format proxy for Playwright if not "direct"
-            if proxy_url and proxy_url != "direct":
-                proxy = {"server": proxy_url}
-                print(f"   🌐 Using Proxy: {proxy_url[:30]}...")
-            
-            # Launch real browser with Stealth Args
-            browser = await p.chromium.launch(
-                headless=True,
-                args=launch_args,
-                proxy=proxy
-            )
-            
-            # Rotate User Agents
-            user_agents = [
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1",
-                "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.193 Mobile Safari/537.36"
-            ]
-            
-            # Use Mobile UA for Swarm strategy
-            if stealth_profile == "mobile":
-                selected_ua = random.choice([ua for ua in user_agents if "Mobile" in ua])
-                viewport = {"width": 390, "height": 844} # iPhone 14 style
-                is_mobile = True
-            else:
-                selected_ua = random.choice([ua for ua in user_agents if "Mobile" not in ua])
-                viewport = {"width": 1280, "height": 720}
-                is_mobile = False
-
-            print(f"   🎭 Stealth Mode: {stealth_profile.upper()} | UA: {selected_ua[:30]}...")
-
-            context = await browser.new_context(
-                user_agent=selected_ua,
-                viewport=viewport,
-                is_mobile=is_mobile,
-                device_scale_factor=2 if is_mobile else 1,
-                has_touch=is_mobile
-            )
-            page = await context.new_page()
-            
-            # Anti-detect script injection V2 (Applying to ALL profiles for Maximum Capacity)
-            if stealth_profile in ["stealth", "mobile", "aggressive"]:
-                await stealth_v2.apply_advanced_stealth(page, user_agent=selected_ua)
-            
-            try:
-                # A/B TESTING LOGIC
-                ab_group = compliance.get('ab_test_group', 'A') if compliance else 'A'
-                target_url = ""
-                
-                if query.startswith("http"):
-                    target_url = query
-                elif ab_group == 'B':
-                    # Strategy B: Direct Domain Guessing (Experimental)
-                    # "Apple" -> "https://www.apple.com"
-                    safe_query = query.replace(" ", "").lower()
-                    target_url = f"https://www.{safe_query}.com"
-                    print(f"   [A/B Test] Group B selected. Trying direct access: {target_url}")
-                else:
-                    # Strategy A: Standard Google Search (Control)
-                    target_url = f"https://www.google.com/search?q={query}"
-                    print(f"   [A/B Test] Group A selected. Doing Search: {target_url}")
-                
-                print(f"   -> Navigating to {target_url}...")
-                
-                # Human-like Navigation with Retry Hardening
-                max_retries = 3
-                for attempt in range(max_retries):
-                    try:
-                        if platform != 'linkedin': # LinkedIn engine has its own nav
-                             await page.goto(target_url, timeout=30000)
-                             await page.wait_for_load_state("networkidle")
-                             await stealth_v2.enact_human_behavior(page)
-                             await Humanizer.random_sleep(1, 2)
-                             await Humanizer.natural_scroll(page)
-                        break # Success
-                    except Exception as nav_err:
-                        print(f"   ⚠️ Nav Attempt {attempt+1} failed: {nav_err}")
-                        if attempt == max_retries - 1: raise nav_err
-                        await asyncio.sleep(2 ** attempt)
-
-                final_url = page.url
-                
-                # --- PLATFORM DISPATCHER (Refactored) ---
-                if platform == "linkedin":
-                    from scrapers.linkedin_engine import LinkedInEngine
-                    engine = LinkedInEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform == "google_maps":
-                    from scrapers.google_maps_engine import GoogleMapsEngine
-                    engine = GoogleMapsEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform == "google_maps_grid":
-                    from scrapers.google_maps_grid_engine import GoogleMapsGridEngine
-                    engine = GoogleMapsGridEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform == "directory":
-                    from scrapers.directory_engine import DirectoryEngine
-                    engine = DirectoryEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform in ["producthunt", "tiktok", "amazon", "shopify", "omni"]:
-                    from scrapers.omni_scout_engine import OmniScoutEngine
-                    engine = OmniScoutEngine(page)
-                    data_results = await engine.unified_scout(query)
-                elif platform == 'twitter':
-                    from scrapers.social_radar import TwitterEngine
-                    engine = TwitterEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform == 'instagram':
-                    from scrapers.social_radar import InstagramEngine
-                    engine = InstagramEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform in ['google_news', 'news']:
-                    from scrapers.news_pulse_engine import NewsPulseEngine
-                    engine = NewsPulseEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform == 'real_estate':
-                    from scrapers.real_estate_engine import RealEstateEngine
-                    engine = RealEstateEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform in ['job_scout', 'hiring']:
-                    from scrapers.job_scout_engine import JobScoutEngine
-                    engine = JobScoutEngine(page)
-                    data_results = await engine.scrape(query)
-                elif platform == 'facebook':
-                    from scrapers.facebook_engine_v2 import FacebookEngineV2
-                    engine = FacebookEngineV2(page)
-                    data_results = await engine.scrape(query)
-                elif platform == 'website':
-                    await page.goto(target_url, timeout=30000)
-                    await page.wait_for_load_state("domcontentloaded")
-                    title = await page.title()
-                    data_results = [{
-                        "source_url": page.url,
-                        "title": title,
-                        "timestamp": datetime.now().isoformat(),
-                        "meta_description": await page.evaluate("() => document.querySelector('meta[name=description]')?.content || ''"),
-                        "verified": True if title else False
-                    }]
-                else:
-                    # Default / Fallback generic scraping
-                    await page.goto(target_url, timeout=30000)
-                    await page.wait_for_load_state("domcontentloaded")
-                    title = await page.title()
-                    data_results = [{
-                        "source_url": page.url,
-                        "title": title,
-                        "timestamp": datetime.now().isoformat(),
-                        "meta_description": await page.evaluate("() => document.querySelector('meta[name=description]')?.content || ''"),
-                        "verified": True if title else False
-                    }]
-
-                # --- ENRICHMENT BRIDGE ---
-                if data_results:
-                    data_results = await self._handle_enrichment(data_results, platform, page)
-                    # For V1 we just take the first or the whole list depending on result handling
-                    scraped_data = data_results[0] if isinstance(data_results, list) and len(data_results) > 0 else (data_results if isinstance(data_results, dict) else {})
-                    is_verified = scraped_data.get('verified', False)
-                else:
-                    is_verified = False
-                    
-            except Exception as e:
-                print(f"❌ Browser Error: {e}")
-                verification_log = f"Browser Error: {str(e)}"
-                is_verified = False
-            finally:
-                # VISION-X: Capture screenshot for image-heavy results or instagram
-                if platform in ['instagram', 'ecommerce'] and 'page' in locals():
-                    os.makedirs("screenshots", exist_ok=True)
-                    try:
-                        await page.screenshot(path=shot_path)
-                    except:
-                        pass
-                
-                # Aggressive Memory Cleanup (Phase 7 Hardening)
-                await page.close()
-                await context.close()
-                await browser.close()
-                
-                # Force Python GC after browser close to free RAM for Render
-                import gc
-                gc.collect()
+        # --- PHASE 12: ETERNAL PERSISTENCE (Self-Healing) ---
+        stealth_profiles = ["stealth", "mobile", "aggressive"]
+        if stealth_profile not in stealth_profiles:
+            stealth_profiles.insert(0, stealth_profile)
         
-        # 1. Verification & Scoring via Arbiter
-        # CRITICAL: Skip vaulting if no data was found to prevent junk results
-        if not scraped_data:
+        data_results = []
+        final_url = ""
+
+        from playwright.async_api import async_playwright
+
+        for attempt_profile in stealth_profiles:
+            print(f"[{self.worker_id}] 🛡️ Eternal Persistence: Attempting {attempt_profile.upper()} Cloak...")
+            try:
+                async with async_playwright() as p:
+                    # Get next proxy from manager
+                    proxy_url = self.proxy_manager.get_proxy()
+                    proxy = None
+                    if proxy_url and proxy_url != "direct":
+                        proxy = {"server": proxy_url}
+                        print(f"   🌐 Using Proxy: {proxy_url[:30]}...")
+                    
+                    browser = await p.chromium.launch(
+                        headless=True,
+                        args=launch_args,
+                        proxy=proxy
+                    )
+                    
+                    user_agents = [
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1",
+                        "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.193 Mobile Safari/537.36"
+                    ]
+                    
+                    if attempt_profile == "mobile":
+                        selected_ua = random.choice([ua for ua in user_agents if "Mobile" in ua])
+                        viewport = {"width": 390, "height": 844}
+                        is_mobile = True
+                    else:
+                        selected_ua = random.choice([ua for ua in user_agents if "Mobile" not in ua])
+                        viewport = {"width": 1280, "height": 720}
+                        is_mobile = False
+
+                    context = await browser.new_context(
+                        user_agent=selected_ua,
+                        viewport=viewport,
+                        is_mobile=is_mobile,
+                        device_scale_factor=2 if is_mobile else 1,
+                        has_touch=is_mobile
+                    )
+                    page = await context.new_page()
+                    
+                    # Apply Stealth
+                    await stealth_v2.apply_advanced_stealth(page, user_agent=selected_ua)
+                    
+                    try:
+                        # Navigator Logic
+                        target_url = f"https://www.google.com/search?q={query}"
+                        if query.startswith("http"): target_url = query
+                        
+                        if platform != 'linkedin':
+                            print(f"   -> Navigating to {target_url}...")
+                            await page.goto(target_url, timeout=30000)
+                            await page.wait_for_load_state("networkidle")
+                            await stealth_v2.enact_human_behavior(page)
+                        
+                        final_url = page.url
+                        
+                        # Platform Dispatcher
+                        if platform == "linkedin":
+                            from scrapers.linkedin_engine import LinkedInEngine
+                            engine = LinkedInEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform == "google_maps":
+                            from scrapers.google_maps_engine import GoogleMapsEngine
+                            engine = GoogleMapsEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform == "google_maps_grid":
+                            from scrapers.google_maps_grid_engine import GoogleMapsGridEngine
+                            engine = GoogleMapsGridEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform == "directory":
+                            from scrapers.directory_engine import DirectoryEngine
+                            engine = DirectoryEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ["producthunt", "tiktok", "amazon", "shopify", "omni"]:
+                            from scrapers.omni_scout_engine import OmniScoutEngine
+                            engine = OmniScoutEngine(page)
+                            data_results = await engine.unified_scout(query)
+                        elif platform == 'twitter':
+                            from scrapers.social_radar import TwitterEngine
+                            engine = TwitterEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform == 'instagram':
+                            from scrapers.social_radar import InstagramEngine
+                            engine = InstagramEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['google_news', 'news']:
+                            from scrapers.news_pulse_engine import NewsPulseEngine
+                            engine = NewsPulseEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform == 'real_estate':
+                            from scrapers.real_estate_engine import RealEstateEngine
+                            engine = RealEstateEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['job_scout', 'hiring']:
+                            from scrapers.job_scout_engine import JobScoutEngine
+                            engine = JobScoutEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform == 'facebook':
+                            from scrapers.facebook_engine_v2 import FacebookEngineV2
+                            engine = FacebookEngineV2(page)
+                            data_results = await engine.scrape(query)
+                        else:
+                            from scrapers.website_engine import WebsiteEngine
+                            engine = WebsiteEngine(page)
+                            data_results = await engine.scrape(target_url)
+
+                        if data_results:
+                            # Success!
+                            print(f"[{self.worker_id}] ✨ Persistence Success! Found {len(data_results)} leads.")
+                            break
+                        else:
+                            print(f"[{self.worker_id}] ⚠️ {attempt_profile.upper()} failed to yield results. Re-cloaking...")
+
+                    except Exception as loop_err:
+                        print(f"   ⚠️ Persistence Loop Error: {loop_err}")
+                    finally:
+                        # VISION-X: Capture screenshot for image-heavy results or instagram
+                        if platform in ['instagram', 'ecommerce']:
+                            os.makedirs("screenshots", exist_ok=True)
+                            try:
+                                await page.screenshot(path=shot_path)
+                            except: pass
+                        
+                        await page.close()
+                        await context.close()
+                        await browser.close()
+            except Exception as outer_err:
+                print(f"   ❌ Persistence Attempt Failed: {outer_err}")
+
+        # Aggressive Memory Cleanup
+        import gc
+        gc.collect()
+
+        
+        # --- PHASE 10: BULK DATA VAULTING ---
+        if not data_results:
             print(f"   ⚠️ No data found for mission {job_id}. Skipping vault.")
-            # Mark job as completed with 0 results
             if self.supabase:
                 self.supabase.table('jobs').update({
                     'status': 'completed',
@@ -383,21 +343,57 @@ class HydraController:
                 }).eq('id', job_id).execute()
             return
 
-        if platform in ['instagram', 'ecommerce'] and os.path.exists(shot_path):
-             clarity_score, verdict = await arbiter.score_visual_lead(query, shot_path)
-        else:
-             clarity_score, verdict = await arbiter.score_lead(query, scraped_data)
+        print(f"   💾 Vaulting {len(data_results)} leads...")
+        saved_count = 0
+        seen_leads = set() # Mission-level deduplication
         
-        print(f"   ⚖️  Arbiter Verdict: {verdict}")
+        for lead in data_results:
+            try:
+                # --- PHASE 11: DATA PURITY (ClarityPearl) ---
+                # 1. Deduplication
+                lead_id = lead.get('email') or lead.get('source_url') or lead.get('linkedin_url')
+                if lead_id in seen_leads:
+                    continue
+                seen_leads.add(lead_id)
+
+                # 2. Data Polishing (Standardization)
+                polished_lead = arbiter.polish_lead(lead)
+                
+                # 3. Verification & Scoring via Arbiter
+                if platform in ['instagram', 'ecommerce'] and os.path.exists(shot_path):
+                     clarity_score, verdict = await arbiter.score_visual_lead(query, shot_path)
+                else:
+                     clarity_score, verdict = await arbiter.score_lead(query, polished_lead)
+                
+                # 4. Triple-Verification Protocol
+                is_verified = lead.get('verified', False)
+                has_site = bool(lead.get('website'))
+                has_email = bool(lead.get('email') or lead.get('decision_maker_email'))
+                
+                if is_verified and has_site and has_email and clarity_score > 85:
+                    polished_lead['triple_verified'] = True
+                    print(f"   💎 TRIPLE-VERIFIED Lead Detected: {polished_lead.get('name')}")
+
+                # 5. Predictive Intent Scoring
+                intent_data = {"intent_score": 0, "oracle_signal": "Baseline Intelligence"}
+                if is_verified and clarity_score > 70:
+                    intent_data = await arbiter.predict_intent(polished_lead)
+                
+                # 6. Save individual result
+                await self._save_single_result(job_data, polished_lead, is_verified, verdict, final_url, clarity_score, intent_data)
+                saved_count += 1
+            except Exception as loop_err:
+                print(f"   ⚠️ Failed to save lead: {loop_err}")
+
+        # 4. Finalize Job Status
+        if self.supabase:
+            self.supabase.table('jobs').update({
+                'status': 'completed',
+                'result_count': saved_count,
+                'completed_at': datetime.now().isoformat()
+            }).eq('id', job_id).execute()
         
-        # 2. Predictive Intent Scoring (Phase 6)
-        intent_data = {"intent_score": 0, "oracle_signal": "Baseline Intelligence"}
-        if is_verified and clarity_score > 70:
-            print(f"   🧠 Oracle: Analyzing Predictive Intent...")
-            intent_data = await arbiter.predict_intent(scraped_data)
-        
-        # 3. Save results (Async)
-        await self.finalize_job(job_id, scraped_data, is_verified, verdict, final_url, clarity_score, intent_data)
+        print(f"🏁 Mission {job_id} Complete. {saved_count} flags planted in the Vault.")
 
     async def check_opt_out(self, identifier):
         """
@@ -416,7 +412,8 @@ class HydraController:
             print(f"⚠️ Compliance check failed: {e}")
             return False
 
-    async def finalize_job(self, job_id, data, verified, log_msg, source_url, clarity_score=0, intent_data=None):
+    async def _save_single_result(self, job_data, data, verified, log_msg, source_url, clarity_score=0, intent_data=None):
+        job_id = job_data.get('id')
         if not self.supabase:
             print(f"   [Offline] Job {job_id} done. Verified: {verified}")
             return
@@ -521,14 +518,8 @@ class HydraController:
                     'p_arbiter_verdict': log_msg
                 }).execute()
                 
-                # 3. Mark Job Complete
-                job_res = self.supabase.table('jobs').update({
-                    'status': 'completed',
-                    'result_count': 1, # simple count for single page
-                    'completed_at': datetime.now().isoformat()
-                }).eq('id', job_id).execute()
-                
-                job_data = job_res.data[0] if job_res.data else {}
+                # 3. Mark Job Stats (Optional: Incremental count in DB if needed)
+                # For now, we update total count at the end of process_job_with_browser
                 
                 # 4. ONE-CLICK AGENCY: Autonomous Flow
                 search_metadata = job_data.get('search_metadata', {})
@@ -628,7 +619,7 @@ class HydraController:
                 #     ] # stealth_v2 will add specific args
                 #     stealth_profile = "stealth"
 
-                await self.process_job_with_browser(job_id, query, platform, compliance, launch_args, stealth_profile)
+                await self.process_job_with_browser(job, launch_args, stealth_profile)
             else:
                 await asyncio.sleep(5)
 

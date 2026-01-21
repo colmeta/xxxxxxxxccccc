@@ -76,7 +76,15 @@ class LinkedInEngine:
                     snippet_handle = await item.query_selector("div.s3v9rd")
                     snippet = await snippet_handle.inner_text() if snippet_handle else ""
                     
-                    results.append(self._parse_linkedin_title(title_text, href, snippet))
+                    # Avatar Extraction
+                    avatar_url = None
+                    try:
+                        img_handle = await item.query_selector("img")
+                        if img_handle:
+                            avatar_url = await img_handle.get_attribute("src")
+                    except: pass
+
+                    results.append(self._parse_linkedin_title(title_text, href, snippet, avatar_url))
             else:
                 # Standard Modern Layout
                 links = await self.page.query_selector_all("div.g a[href*='linkedin.com/in/']")
@@ -95,7 +103,18 @@ class LinkedInEngine:
                             snippet = await container.as_element().inner_text()
                     except: pass
                     
-                    results.append(self._parse_linkedin_title(title_text, href, snippet))
+                    # Avatar Extraction
+                    avatar_url = None
+                    try:
+                        # In modern Google, avatars are often in the parent .g container or adjacent
+                        container = await self.page.evaluate_handle("el => el.closest('.g')", link)
+                        if container:
+                            img_handle = await container.as_element().query_selector("img")
+                            if img_handle:
+                                avatar_url = await img_handle.get_attribute("src")
+                    except: pass
+                    
+                    results.append(self._parse_linkedin_title(title_text, href, snippet, avatar_url))
 
             if results:
                  print(f"[{self.platform}] ✅ Google found {len(results)} leads.")
@@ -105,7 +124,7 @@ class LinkedInEngine:
             print(f"[{self.platform}] ❌ Google Error: {e}")
             return []
 
-    def _parse_linkedin_title(self, title_text, href, snippet=""):
+    def _parse_linkedin_title(self, title_text, href, snippet="", avatar_url=None):
         """Centralized parser for LinkedIn search results."""
         clean_text = title_text.replace("| LinkedIn", "").replace(" ...", "").strip()
         parts = clean_text.split(" - ")
@@ -133,6 +152,7 @@ class LinkedInEngine:
             "source_url": href,
             "verified": True,
             "snippet": snippet[:200] if snippet else clean_text,
+            "avatar_url": avatar_url,
             "channel_priority": ["email", "dm"]
         }
 
