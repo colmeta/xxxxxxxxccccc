@@ -77,6 +77,21 @@ I have subdivided myself into 5 specialized "Personas" to handle your project in
 - **The Invisible Hand v2**: Deep Zapier/Make.com integration for 500+ third-party actions.
 - **Swarm Load-Balancing**: Dynamic mission routing based on worker geo-latency and IP trust.
 
+### 🌌 Phase 14: The Sovereign Extension (Omnipresence)
+- **Browser Integration**: Architecting the Chrome/Edge Extension for one-click scraping.
+- **Overlay Intelligence**: Real-time Lead/Company data overlay on LinkedIn and active web tabs.
+- **Vault Sync**: Immediate integration between browsing sessions and the Sales Intelligence Vault.
+
+### 🌍 Phase 15: Global Map Intelligence (Visual Dominance)
+- **Interactive Mapping**: Visualizing lead hotspots and geographic penetration clusters.
+- **G-Heatmaps**: Real-time geographic velocity heatmaps for market growth monitoring.
+- **Search-by-Radius**: Precision target location missions through map-based coordination.
+
+### ✍️ Phase 16: Ghostwriter v2 (Autonomous Engagement)
+- **Direct Sending**: Integrated SMTP/Mailgun relay for fully automated cold email sequences.
+- **Lead Triggers**: Auto-engaging "Diamond" leads with AI-generated displacement scripts.
+- **Outreach Feedback**: Tracking open rates and reply sentiment directly in the Command Center.
+
 ---
 
 ## 4. FAQ: How it Works
