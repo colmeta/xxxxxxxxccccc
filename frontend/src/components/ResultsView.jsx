@@ -185,16 +185,16 @@ export default function ResultsView() {
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                     <div style={{ position: 'relative' }}>
                                                         {r.data_payload?.avatar_url ? (
-                                                            <img 
-                                                                src={r.data_payload.avatar_url} 
-                                                                alt={r.data_payload.name} 
+                                                            <img
+                                                                src={r.data_payload.avatar_url}
+                                                                alt={r.data_payload.name}
                                                                 style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--glass-border)' }}
                                                             />
                                                         ) : (
-                                                            <div style={{ 
-                                                                width: '36px', 
-                                                                height: '36px', 
-                                                                borderRadius: '8px', 
+                                                            <div style={{
+                                                                width: '36px',
+                                                                height: '36px',
+                                                                borderRadius: '8px',
                                                                 background: 'linear-gradient(135deg, hsl(var(--pearl-primary)), hsl(var(--pearl-accent)))',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
@@ -207,16 +207,16 @@ export default function ResultsView() {
                                                             </div>
                                                         )}
                                                         {r.data_payload?.logo_url && (
-                                                            <img 
-                                                                src={r.data_payload.logo_url} 
+                                                            <img
+                                                                src={r.data_payload.logo_url}
                                                                 alt="Company"
-                                                                style={{ 
-                                                                    position: 'absolute', 
-                                                                    bottom: '-3px', 
-                                                                    right: '-3px', 
-                                                                    width: '14px', 
-                                                                    height: '14px', 
-                                                                    borderRadius: '3px', 
+                                                                style={{
+                                                                    position: 'absolute',
+                                                                    bottom: '-3px',
+                                                                    right: '-3px',
+                                                                    width: '14px',
+                                                                    height: '14px',
+                                                                    borderRadius: '3px',
                                                                     background: '#fff',
                                                                     border: '1px solid var(--glass-border)',
                                                                     padding: '1px'
@@ -235,21 +235,20 @@ export default function ResultsView() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                    {r.is_high_intent && (
-                                                        <span style={{
-                                                            fontSize: '0.65rem',
-                                                            color: 'hsl(var(--pearl-warning))',
-                                                            fontWeight: 900,
-                                                            background: 'rgba(245, 158, 11, 0.2)',
-                                                            padding: '4px 8px',
-                                                            borderRadius: '6px',
-                                                            border: '1px solid hsla(var(--pearl-warning), 0.4)',
-                                                            width: 'fit-content'
-                                                        }}>
-                                                            🔥 HIGH INTENT
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                {r.is_high_intent && (
+                                                    <span style={{
+                                                        fontSize: '0.65rem',
+                                                        color: 'hsl(var(--pearl-warning))',
+                                                        fontWeight: 900,
+                                                        background: 'rgba(245, 158, 11, 0.2)',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '6px',
+                                                        border: '1px solid hsla(var(--pearl-warning), 0.4)',
+                                                        width: 'fit-content'
+                                                    }}>
+                                                        🔥 HIGH INTENT
+                                                    </span>
+                                                )}
                                             </td>
                                             <td style={{ padding: '1.25rem 1rem' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -528,6 +527,6 @@ export default function ResultsView() {
                     .mobile-cards { display: flex !important; }
                 }
             `}</style>
-        </div >
+        </div>
     )
 }
