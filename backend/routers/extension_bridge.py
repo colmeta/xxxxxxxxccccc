@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Body
 from backend.services.supabase_client import get_supabase
 from typing import Optional
 
@@ -46,3 +46,29 @@ async def identify_profile(
         "displacement_script": meta.get('displacement_data', {}).get('sovereign_script', ''),
         "vault_id": lead.get('id')
     }
+@router.post("/capture")
+async def capture_profile(
+    data: dict = Body(...)
+):
+    """
+    CLARITY PEARL: Sovereign Capture
+    Receives lead data from the browser extension and vaults it.
+    """
+    supabase = get_supabase()
+    
+    # 1. Standardize (Minimal Polish)
+    profile = {
+        "job_id": None, # Extension captures are direct
+        "data_payload": data,
+        "capture_source": "extension",
+        "verified": True, # Extension captures are considered 'live' verified
+        "clarity_score": 100 # Direct human capture
+    }
+    
+    # 2. Insert into Results
+    res = supabase.table('results').insert(profile).execute()
+    
+    if not res.data:
+        raise HTTPException(status_code=500, detail="Vault Insertion Failed")
+        
+    return {"status": "success", "vault_id": res.data[0]['id']}

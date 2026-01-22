@@ -87,10 +87,10 @@ I have subdivided myself into 5 specialized "Personas" to handle your project in
 - **Overlay Intelligence**: Real-time Lead/Company data overlay on LinkedIn and active web tabs.
 - **Vault Sync**: Immediate integration between browsing sessions and the Sales Intelligence Vault.
 
-### 🌍 Phase 16: Global Map Intelligence (Visual Dominance)
-- **Interactive Mapping**: Visualizing lead hotspots and geographic penetration clusters.
-- **G-Heatmaps**: Real-time geographic velocity heatmaps for market growth monitoring.
-- **Search-by-Radius**: Precision target location missions through map-based coordination.
+### 🌍 Phase 16: Global Map & Value Hardening (B2B Powerhouse)
+- **Mandatory Enrichment**: Every discovery mission now automatically triggers "The Bridge" to find Decision-Makers and Emails.
+- **ScraperAPI Crawler**: Eliminating the URL discovery bottleneck with automated, deep site-wide scraping.
+- **Interactive Mapping**: Visualizing lead hotspots and geographic penetration clusters on a global leaflet map.
 
 ### ✍️ Phase 17: Ghostwriter v2 (Autonomous Engagement)
 - **Direct Sending**: Integrated SMTP/Mailgun relay for fully automated cold email sequences.

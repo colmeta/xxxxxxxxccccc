@@ -21,7 +21,9 @@ from utils.humanizer import Humanizer
 from utils.email_verifier import email_verifier
 from utils.lead_prioritizer import lead_prioritizer
 from backend.routers.slack_relay import send_oracle_alert
+from backend.routers.webhook_relay import send_webhook_alert
 from utils.velocity_engine import velocity_engine
+from utils.geocoder import geocoder
 
 # Try to import Supabase, but don't fail immediately if missing (allows local dev setup)
 try:
@@ -50,6 +52,7 @@ class HydraController:
         if url and key:
             try:
                 self.supabase = create_client(url, key)
+                geocoder.supabase = self.supabase # Link cache to database
                 print(f"[{self.worker_id}] Supabase Connection Active.")
                 # Schema discovery will happen lazily in mesh_pulse or heartbeat
             except Exception as e:
@@ -307,6 +310,18 @@ class HydraController:
                         if data_results:
                             # Success!
                             print(f"[{self.worker_id}] ✨ Persistence Success! Found {len(data_results)} leads.")
+                            
+                            # --- PHASE 16: VALUE HARDENING (The Bridge) ---
+                            # For discovery/geographic missions, we MUST enrich to find DMs and Emails
+                            mission_type = job_data.get('mission_type', 'discovery').lower()
+                            if mission_type in ['discovery', 'geographic'] or platform in ['google_maps', 'duckduckgo']:
+                                print(f"🌉 Bridge: Hardening Lead Value for {len(data_results)} entities...")
+                                bridge = EnrichmentBridge(page)
+                                # We limit enrichment to top 10 leads if it's a large discovery to avoid timeouts
+                                leads_to_enrich = data_results[:15]
+                                enriched = await bridge.enrich_business_leads(leads_to_enrich)
+                                data_results = enriched + data_results[15:]
+                            
                             break
                         else:
                             print(f"[{self.worker_id}] ⚠️ {attempt_profile.upper()} failed to yield results. Re-cloaking...")
@@ -451,6 +466,13 @@ class HydraController:
 
             # 1. Polish Data (The Clarity Pearl Standard)
             data = arbiter.polish_lead(data)
+            
+            # 1a. Geocode Location (Phase 14 Bedrock)
+            if data.get('location') and not data.get('geo_lat'):
+                print(f"   🌍 Geocoding location: {data['location']}...")
+                coords = await geocoder.get_coordinates(data['location'])
+                if coords:
+                    data['geo_lat'], data['geo_lng'] = coords
 
             result_payload = {
                 "job_id": job_id,
@@ -462,7 +484,10 @@ class HydraController:
                 "predictive_growth_score": intent_data.get('predictive_growth_score', 0) if intent_data else 0,
                 "reasoning": intent_data.get('reasoning', '') if intent_data else '',
                 "velocity_data": velocity_data,
-                "displacement_data": displacement_data
+                "displacement_data": displacement_data,
+                "capture_source": data.get('capture_source', 'swarm'),
+                "geo_lat": data.get('geo_lat'),
+                "geo_lng": data.get('geo_lng')
             }
             
             if result_payload:
@@ -554,6 +579,14 @@ class HydraController:
                         lead_data=data,
                         velocity_signal=velocity_data.get('scaling_signal'),
                         displacement_script=displacement_data.get('sovereign_script')
+                    ))
+                    
+                    # 5b. THE INVISIBLE HAND v2: Generic Webhooks
+                    asyncio.create_task(send_webhook_alert(
+                        org_id=job_data.get('org_id'),
+                        result_id=result_id,
+                        event_type="high_intent_discovery",
+                        lead_data=data
                     ))
 
                 # 6. RECURSIVE FACT-CHECKING (The Sleuth Protocol)

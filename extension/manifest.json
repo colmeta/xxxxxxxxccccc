@@ -1,28 +1,38 @@
 {
     "manifest_version": 3,
-    "name": "Clarity Pearl: The Sovereign Extension",
+    "name": "Clarity Pearl: Sovereign Extension",
     "version": "1.0.0",
-    "description": "The Invisible Hand of Market Intelligence.",
+    "description": "One-click Lead Capture & Sales Intelligence directly from your browser.",
     "permissions": [
         "activeTab",
-        "storage"
+        "storage",
+        "scripting"
+    ],
+    "host_permissions": [
+        "*://*.linkedin.com/*",
+        "*://*.google.com/*",
+        "*://claritypearl.app/*",
+        "http://localhost:8000/*"
     ],
     "action": {
         "default_popup": "popup.html",
-        "default_icon": "icon.png"
+        "default_icon": "icons/icon128.png"
+    },
+    "background": {
+        "service_worker": "background.js"
     },
     "content_scripts": [
         {
             "matches": [
-                "https://www.linkedin.com/in/*",
-                "https://*.myshopify.com/*"
+                "*://*.linkedin.com/in/*",
+                "*://*.linkedin.com/company/*"
             ],
             "js": [
                 "content.js"
             ]
         }
     ],
-    "background": {
-        "service_worker": "background.js"
+    "icons": {
+        "128": "icons/icon128.png"
     }
 }
