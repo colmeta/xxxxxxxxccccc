@@ -99,7 +99,24 @@ I have subdivided myself into 5 specialized "Personas" to handle your project in
 
 ---
 
-## 4. FAQ: How it Works
+## 4. Commercial Strategy: The 7-Day Blitz
+We are shifting from a "Data Tool" to a **B2B Data Supplier** powerhouse. The goal is immediate and continuous cash flow through high-value "Lead Packs".
+
+### 📦 The "Agency Growth Pack" (Our MVP)
+Every lead delivered via Clarity Pearl is now standardized for maximum market value:
+*   **Company & Website**: Verified & active.
+*   **Industry & Location**: Precision filtered (e.g., "SaaS in Austin").
+*   **Decision-Maker**: Name & Title (CEO/Founder/Head of Marketing).
+*   **Verified Contact**: Deliverable Email & LinkedIn URL.
+
+### 💰 Monetization Roadmap
+*   **Starter Pack**: 250 Verified Leads - $99
+*   **Growth Pack**: 500 Verified Leads - $179
+*   **Monthly Subscription**: 500 New Leads/Month - $249/mo
+
+---
+
+## 5. FAQ: How it Works
 **Q: When does the platform use my PC?**
 A: Your PC acts as a **High-Authority Worker Node**. When a job is claimed, your local Python worker uses your residential IP (which platforms trust more than data centers) to execute the scrape. This is why Clarity Pearl can bypass blocks that stop cloud-based competitors.
 

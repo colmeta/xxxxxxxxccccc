@@ -108,15 +108,14 @@ export default function OracleControl() {
                                             </span>
                                             {d.reasoning && (
                                                 <span style={{
-                                                < span style={{
-                                                        fontSize: '0.75rem', // Larger text
-                                                        color: 'rgba(255,255,255,0.9)', // High visibility white
-                                                        fontStyle: 'italic',
-                                                        whiteSpace: 'nowrap',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        fontWeight: 500
-                                                    }}>
+                                                    fontSize: '0.75rem',
+                                                    color: 'rgba(255,255,255,0.9)',
+                                                    fontStyle: 'italic',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    fontWeight: 500
+                                                }}>
                                                     // {d.reasoning}
                                                 </span>
                                             )}
