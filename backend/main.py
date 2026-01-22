@@ -43,9 +43,10 @@ from backend.routers import opt_out
 app.include_router(opt_out.router)
 
 # CRM & Outreach Routers (Production)
-from backend.routers import crm, outreach, bulk, oracle, clarity_pearl, slack_relay, webhook_relay, organization_onboarding, diagnostics
+from backend.routers import crm, outreach, bulk, oracle, clarity_pearl, slack_relay, webhook_relay, campaigns, organization_onboarding, diagnostics
 app.include_router(crm.router)
 app.include_router(webhook_relay.router)
+app.include_router(campaigns.router)
 app.include_router(outreach.router)
 app.include_router(bulk.router)
 app.include_router(oracle.router)

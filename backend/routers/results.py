@@ -46,6 +46,23 @@ def get_global_stats(user: dict = Depends(get_current_user)):
         print(f"Stats Error: {e}")
         return {"total_leads": 0, "verified_leads": 0, "success_rate": 0, "avg_clarity": 0}
 
+@router.get("/geodata")
+def get_map_results(user: dict = Depends(get_current_user)):
+    """
+    Returns all leads with valid Lat/Long for the Global Map.
+    """
+    supabase = get_supabase()
+    if not supabase:
+        return []
+
+    try:
+        # Fetch results where lat/long is not null
+        res = supabase.table('results').select("id, data_payload, geo_lat, geo_lng, intent_score").not_.is_('geo_lat', 'null').execute()
+        return res.data
+    except Exception as e:
+        print(f"GeoData Error: {e}")
+        return []
+
 @router.get("/{job_id}/")
 def get_job_results(job_id: str, user: dict = Depends(get_current_user)):
     """

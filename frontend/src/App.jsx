@@ -18,6 +18,8 @@ import CompliancePortal from './pages/CompliancePortal'
 import VelocityView from './components/VelocityView'
 import DisplacementLibrary from './components/DisplacementLibrary'
 import CommandCenter from './components/CommandCenter'
+import GlobalMapView from './components/GlobalMapView'
+import GhostwriterHub from './components/GhostwriterHub'
 import './styles/supreme.css'
 
 function App() {
@@ -165,6 +167,15 @@ function App() {
                     🔗 CRM
                 </button>
                 <button
+                    onClick={() => setView('engagement')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'engagement' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'engagement' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    ✍️ ENGAGEMENT
+                </button>
+                <button
                     onClick={() => setView('bulk')}
                     style={{
                         background: 'none', border: 'none', padding: '1rem 0', color: view === 'bulk' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
@@ -172,6 +183,15 @@ function App() {
                     }}
                 >
                     📁 BULK
+                </button>
+                <button
+                    onClick={() => setView('map')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'map' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'map' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    🌍 MAP
                 </button>
                 <button
                     onClick={() => setView('command')}
@@ -327,6 +347,10 @@ function App() {
                 </div>
             ) : view === 'command' ? (
                 <CommandCenter session={session} />
+            ) : view === 'map' ? (
+                <GlobalMapView session={session} />
+            ) : view === 'engagement' ? (
+                <GhostwriterHub session={session} />
             ) : (
                 <SettingsView session={session} />
             )}

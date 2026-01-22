@@ -24,6 +24,7 @@ from backend.routers.slack_relay import send_oracle_alert
 from backend.routers.webhook_relay import send_webhook_alert
 from utils.velocity_engine import velocity_engine
 from utils.geocoder import geocoder
+from utils.ghostwriter import ghostwriter
 
 # Try to import Supabase, but don't fail immediately if missing (allows local dev setup)
 try:
@@ -54,6 +55,8 @@ class HydraController:
                 self.supabase = create_client(url, key)
                 geocoder.supabase = self.supabase # Link cache to database
                 print(f"[{self.worker_id}] Supabase Connection Active.")
+                geocoder.supabase = self.supabase
+                ghostwriter.supabase = self.supabase
                 # Schema discovery will happen lazily in mesh_pulse or heartbeat
             except Exception as e:
                 print(f"[{self.worker_id}] Supabase Connection Failed: {e}")
@@ -98,6 +101,11 @@ class HydraController:
                     if "last_pulse" in self.supported_columns: payload["last_pulse"] = datetime.now().isoformat()
                     
                     self.supabase.table('worker_status').upsert(payload).execute()
+                    
+                    # --- PHASE 17: GHOSTWRITER HEARBEAT ---
+                    # Periodically check for outreach tasks
+                    if random.random() < 0.2: # 20% of pulses to avoid spamming DB
+                        asyncio.create_task(ghostwriter.process_outreach_queue())
             except Exception as e:
                 print(f"[{self.worker_id}] Heartbeat Warning: {e}")
             await asyncio.sleep(30)
