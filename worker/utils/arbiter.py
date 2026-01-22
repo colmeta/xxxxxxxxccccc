@@ -117,7 +117,51 @@ class ArbiterAgent:
             comp = re.sub(r'[,\-]$', '', comp).strip()
             cleaned['company'] = comp.title()
             
-        # 3. Clean Job Title
+        # 3. Handle Location (Geographic Intelligence)
+        if cleaned.get('location'):
+            loc = cleaned['location'].strip()
+            # Standardize 'USA' or 'United States'
+            if loc.lower() in ['us', 'usa', 'united states']:
+                cleaned['location'] = 'United States'
+            else:
+                cleaned['location'] = loc.title()
+        elif cleaned.get('address'):
+            # Extract City/State/Country from address
+            addr = cleaned['address']
+            parts = [p.strip() for p in addr.split(',') if p.strip()]
+            if len(parts) >= 3:
+                # e.g '123 Main St, Austin, TX 78701' -> 'Austin, TX'
+                # or '123 Main St, London, SW1A 1AA, UK' -> 'London, UK'
+                cleaned['location'] = f"{parts[-3]}, {parts[-1]}"
+            elif len(parts) == 2:
+                cleaned['location'] = f"{parts[0]}, {parts[1]}"
+            else:
+                cleaned['location'] = addr
+        else:
+            cleaned['location'] = "Global / Remote"
+
+        # 4. Handle Industry
+        if not cleaned.get('industry'):
+            # Guess industry from snippet/meta
+            text_context = (cleaned.get('snippet', '') + " " + cleaned.get('meta_description', '')).lower()
+            industries = {
+                "SaaS": ["software", "saas", "platform", "cloud", "api", "dashboard"],
+                "E-commerce": ["shop", "store", "buy", "product", "ecommerce", "brand", "direct-to-consumer"],
+                "Agency": ["agency", "marketing", "seo", "branding", "creative", "service"],
+                "Real Estate": ["realty", "property", "investor", "housing", "estate"],
+                "Health": ["medical", "doctor", "health", "care", "pharma"],
+                "Tech": ["technology", "engineer", "dev", "data", "ai", "hardware"]
+            }
+            guessed = "General"
+            for ind, keywords in industries.items():
+                if any(k in text_context for k in keywords):
+                    guessed = ind
+                    break
+            cleaned['industry'] = guessed
+        else:
+            cleaned['industry'] = cleaned['industry'].title()
+
+        # 5. Clean Job Title
         if cleaned.get('title'):
             title = cleaned['title'].strip()
             # Standardize common acronyms

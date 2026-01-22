@@ -17,6 +17,7 @@ import OnboardingWizard from './components/OnboardingWizard'
 import CompliancePortal from './pages/CompliancePortal'
 import VelocityView from './components/VelocityView'
 import DisplacementLibrary from './components/DisplacementLibrary'
+import CommandCenter from './components/CommandCenter'
 import './styles/supreme.css'
 
 function App() {
@@ -173,6 +174,15 @@ function App() {
                     📁 BULK
                 </button>
                 <button
+                    onClick={() => setView('command')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'command' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'command' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    🗼 COMMAND
+                </button>
+                <button
                     onClick={() => setView('settings')}
                     style={{
                         background: 'none', border: 'none', padding: '1rem 0', color: view === 'settings' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
@@ -315,6 +325,8 @@ function App() {
                 <div style={{ display: 'grid', gap: '2rem' }}>
                     <BulkMissionControl session={session} />
                 </div>
+            ) : view === 'command' ? (
+                <CommandCenter session={session} />
             ) : (
                 <SettingsView session={session} />
             )}

@@ -144,16 +144,24 @@ class LinkedInEngine:
         email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', f"{clean_text} {snippet}")
         email = email_match.group(0) if email_match else None
         
+        # Extract location from snippet or title
+        location = "Remote / USA"
+        # Often after the name or in the snippet text 'Austin, TX'
+        loc_match = re.search(r'([A-Z][a-z]+, [A-Z]{2}|[A-Z][a-z]+, [A-Z][a-z]+)', f"{clean_text} {snippet}")
+        if loc_match:
+            location = loc_match.group(0)
+
         return {
             "name": name,
             "title": job,
             "company": company,
+            "location": location,
+            "linkedin_url": href,
             "email": email,
-            "source_url": href,
-            "verified": True,
-            "snippet": snippet[:200] if snippet else clean_text,
             "avatar_url": avatar_url,
-            "channel_priority": ["email", "dm"]
+            "source_url": href,
+            "platform": "linkedin",
+            "verified": True
         }
 
     async def _search_bing(self, query):

@@ -196,7 +196,16 @@ class WebsiteEngine:
                 results["relevance_reason"] = reason
                 print(f"[{self.platform}] 🛡️ Bouncer Verdict: {'✅ Allowed' if is_relevant else '⛔ Denied'} ({reason})")
 
-            # 3. Look for "Contact" / "About" links for deeper scraping
+            # Extract physical address (for Location)
+            try:
+                # Look for address-like patterns in footer or body
+                # Standard US address: City, ST Zip
+                addr_match = re.search(r'([A-Z][a-z]+, [A-Z]{2}\s+\d{5})', text)
+                if addr_match:
+                    results["location"] = addr_match.group(0)
+            except: pass
+
+            # 4. Look for "Contact" / "About" links for deeper scraping
             # We scrape current page (Home) + potentially Contact page
             pages_to_scrape = [text] # Start with homepage text
             

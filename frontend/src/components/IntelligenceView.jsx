@@ -45,7 +45,7 @@ export default function IntelligenceView({ session }) {
     const downloadIntelligenceAsCSV = () => {
         if (results.length === 0) return
 
-        const headers = ["Name", "Title", "Company", "Email", "Intent Score", "Oracle Signal", "Clarity Score", "Velocity"]
+        const headers = ["Name", "Title", "Company", "Industry", "Location", "Email", "LinkedIn", "Intent Score", "Oracle Signal", "Clarity Score", "Velocity"]
         const csvRows = [headers.join(",")]
 
         results.forEach(res => {
@@ -55,7 +55,10 @@ export default function IntelligenceView({ session }) {
                 `"${(data.name || "").replace(/"/g, '""')}"`,
                 `"${(data.title || "").replace(/"/g, '""')}"`,
                 `"${(data.company || "").replace(/"/g, '""')}"`,
+                `"${(data.industry || "General").replace(/"/g, '""')}"`,
+                `"${(data.location || "USA").replace(/"/g, '""')}"`,
                 `"${data.email || ""}"`,
+                `"${(data.linkedin_url || "").replace(/"/g, '""')}"`,
                 res.intent_score || 0,
                 `"${(res.oracle_signal || "").replace(/"/g, '""')}"`,
                 res.clarity_score || 0,
@@ -216,8 +219,10 @@ export default function IntelligenceView({ session }) {
                                             <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem', margin: 0 }}>
                                                 {data.name || data.company || 'Unknown Contact'}
                                             </h3>
-                                            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>
+                                            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                                 {data.title} {data.company ? `@ ${data.company}` : ''}
+                                                {data.location && <span style={{ padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', fontSize: '0.65rem' }}>📍 {data.location}</span>}
+                                                {data.industry && <span style={{ padding: '2px 6px', background: 'rgba(147,51,234,0.1)', color: '#a855f7', borderRadius: '4px', fontSize: '0.65rem' }}>🏭 {data.industry}</span>}
                                             </div>
                                         </div>
                                     </div>
@@ -319,7 +324,8 @@ export default function IntelligenceView({ session }) {
                                         flexWrap: 'wrap'
                                     }}>
                                         <span>📧 {data.email}</span>
-                                        {data.source_url && <a href={data.source_url} target="_blank" style={{ color: 'hsl(var(--pearl-primary))' }}>🔗 View Profile</a>}
+                                        {data.linkedin_url && <a href={data.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))' }}>💼 LinkedIn</a>}
+                                        {data.source_url && <a href={data.source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))' }}>🌐 Website</a>}
                                     </div>
                                 )}
                             </div>

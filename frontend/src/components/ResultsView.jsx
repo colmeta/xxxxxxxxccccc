@@ -41,7 +41,7 @@ export default function ResultsView() {
     const downloadResultsAsCSV = () => {
         if (results.length === 0) return
 
-        const headers = ["Name", "Title", "Company", "Email", "Clarity Score", "Intent Score", "LinkedIn", "Status"]
+        const headers = ["Name", "Title", "Company", "Industry", "Location", "Email", "Clarity Score", "Intent Score", "LinkedIn", "Status"]
         const csvRows = [headers.join(",")]
 
         results.forEach(res => {
@@ -50,6 +50,8 @@ export default function ResultsView() {
                 `"${(data.name || "").replace(/"/g, '""')}"`,
                 `"${(data.title || "").replace(/"/g, '""')}"`,
                 `"${(data.company || "").replace(/"/g, '""')}"`,
+                `"${(data.industry || "General").replace(/"/g, '""')}"`,
+                `"${(data.location || "USA").replace(/"/g, '""')}"`,
                 `"${data.email || ""}"`,
                 res.clarity_score || 0,
                 res.intent_score || 0,
@@ -226,8 +228,10 @@ export default function ResultsView() {
                                                         <div style={{ fontWeight: 800, color: '#fff', fontSize: '1rem' }}>
                                                             {r.data_payload?.name || r.data_payload?.full_name || 'Unknown'}
                                                         </div>
-                                                        <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
+                                                        <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                                             {r.data_payload?.title || 'No Title'}
+                                                            {r.data_payload?.location && <span style={{ opacity: 0.6 }}>• 📍 {r.data_payload.location}</span>}
+                                                            {r.data_payload?.industry && <span style={{ opacity: 0.6 }}>• 🏭 {r.data_payload.industry}</span>}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -386,8 +390,10 @@ export default function ResultsView() {
                                     <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.3rem' }}>
                                         {r.data_payload?.title || 'No Title'}
                                     </div>
-                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
-                                        {r.data_payload?.company || 'No Company'}
+                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        <span>🏢 {r.data_payload?.company || 'No Company'}</span>
+                                        {r.data_payload?.location && <span style={{ color: 'hsl(var(--pearl-primary))' }}>📍 {r.data_payload.location}</span>}
+                                        {r.data_payload?.industry && <span style={{ color: '#a855f7' }}>🏭 {r.data_payload.industry}</span>}
                                     </div>
                                 </div>
 

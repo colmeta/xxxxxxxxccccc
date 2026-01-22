@@ -449,6 +449,9 @@ class HydraController:
             except Exception as vel_err:
                 print(f"   ⚠️ Velocity/Displacement calculation failed: {vel_err}")
 
+            # 1. Polish Data (The Clarity Pearl Standard)
+            data = arbiter.polish_lead(data)
+
             result_payload = {
                 "job_id": job_id,
                 "data_payload": data,
