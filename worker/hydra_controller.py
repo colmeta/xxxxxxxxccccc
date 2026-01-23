@@ -320,15 +320,18 @@ class HydraController:
                             print(f"[{self.worker_id}] ✨ Persistence Success! Found {len(data_results)} leads.")
                             
                             # --- PHASE 16: VALUE HARDENING (The Bridge) ---
-                            # For discovery/geographic missions, we MUST enrich to find DMs and Emails
-                            mission_type = job_data.get('mission_type', 'discovery').lower()
-                            if mission_type in ['discovery', 'geographic'] or platform in ['google_maps', 'duckduckgo']:
+                            # Aggressively enrich business-oriented results to find DMs and Emails
+                            is_person_platform = platform in ['linkedin', 'twitter', 'instagram']
+                            
+                            # If we have leads without emails, or it's a discovery platform, trigger the bridge
+                            needs_enrichment = any(not lead.get('email') for lead in data_results[:10])
+                            
+                            if (needs_enrichment and not is_person_platform) or platform in ['google_maps', 'duckduckgo']:
                                 print(f"🌉 Bridge: Hardening Lead Value for {len(data_results)} entities...")
                                 bridge = EnrichmentBridge(page)
-                                # We limit enrichment to top 10 leads if it's a large discovery to avoid timeouts
-                                leads_to_enrich = data_results[:15]
-                                enriched = await bridge.enrich_business_leads(leads_to_enrich)
-                                data_results = enriched + data_results[15:]
+                                # Enrich top 10 for performance, can be increased in high-spec environments
+                                enriched = await bridge.enrich_business_leads(data_results[:10])
+                                data_results = enriched + data_results[10:]
                             
                             break
                         else:

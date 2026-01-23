@@ -33,14 +33,50 @@ class LinkedInEngine:
         results = await self._search_ddg(query)
         if results: return results
 
+        # 4. ScraperAPI Fallback (The Force Multiplier)
+        from utils.scraper_api_bridge import scraper_api_bridge
+        if os.getenv("SCRAPER_API_KEY"):
+            print(f"[{self.platform}] 🚀 Local engines blocked. Engaging ScraperAPI Proxy Search...")
+            results = await self._search_via_scraper_api(query)
+            if results: return results
+
         print(f"[{self.platform}] 🔧 All strategies exhausted. Using Mock Data.")
         return self._get_mock_data(query)
 
-    async def _search_google(self, query):
+    async def _search_via_scraper_api(self, query):
+        """Uses ScraperAPI to fetch LinkedIn search results if local worker is throttled."""
+        from utils.scraper_api_bridge import scraper_api_bridge
+        encoded_query = urllib.parse.quote(f"site:linkedin.com/in/ {query}")
+        url = f"https://www.google.com/search?q={encoded_query}&num=20"
+        
+        try:
+            # We use the bridge's logic to fetch content via proxy
+            # Note: We need a method in ScraperAPIBridge for simple get_content
+            import httpx
+            api_key = os.getenv("SCRAPER_API_KEY")
+            proxy_url = f"http://scraperapi:{api_key}@proxy-server.scraperapi.com:8001"
+            
+            async with httpx.AsyncClient(proxies=proxy_url, timeout=30.0) as client:
+                res = await client.get(url)
+                if res.status_code == 200:
+                    # We can't use Playwright on the returned HTML directly easily, 
+                    # so we'll do a simple regex/selector parse of the raw HTML
+                    # or better: we'll use the page.goto WITH the proxy in a new context
+                    return await self._search_google(query, use_proxy=True)
+        except Exception as e:
+            print(f"❌ ScraperAPI Proxy Search Error: {e}")
+        return []
+
+    async def _search_google(self, query, use_proxy=False):
         try:
             # Dorking query
             encoded_query = urllib.parse.quote(f"site:linkedin.com/in/ {query}")
-            url = f"https://www.google.com/search?q={encoded_query}&num=100"
+            
+            if use_proxy and os.getenv("SCRAPER_API_KEY"):
+                api_key = os.getenv("SCRAPER_API_KEY")
+                url = f"http://api.scraperapi.com?api_key={api_key}&url=https://www.google.com/search?q={encoded_query}&num=20"
+            else:
+                url = f"https://www.google.com/search?q={encoded_query}&num=100"
             
             print(f"[{self.platform}] 📡 Google: {url}")
             await self.page.goto(url, wait_until="domcontentloaded", timeout=30000)

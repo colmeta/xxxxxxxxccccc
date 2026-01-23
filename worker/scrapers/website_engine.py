@@ -8,7 +8,7 @@ class WebsiteEngine:
         self.page = page
         self.platform = "generic_website"
         
-    async def find_company_website(self, company_name):
+    async def find_company_website(self, company_name, use_proxy=False):
         """
         Multi-headed search to find the official website.
         Google -> Bing -> DuckDuckGo
@@ -16,25 +16,30 @@ class WebsiteEngine:
         print(f"[{self.platform}] 🔍 Searching for website: {company_name}")
         
         # 1. Google Search
-        url = await self._search_google(company_name)
+        url = await self._search_google(company_name, use_proxy=use_proxy)
         if url: return url
         
         # 2. Bing Search
         print(f"[{self.platform}] ⚠️ Google dry/blocked. Engaging BING fallback...")
-        url = await self._search_bing(company_name)
+        url = await self._search_bing(company_name, use_proxy=use_proxy)
         if url: return url
 
         # 3. DuckDuckGo Search
         print(f"[{self.platform}] ⚠️ Bing dry. Engaging DUCKDUCKGO...")
-        url = await self._search_ddg(company_name)
+        url = await self._search_ddg(company_name, use_proxy=use_proxy)
         if url: return url
 
         return None
 
-    async def _search_google(self, company_name):
+    async def _search_google(self, company_name, use_proxy=False):
         try:
             query = urllib.parse.quote(f"{company_name} official site")
-            url = f"https://www.google.com/search?q={query}&num=10"
+            
+            if use_proxy and os.getenv("SCRAPER_API_KEY"):
+                api_key = os.getenv("SCRAPER_API_KEY")
+                url = f"http://api.scraperapi.com?api_key={api_key}&url=https://www.google.com/search?q={query}&num=10"
+            else:
+                url = f"https://www.google.com/search?q={query}&num=10"
             
             await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
             await Humanizer.random_sleep(1, 2)
@@ -69,10 +74,15 @@ class WebsiteEngine:
             print(f"[{self.platform}] ❌ Google Error: {e}")
             return None
 
-    async def _search_bing(self, company_name):
+    async def _search_bing(self, company_name, use_proxy=False):
         try:
             query = urllib.parse.quote(f"{company_name} official site")
-            url = f"https://www.bing.com/search?q={query}"
+            
+            if use_proxy and os.getenv("SCRAPER_API_KEY"):
+                api_key = os.getenv("SCRAPER_API_KEY")
+                url = f"http://api.scraperapi.com?api_key={api_key}&url=https://www.bing.com/search?q={query}"
+            else:
+                url = f"https://www.bing.com/search?q={query}"
             
             await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
             await Humanizer.random_sleep(1, 2)
@@ -88,10 +98,15 @@ class WebsiteEngine:
             print(f"[{self.platform}] ❌ Bing Error: {e}")
             return None
 
-    async def _search_ddg(self, company_name):
+    async def _search_ddg(self, company_name, use_proxy=False):
         try:
             query = urllib.parse.quote(f"{company_name} official site")
-            url = f"https://duckduckgo.com/?q={query}&t=hp&ia=web"
+            
+            if use_proxy and os.getenv("SCRAPER_API_KEY"):
+                api_key = os.getenv("SCRAPER_API_KEY")
+                url = f"http://api.scraperapi.com?api_key={api_key}&url=https://duckduckgo.com/?q={query}"
+            else:
+                url = f"https://duckduckgo.com/?q={query}&t=hp&ia=web"
             
             await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
             await Humanizer.random_sleep(1, 2)
