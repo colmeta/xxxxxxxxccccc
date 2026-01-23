@@ -1,5 +1,6 @@
 import asyncio
 import random
+import os
 import urllib.parse
 import re
 from playwright.async_api import TimeoutError
@@ -181,11 +182,16 @@ class LinkedInEngine:
         email = email_match.group(0) if email_match else None
         
         # Extract location from snippet or title
-        location = "Remote / USA"
-        # Often after the name or in the snippet text 'Austin, TX'
-        loc_match = re.search(r'([A-Z][a-z]+, [A-Z]{2}|[A-Z][a-z]+, [A-Z][a-z]+)', f"{clean_text} {snippet}")
+        location = None
+        # Look for patterns like "Austin, TX" or "New York, New York"
+        loc_match = re.search(r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?,\s+[A-Z]{2}(?:\s+\d{5})?)|([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?,\s+[A-Z][a-z]+)', f"{clean_text} {snippet}")
         if loc_match:
             location = loc_match.group(0)
+        else:
+            # Try to find "Greater City Area" pattern
+            area_match = re.search(r'Greater\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:Area|Metropolitan)', f"{clean_text} {snippet}")
+            if area_match:
+                location = area_match.group(1)
 
         return {
             "name": name,

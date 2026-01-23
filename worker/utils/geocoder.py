@@ -14,7 +14,7 @@ class Geocoder:
         Converts an address string into Latitude and Longitude.
         Implements persistent caching via Supabase to minimize external API calls.
         """
-        if not address_string or address_string == "Global / Remote":
+        if not address_string or address_string in ["Global / Remote", "Unknown", "n/a", "N/A"]:
             return None
 
         # 1. Check Cache

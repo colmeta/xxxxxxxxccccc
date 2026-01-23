@@ -8,6 +8,8 @@ export default function JobCreator({ session }) {
     const [boostMode, setBoostMode] = useState(false)
     const [strategy, setStrategy] = useState('A')
     const [oneClickMode, setOneClickMode] = useState(false)
+    const [category, setCategory] = useState('')
+    const [excludeDelivered, setExcludeDelivered] = useState(false)
 
     const platforms = [
         { id: 'linkedin', label: 'LinkedIn', icon: '👔' },
@@ -43,7 +45,9 @@ export default function JobCreator({ session }) {
                     priority: boostMode ? 10 : 1,
                     ab_test_group: strategy,
                     search_metadata: {
-                        one_click_agency: oneClickMode
+                        one_click_agency: oneClickMode,
+                        category: category || null,
+                        exclude_delivered: excludeDelivered
                     }
                 })
             })
@@ -148,6 +152,46 @@ export default function JobCreator({ session }) {
                     }}
                 >
                     🤖 ONE-CLICK AGENCY: {oneClickMode ? 'ACTIVE' : 'OFF'}
+                </button>
+
+                <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '12px',
+                        background: 'rgba(255,255,255,0.05)',
+                        color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        fontSize: '0.7rem',
+                        fontWeight: 800,
+                        cursor: 'pointer'
+                    }}
+                >
+                    <option value="">📂 Auto-Detect Category</option>
+                    <option value="SaaS Companies">💻 SaaS Companies</option>
+                    <option value="C-Level Executives">👔 C-Level Executives</option>
+                    <option value="Marketing Agencies">📢 Marketing Agencies</option>
+                    <option value="Real Estate">🏠 Real Estate</option>
+                    <option value="Finance">💰 Finance</option>
+                    <option value="E-commerce">🛒 E-commerce</option>
+                    <option value="Healthcare">⚕️ Healthcare</option>
+                </select>
+
+                <button
+                    onClick={() => setExcludeDelivered(!excludeDelivered)}
+                    style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '12px',
+                        background: excludeDelivered ? 'hsl(var(--pearl-success))' : 'rgba(255,255,255,0.05)',
+                        color: excludeDelivered ? '#000' : '#fff',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        fontSize: '0.7rem',
+                        fontWeight: 900,
+                        cursor: 'pointer'
+                    }}
+                >
+                    🛡️ EXCLUDE DELIVERED: {excludeDelivered ? 'ON' : 'OFF'}
                 </button>
             </div>
 

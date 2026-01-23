@@ -47,6 +47,10 @@ def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
         supabase.table('organizations').update({'credits_used': used + 1}).eq('id', org_id).execute()
         
         # 4. Create job data
+        # Auto-detect category if not provided
+        category = job.search_metadata.get('category') if job.search_metadata else None
+        exclude_delivered = job.search_metadata.get('exclude_delivered', False) if job.search_metadata else False
+        
         # Explicit priority boost if requested
         final_priority = job.priority
         if job.search_metadata and job.search_metadata.get('boost'):
@@ -60,6 +64,8 @@ def create_job(job: JobRequest, user: dict = Depends(get_current_user)):
             "compliance_mode": job.compliance_mode,
             "priority": final_priority,
             "ab_test_group": job.ab_test_group,
+            "category": category,  # NEW: Category tracking
+            "exclude_delivered": exclude_delivered,  # NEW: Deduplication flag
             "search_metadata": job.search_metadata or {},
             "status": "queued"
         }

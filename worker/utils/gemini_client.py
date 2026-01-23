@@ -28,7 +28,10 @@ class GeminiClient:
         self.health_map = {} # {model_id: {"last_fail": timestamp, "fail_type": "429"|"404"|"error"}}
         self.cooldown_period = 300 # 5 minutes for 429s
         
-        print(f"DEBUG: GeminiClient Init - Gemini Key: {bool(self.gemini_key)}, Groq Key: {bool(self.groq_key)}")
+        # Better API key status logging
+        gemini_status = "✓ Active" if self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE" else "✗ Missing/Invalid"
+        groq_status = "✓ Active" if self.groq_key else "✗ Missing"
+        print(f"🤖 AI Integration Status: Gemini {gemini_status}, Groq {groq_status}")
         
         # Correct Gemini model IDs (Updated for GenAI SDK compatibility)
         self.model_candidates = [
@@ -97,7 +100,6 @@ class GeminiClient:
                     # Successful call clears health record
                     if model in self.health_map: del self.health_map[model]
                     self.model_id = model
-                    print(f"DEBUG: Gemini '{model}' success. Response sample: {response.text[:50]}...")
                     return response.text
                 continue
             except Exception as e:
@@ -115,12 +117,10 @@ class GeminiClient:
                 self.health_map[model] = {"last_fail": datetime.now(), "fail_type": fail_type}
                 continue
         
-        print("DEBUG: All Gemini models failed. Engaging Heuristic Intelligence.")
         return None
 
     def _call_groq(self, prompt):
         if not self.groq_key: 
-            print("DEBUG: Groq Key missing, skipping Groq.")
             return None
         headers = {
             "Authorization": f"Bearer {self.groq_key}",
@@ -141,7 +141,6 @@ class GeminiClient:
                     continue
                 content = resp.json()['choices'][0]['message']['content']
                 if content:
-                    print(f"DEBUG: Groq Success ('{model}'). Response sample: {content[:50]}...")
                     self.groq_model = model
                     return content
             except Exception as e:
@@ -153,21 +152,25 @@ class GeminiClient:
         """PRIMARY: Groq (faster, better free tier). BACKUP: Gemini."""
         # Images MUST use Gemini (Groq doesn't support vision)
         if image_path:
+            print("🖼️ Vision request detected, using Gemini...")
             return self._call_gemini(prompt, image_path)
         
         # Text: Try Groq FIRST (Primary AI)
         if self.groq_key:
-            print("DEBUG: Attempting Groq (Primary AI)...")
+            print("🧠 Attempting Groq AI (Primary)...")
             res = self._call_groq(prompt)
             if res: 
-                print("DEBUG: Groq succeeded, skipping Gemini")
+                print("✓ Groq AI succeeded")
                 return res
-            print("DEBUG: Groq failed, falling back to Gemini...")
+            print("⚠️ Groq failed, falling back to Gemini...")
         else:
-            print("DEBUG: No Groq key, using Gemini directly...")
+            print("⚠️ No Groq key available, trying Gemini...")
         
         # Fallback to Gemini only if Groq unavailable/failed
-        return self._call_gemini(prompt)
+        result = self._call_gemini(prompt)
+        if not result:
+            print("⚠️ All AI models failed. Engaging Heuristic Intelligence.")
+        return result
 
     async def analyze_visuals(self, query, image_path):
         prompt = f"Analyze this screenshot for the query: {query}. Return ONLY a JSON object: {{\"truth_score\": int, \"verdict\": \"string\"}}"

@@ -43,7 +43,7 @@ from backend.routers import opt_out
 app.include_router(opt_out.router)
 
 # CRM & Outreach Routers (Production)
-from backend.routers import crm, outreach, bulk, oracle, clarity_pearl, slack_relay, webhook_relay, campaigns, organization_onboarding, diagnostics
+from backend.routers import crm, outreach, bulk, oracle, clarity_pearl, slack_relay, webhook_relay, campaigns, organization_onboarding, diagnostics, deliveries
 app.include_router(crm.router)
 app.include_router(webhook_relay.router)
 app.include_router(campaigns.router)
@@ -54,6 +54,7 @@ app.include_router(clarity_pearl.router)
 app.include_router(slack_relay.router)
 app.include_router(organization_onboarding.router)
 app.include_router(diagnostics.router)
+app.include_router(deliveries.router)  # NEW: Delivery tracking
 
 # White-Label API & Phase 12 Bridge
 from backend.routers import v1, extension_bridge, flutterwave_router

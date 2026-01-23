@@ -25,6 +25,8 @@ from backend.routers.webhook_relay import send_webhook_alert
 from utils.velocity_engine import velocity_engine
 from utils.geocoder import geocoder
 from utils.ghostwriter import ghostwriter
+from utils.deduplication_service import get_dedup_service
+from utils.rate_limiter import get_rate_limiter
 
 # Try to import Supabase, but don't fail immediately if missing (allows local dev setup)
 try:
@@ -46,6 +48,8 @@ class HydraController:
         self.worker_id = worker_id or os.getenv("WORKER_ID") or "production_hydra_01"
         self.supabase = None
         self.supported_columns = [] # Dynamic schema discovery
+        self.dedup_service = None  # Will be initialized after supabase connection
+        self.rate_limiter = get_rate_limiter()
         
         # Initialize Supabase
         url = os.getenv("SUPABASE_URL")
@@ -57,6 +61,8 @@ class HydraController:
                 print(f"[{self.worker_id}] Supabase Connection Active.")
                 geocoder.supabase = self.supabase
                 ghostwriter.supabase = self.supabase
+                self.dedup_service = get_dedup_service(self.supabase)  # Initialize dedup service
+                print(f"✅ Deduplication service initialized")
                 # Schema discovery will happen lazily in mesh_pulse or heartbeat
             except Exception as e:
                 print(f"[{self.worker_id}] Supabase Connection Failed: {e}")
@@ -363,7 +369,7 @@ class HydraController:
         gc.collect()
 
         
-        # --- PHASE 10: BULK DATA VAULTING ---
+        # --- PHASE 10: BULK DATA VAULTING WITH DEDUPLICATION ---
         if not data_results:
             print(f"   ⚠️ No data found for mission {job_id}. Skipping vault.")
             if self.supabase:
@@ -373,6 +379,24 @@ class HydraController:
                     'completed_at': datetime.now().isoformat()
                 }).eq('id', job_id).execute()
             return
+        
+        # Auto-detect category from search query
+        category = job_data.get('search_metadata', {}).get('category')
+        if not category and self.dedup_service:
+            category = self.dedup_service.auto_detect_category(query)
+            print(f"📂 Auto-detected category: {category}")
+        elif not category:
+            category = "Uncategorized"
+        
+        # Filter duplicates if requested
+        org_id = job_data.get('org_id')
+        exclude_delivered = job_data.get('exclude_delivered') or job_data.get('search_metadata', {}).get('exclude_delivered', False)
+        
+        if exclude_delivered and self.dedup_service and org_id:
+            print(f"🔍 Checking for duplicates in category: {category}")
+            data_results, duplicate_count = self.dedup_service.filter_duplicates(org_id, data_results, category)
+            if duplicate_count > 0:
+                print(f"✅ Filtered {duplicate_count} duplicates, {len(data_results)} new leads remaining")
 
         print(f"   💾 Vaulting {len(data_results)} leads...")
         saved_count = 0
@@ -416,13 +440,31 @@ class HydraController:
             except Exception as loop_err:
                 print(f"   ⚠️ Failed to save lead: {loop_err}")
 
-        # 4. Finalize Job Status
+        # 4. Finalize Job Status with Data Quality Metrics
         if self.supabase:
+            # Calculate data quality stats
+            quality_stats = {
+                'total_leads': saved_count,
+                'with_email': sum(1 for lead in data_results if lead.get('email') or lead.get('decision_maker_email')),
+                'with_phone': sum(1 for lead in data_results if lead.get('phone') or (lead.get('phones') and len(lead.get('phones')) > 0)),
+                'with_location': sum(1 for lead in data_results if lead.get('location') and lead.get('location') not in ['Unknown', 'Remote / USA', None]),
+                'with_socials': sum(1 for lead in data_results if lead.get('socials') and len(lead.get('socials')) > 0)
+            }
+            
             self.supabase.table('jobs').update({
                 'status': 'completed',
                 'result_count': saved_count,
                 'completed_at': datetime.now().isoformat()
             }).eq('id', job_id).execute()
+            
+            # Log data quality summary
+            print(f"\n📊 Mission {job_id[:8]} Data Quality Report:")
+            print(f"   Total Leads: {quality_stats['total_leads']}")
+            if quality_stats['total_leads'] > 0:
+                print(f"   ✉️  With Email: {quality_stats['with_email']} ({quality_stats['with_email']/quality_stats['total_leads']*100:.1f}%)")
+                print(f"   📱 With Phone: {quality_stats['with_phone']} ({quality_stats['with_phone']/quality_stats['total_leads']*100:.1f}%)")
+                print(f"   📍 With Location: {quality_stats['with_location']} ({quality_stats['with_location']/quality_stats['total_leads']*100:.1f}%)")
+                print(f"   🔗 With Social Media: {quality_stats['with_socials']} ({quality_stats['with_socials']/quality_stats['total_leads']*100:.1f}%)")
         
         print(f"🏁 Mission {job_id} Complete. {saved_count} flags planted in the Vault.")
 
@@ -631,6 +673,14 @@ class HydraController:
         print(f"[{self.worker_id}] Entering continuous surveillance loop...")
         self._start_heartbeat()
         while True:
+            # Check rate limits before claiming job
+            can_proceed, reason = self.rate_limiter.can_proceed_with_mission()
+            if not can_proceed:
+                print(f"🚫 Rate limit pause: {reason}")
+                print("⏰ Waiting 5 minutes before retry...")
+                await asyncio.sleep(300)  # Wait 5 minutes
+                continue
+            
             job = await self.poll_and_claim()
             if job:
                 job_id = job.get('id')

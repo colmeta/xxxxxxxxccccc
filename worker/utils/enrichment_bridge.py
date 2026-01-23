@@ -1,4 +1,5 @@
 import asyncio
+import os
 # from scrapers.linkedin_engine import LinkedInEngine # Lazy-loaded in __init__
 from utils.email_verifier import email_verifier
 

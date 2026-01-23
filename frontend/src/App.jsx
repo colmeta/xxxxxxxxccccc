@@ -20,6 +20,7 @@ import DisplacementLibrary from './components/DisplacementLibrary'
 import CommandCenter from './components/CommandCenter'
 import GlobalMapView from './components/GlobalMapView'
 import GhostwriterHub from './components/GhostwriterHub'
+import JobSeparatedResults from './components/JobSeparatedResults'
 import './styles/supreme.css'
 
 function App() {
@@ -120,6 +121,15 @@ function App() {
                     }}
                 >
                     💎 SALES VAULT
+                </button>
+                <button
+                    onClick={() => setView('datasets')}
+                    style={{
+                        background: 'none', border: 'none', padding: '1rem 0', color: view === 'datasets' ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.4)',
+                        fontWeight: 900, cursor: 'pointer', borderBottom: view === 'datasets' ? '2px solid hsl(var(--pearl-primary))' : 'none', whiteSpace: 'nowrap'
+                    }}
+                >
+                    📦 DATA SETS
                 </button>
                 <button
                     onClick={() => setView('velocity')}
@@ -329,6 +339,8 @@ function App() {
                         <LiveFeed />
                     </div>
                 </div>
+            ) : view === 'datasets' ? (
+                <JobSeparatedResults />
             ) : view === 'velocity' ? (
                 <VelocityView />
             ) : view === 'displacement' ? (

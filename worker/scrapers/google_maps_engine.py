@@ -86,6 +86,7 @@ class GoogleMapsEngine:
                     rating = "N/A"
                     address = "Unknown"
                     phone = "N/A"
+                    website = None
                     
                     for line in lines:
                         if "(" in line and ")" in line and ("." in line or "," in line):
@@ -94,12 +95,16 @@ class GoogleMapsEngine:
                             address = line
                         if line.startswith("+") or (line.count("-") == 2 and any(char.isdigit() for char in line)):
                             phone = line
+                        # Try to extract website from buttons or links
+                        if "http" in line and "google.com" not in line:
+                            website = line.strip()
 
                     results.append({
                         "name": name,
                         "rating": rating,
                         "address": address,
                         "phone": phone,
+                        "website": website,
                         "source_url": href,
                         "verified": True,
                         "snippet": f"{name} ({rating}) - {address}"
