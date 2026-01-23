@@ -1,0 +1,76 @@
+"Skip to content
+colmeta
+xxxxxxxxccccc
+Repository navigation
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+Settings
+Hydra Worker (GitHub Actions)
+Hydra Worker (GitHub Actions) #1398
+All jobs
+Run details
+scrape
+Started 54m 56s ago
+
+1s
+1s
+0s
+38s
+54m 16s
+[linkedin] 🔧 All strategies exhausted. Using Mock Data.
+🔸 Bridge Miss: Match 'Tech Stealth Inc.' != '222 Digital Marketing Agency Chicago'
+🌉 Bridge: Hunting for Head of Marketing at 222 Digital Marketing Agency Chicago...
+[linkedin] 🚀 Launching 'Unshakable' Search for: Head of Marketing "222 Digital Marketing Agency Chicago"
+[linkedin] 📡 Google: https://www.google.com/search?q=site%3Alinkedin.com/in/%20Head%20of%20Marketing%20%22222%20Digital%20Marketing%20Agency%20Chicago%22&num=100
+[linkedin] 🔦 Detected 'Basic HTML' Layout. Extraction bypass active...
+[linkedin] ⚠️ Google dry/blocked. engaging BING fallback...
+2026-01-23 05:55:33,111 - INFO - HTTP Request: POST ***/rest/v1/worker_status "HTTP/2 200 OK"
+[linkedin] ⚠️ Bing dry. Engaging DUCKDUCKGO...
+[linkedin] 🔧 All strategies exhausted. Using Mock Data.
+🔸 Bridge Miss: Match 'Tech Stealth Inc.' != '222 Digital Marketing Agency Chicago'
+[generic_website] 🔍 Searching for website: DS&P Digital Marketing & PR Agency
+[generic_website] ⚠️ Google dry/blocked. Engaging BING fallback...
+[generic_website] ⚠️ Bing dry. Engaging DUCKDUCKGO...
+[generic_website] 🎯 DDG Found URL: https://duckduckgo.com/y.js?ad_domain=logicalposition.com&ad_provider=bingv7aa&ad_type=txad&click_metadata=xyYK3Vb5S06L5Vru89BXZXu2y%2DPsBpXKW70O7GE_NtUaFnjCCoudPOn7imlpm4xuV5y3WJMVAhbHeF8thhYzm703UQmoABCpmJhOi6Y83yk7S%2DBNIeqQSV0dKQwoSlfKGyZSsVbuUYLXs6hEBzgZzbLl0BTWY9%2Diruu7VSSHHj4.CCIm6kfGIsVFh6_%2Do8mtsQ&eddgt=eTcI2IEAZw32W37C1SeBSA%3D%3D&rut=4824d4b40c0296674ca3d6bd1c4398781e9a5a49a021ac2d24ac4525a5172c71&u3=https%3A%2F%2Fwww.bing.com%2Faclick%3Fld%3De8DXq3D%2DJxuKykQoVfo17CijVUCUxljyzn6_pTkdxflQbmWlfabaEJU1sdrwmhBs4OzqDrJ2HCWQoLiqiUaShOwSSebl_emOqfoaGgi1nwEeQDb%2DzTdoUx%2Du2%2D84SKqkpjOulsn4xqoZrpTf_bIgiYpK7fF0EwjcWcpc_q48JjIq8tMAM6m6dyn2dMG0_ZsDXvJQY%2DLMCe9A7hrE9q2mt2LH%2D5gvUk3GmddSWlTSzTEE8ya8G8imeUya19CL5ePfzz2lhk_MbRNIzZ_ScnM4plkJGZ8VedbX66enGo_MFu06oHOq9jCztYY6FypLnxLFgKRQk73k8ctBNWfDitcjRB2IPKoBdbAKJvjT96%2DFar4RteiQlj%2DBsXtt_h7yu5uEE3mRZWMItaWKP_hitzCyjcWCBTj55kxf%2DtguevO27RFPAPHWQHiMhLTXNQt7v7oLclhrw3IgrjRR%2DYuhu6K5DrEIxfePyWORczfv0LxpjCy7%2D2pn7kt%2DsuqX.
+[generic_website] 🌐 Visiting Target Headquarters: https://duckduckgo.com/y.js?ad_domain=logicalposition.com&ad_provider=bingv7aa&ad_type=txad&click_metadata=xyYK3Vb5S06L5Vru89BXZXu2y%2DPsBpXKW70O7GE_NtUaFnjCCoudPOn7imlpm4xuV5y3WJMVAhbHeF8thhYzm703UQmoABCpmJhOi6Y83yk7S%2DBNIeqQSV0dKQwoSlfKGyZSsVbuUYLXs6hEBzgZzbLl0BTWY9%2Diruu7VSSHHj4.CCIm6kfGIsVFh6_%2Do8mtsQ&eddgt=eTcI2IEAZw32W37C1SeBSA%3D%3D&rut=4824d4b40c0296674ca3d6bd1c4398781e9a5a49a021ac2d24ac4525a5172c71&u3=https%3A%2F%2Fwww.bing.com%2Faclick%3Fld%3De8DXq3D%2DJxuKykQoVfo17CijVUCUxljyzn6_pTkdxflQbmWlfabaEJU1sdrwmhBs4OzqDrJ2HCWQoLiqiUaShOwSSebl_emOqfoaGgi1nwEeQDb%2DzTdoUx%2Du2%2D84SKqkpjOulsn4xqoZrpTf_bIgiYpK7fF0EwjcWcpc_q48JjIq8tMAM6m6dyn2dMG0_ZsDXvJQY%2DLMCe9A7hrE9q2mt2LH%2D5gvUk3GmddSWlTSzTEE8ya8G8imeUya19CL5ePfzz2lhk_MbRNIzZ_ScnM4plkJGZ8VedbX66enGo_MFu06oHOq9jCztYY6FypLnxLFgKRQk73k8ctBNWfDitcjRB2IPKoBdbAKJvjT96%2DFar4RteiQlj%2DBsXtt_h7yu5uEE3mRZWMItaWKP_hitzCyjcWCBTj55kxf%2DtguevO27RFPAPHWQHiMhLTXNQt7v7oLclhrw3IgrjRR%2DYuhu6K5DrEIxfePyWORczfv0LxpjCy7%.
+[generic_website] 🛡️ Bouncer Verdict: ✅ Allowed (Verified Industry Match)
+[generic_website] 🔗 Navigating to Contact Page: /contact
+[generic_website] ✅ Extracted: 1 emails, 1 phones, 5 socials.
+🌉 Bridge: Hunting for Founder at DS&P Digital Marketing & PR Agency...
+[linkedin] 🚀 Launching 'Unshakable' Search for: Founder "DS&P Digital Marketing & PR Agency"
+[linkedin] 📡 Google: https://www.google.com/search?q=site%3Alinkedin.com/in/%20Founder%20%22DS%26P%20Digital%20Marketing%20%26%20PR%20Agency%22&num=100
+[linkedin] 🔦 Detected 'Basic HTML' Layout. Extraction bypass active...
+[linkedin] ⚠️ Google dry/blocked. engaging BING fallback...
+2026-01-23 06:23:10,624 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:15,927 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:20,497 - INFO - HTTP Request: POST ***/rest/v1/worker_status "HTTP/2 200 OK"
+✍️ Ghostwriter: Scanning for engagement opportunities...
+2026-01-23 06:23:20,849 - INFO - HTTP Request: GET ***/rest/v1/outreach_logs?select=%2A&status=eq.pending&scheduled_at=lt.2026-01-23T06%3A23%3A20.498369 "HTTP/2 200 OK"
+2026-01-23 06:23:21,224 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:26,528 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:32,414 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:37,709 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:43,004 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:48,282 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:50,758 - INFO - HTTP Request: POST ***/rest/v1/worker_status "HTTP/2 200 OK"
+✍️ Ghostwriter: Scanning for engagement opportunities...
+2026-01-23 06:23:51,029 - INFO - HTTP Request: GET ***/rest/v1/outreach_logs?select=%2A&status=eq.pending&scheduled_at=lt.2026-01-23T06%3A23%3A50.759197 "HTTP/2 200 OK"
+2026-01-23 06:23:53,539 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:23:58,821 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:04,555 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:09,848 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:15,118 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:20,394 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:21,018 - INFO - HTTP Request: POST ***/rest/v1/worker_status "HTTP/2 200 OK"
+2026-01-23 06:24:25,655 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:30,941 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:36,214 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:41,504 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+2026-01-23 06:24:46,810 - INFO - HTTP Request: POST ***/rest/v1/rpc/fn_claim_job "HTTP/2 200 OK"
+"
+ https://github.com/colmeta/xxxxxxxxccccc/actions/runs/21275838206/job/61235273745#:~:text=Skip%20to%20content,Post%20Checkout%20Code
