@@ -310,6 +310,11 @@ class HydraController:
                             from scrapers.facebook_engine_v2 import FacebookEngineV2
                             engine = FacebookEngineV2(page)
                             data_results = await engine.scrape(query)
+                        elif platform == "generic" and not query.startswith("http"):
+                            from scrapers.base_dork_engine import BaseDorkEngine
+                            # Use Global Radar for general search queries to find a list of candidates
+                            engine = BaseDorkEngine(page, "Global Radar")
+                            data_results = await engine.run_dork_search(query, "")
                         else:
                             from scrapers.website_engine import WebsiteEngine
                             engine = WebsiteEngine(page)

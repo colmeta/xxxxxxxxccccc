@@ -28,6 +28,13 @@ class BaseDorkEngine:
         results = await self._search_ddg(query, site_filter)
         if results: return results
 
+        # 4. ScraperAPI (The Unshakable Fallback)
+        import os
+        if os.getenv("SCRAPER_API_KEY"):
+            print(f"[{self.platform}] 🚀 Local engines blocked. Engaging ScraperAPI Proxy Search...")
+            results = await self._search_google(query, site_filter, use_proxy=True)
+            if results: return results
+
         print(f"[{self.platform}] 🔧 All strategies exhausted. Returning fallback.")
         return [{
             "name": f"Search: {query}",
@@ -37,10 +44,17 @@ class BaseDorkEngine:
             "snippet": "No direct leads found via automated channels. Manual check recommended."
         }]
 
-    async def _search_google(self, query, site_filter):
+    async def _search_google(self, query, site_filter, use_proxy=False):
         try:
-            encoded_val = urllib.parse.quote(f"site:{site_filter} {query}")
-            url = f"https://www.google.com/search?q={encoded_val}&num=10"
+            import os
+            dork_query = f"site:{site_filter} {query}" if site_filter else query
+            encoded_val = urllib.parse.quote(dork_query)
+            
+            if use_proxy and os.getenv("SCRAPER_API_KEY"):
+                api_key = os.getenv("SCRAPER_API_KEY")
+                url = f"http://api.scraperapi.com?api_key={api_key}&url=https://www.google.com/search?q={encoded_val}&num=10"
+            else:
+                url = f"https://www.google.com/search?q={encoded_val}&num=10"
             
             await self.page.goto(url, wait_until="domcontentloaded", timeout=30000)
             await Humanizer.random_sleep(2, 3)

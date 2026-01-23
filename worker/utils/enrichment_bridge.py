@@ -34,6 +34,11 @@ class EnrichmentBridge:
         for lead in leads:
             company_name = lead.get('name', '').strip()
             
+            # PHASE 16 HARDENING: Ignore junk leads without names
+            if not company_name:
+                print(f"🌉 Bridge: Skipping lead with empty name (ID: {lead.get('source_url', 'unknown')})")
+                continue
+
             # --- 1. THE BOUNCER (Name Filter) ---
             # If name is obviously wrong, mark as irrelevant immediately
             low_name = company_name.lower()
