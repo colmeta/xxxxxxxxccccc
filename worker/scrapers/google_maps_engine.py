@@ -88,16 +88,34 @@ class GoogleMapsEngine:
                     phone = "N/A"
                     website = None
                     
+                    rating = "N/A"
+                    address = "Unknown"
+                    phone = "N/A"
+                    website = None
+                    
+                    # Enhanced Line Parsing
+                    import re
+                    phone_pattern = re.compile(r"(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}")
+                    
                     for line in lines:
-                        if "(" in line and ")" in line and ("." in line or "," in line):
+                        if "(" in line and ")" in line and ("." in line or "," in line) and len(line) < 20:
                             rating = line.split("·")[0].strip()
-                        if "United States" in line or "UK" in line or "Canada" in line or (", " in line and any(char.isdigit() for char in line)):
-                            address = line
-                        if line.startswith("+") or (line.count("-") == 2 and any(char.isdigit() for char in line)):
+                        
+                        # Better Address Detection
+                        if not address or address == "Unknown":
+                            if any(x in line for x in ["United States", "USA", "Street", "St.", "Ave", "Road", "Blvd", "Lane", "Suite", "Floor"]):
+                                address = line
+                            elif "," in line and any(char.isdigit() for char in line) and len(line) > 10:
+                                address = line
+                                
+                        # Regex Phone Detection
+                        if (phone == "N/A" or not phone) and phone_pattern.search(line):
                             phone = line
-                        # Try to extract website from buttons or links
-                        if "http" in line and "google.com" not in line:
-                            website = line.strip()
+                            
+                        # Website Detection
+                        if "http" in line or ".com" in line or ".net" in line or ".org" in line:
+                            if "google.com" not in line and "maps" not in line and "search" not in line:
+                                website = line.strip()
 
                     results.append({
                         "name": name,

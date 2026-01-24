@@ -77,47 +77,69 @@ class GeminiClient:
         if not self.gemini_key: return None
         
         # Try models in order, skipping unhealthy ones
+        # Using RAW REST API to bypass SDK version/path issues
+        url_base = "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent"
+        
         for model in self.model_candidates:
             if not self._is_healthy(model):
                 continue
 
             try:
+                # Remove 'models/' prefix if present for raw URL construction
+                clean_model = model.replace("models/", "")
+                url = url_base.format(clean_model)
+                headers = {"Content-Type": "application/json"}
+                params = {"key": self.gemini_key}
+                
+                payload = {
+                    "contents": [{
+                        "parts": [{"text": prompt}]
+                    }],
+                    "generationConfig": {
+                        "temperature": 0.1
+                    }
+                }
+
                 if image_path and os.path.exists(image_path):
-                    with open(image_path, "rb") as f:
-                        image_data = f.read()
+                     with open(image_path, "rb") as f:
+                        image_data = base64.b64encode(f.read()).decode('utf-8')
+                     payload["contents"][0]["parts"].append({
+                        "inline_data": {
+                            "mime_type": "image/png", 
+                            "data": image_data
+                        }
+                     })
+
+                response = requests.post(url, headers=headers, params=params, json=payload, timeout=30)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    # Parse response
+                    try:
+                        text = data['candidates'][0]['content']['parts'][0]['text']
+                        if model in self.health_map: del self.health_map[model]
+                        self.model_id = model
+                        return text
+                    except (KeyError, IndexError):
+                         print(f"⚠️ Gemini Empty/Malformed Response: {data}")
+                         continue
+                else:
+                    err_str = response.text.lower()
+                    fail_type = "error"
+                    if response.status_code == 404:
+                         print(f"⚠️ Gemini '{model}' fallback: 404 Not Found.")
+                         fail_type = "404"
+                    elif response.status_code == 429:
+                         print(f"⚠️ Gemini '{model}' fallback: 429 Quota Exceeded.")
+                         fail_type = "429"
+                    else:
+                         print(f"[X] Gemini REST Error ({model}): {response.status_code} - {response.text[:200]}")
                     
-                    response = self.client.models.generate_content(
-                        model=model,
-                        contents=[
-                            prompt,
-                            {"mime_type": "image/png", "data": base64.b64encode(image_data).decode('utf-8')}
-                        ]
-                    )
-                else:
-                    response = self.client.models.generate_content(
-                        model=model,
-                        contents=prompt
-                    )
-                
-                if response and response.text:
-                    # Successful call clears health record
-                    if model in self.health_map: del self.health_map[model]
-                    self.model_id = model
-                    return response.text
-                continue
+                    self.health_map[model] = {"last_fail": datetime.now(), "fail_type": fail_type}
+                    continue
+
             except Exception as e:
-                err_str = str(e).lower()
-                fail_type = "error"
-                if "404" in err_str or "not found" in err_str:
-                    print(f"⚠️ Gemini '{model}' fallback: 404 Not Found.")
-                    fail_type = "404"
-                elif "429" in err_str or "quota" in err_str:
-                    print(f"⚠️ Gemini '{model}' fallback: 429 Quota Exceeded.")
-                    fail_type = "429"
-                else:
-                    print(f"[X] Gemini SDK Error ({model}): {e}")
-                
-                self.health_map[model] = {"last_fail": datetime.now(), "fail_type": fail_type}
+                print(f"[X] Gemini Request Error ({model}): {e}")
                 continue
         
         return None
