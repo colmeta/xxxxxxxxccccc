@@ -57,7 +57,7 @@ class LinkedInEngine:
             api_key = os.getenv("SCRAPER_API_KEY")
             proxy_url = f"http://scraperapi:{api_key}@proxy-server.scraperapi.com:8001"
             
-            async with httpx.AsyncClient(proxies=proxy_url, timeout=30.0) as client:
+            async with httpx.AsyncClient(proxies=proxy_url, timeout=30.0, verify=False) as client:
                 res = await client.get(url)
                 if res.status_code == 200:
                     # We can't use Playwright on the returned HTML directly easily, 

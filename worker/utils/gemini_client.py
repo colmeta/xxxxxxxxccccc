@@ -35,11 +35,11 @@ class GeminiClient:
         
         # Correct Gemini model IDs (Updated for GenAI SDK compatibility)
         self.model_candidates = [
-            'models/gemini-1.5-flash',
-            'models/gemini-1.5-flash-8b',
-            'models/gemini-1.5-pro',
-            'models/gemini-2.0-flash-exp',
-            'models/gemini-pro' # Legacy fallback
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-8b',
+            'gemini-1.5-pro',
+            'gemini-2.0-flash-exp',
+            'gemini-pro' # Legacy fallback
         ]
         self.model_id = self.model_candidates[0]
 
