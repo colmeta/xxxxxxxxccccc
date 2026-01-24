@@ -6,8 +6,8 @@ Endpoints for marking jobs as delivered and tracking delivery history.
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-from ..auth import get_current_user, get_user_org
-from ..services.supabase_client import get_supabase
+from backend.dependencies import get_current_user
+from backend.services.supabase_client import get_supabase
 
 router = APIRouter(prefix="/api/deliveries", tags=["deliveries"])
 
@@ -32,7 +32,7 @@ async def mark_job_delivered(
     """Mark all results from a job as delivered to prevent future duplicates."""
     
     # Get user's organization
-    org_id = await get_user_org(user['id'], supabase)
+    org_id = user.get("org_id")
     if not org_id:
         raise HTTPException(status_code=400, detail="No organization found for user")
     
@@ -76,7 +76,7 @@ async def get_delivery_history(
 ):
     """Get delivery history for the user's organization."""
     
-    org_id = await get_user_org(user['id'], supabase)
+    org_id = user.get("org_id")
     if not org_id:
         raise HTTPException(status_code=400, detail="No organization found for user")
     
@@ -104,7 +104,7 @@ async def get_delivery_stats(
 ):
     """Get delivery statistics per category."""
     
-    org_id = await get_user_org(user['id'], supabase)
+    org_id = user.get("org_id")
     if not org_id:
         raise HTTPException(status_code=400, detail="No organization found for user")
     
@@ -128,7 +128,7 @@ async def get_categories(
 ):
     """Get list of unique categories for this organization."""
     
-    org_id = await get_user_org(user['id'], supabase)
+    org_id = user.get("org_id")
     if not org_id:
         raise HTTPException(status_code=400, detail="No organization found for user")
     
