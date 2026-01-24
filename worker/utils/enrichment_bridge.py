@@ -67,6 +67,37 @@ class EnrichmentBridge:
             else:
                 lead['website'] = lead['source_url']
 
+            # --- 2b. DEEP CONTACT EXTRACTION (The Missing Link) ---
+            if lead.get('website'):
+                print(f"   ⛏️ Bridge: Mining Contact Data from {lead['website']}...")
+                try:
+                    scrape_results = await website_engine.scrape(lead['website'])
+                    if scrape_results:
+                        site_data = scrape_results[0]
+                        # Merge extracted data
+                        if site_data.get('emails'):
+                            lead['emails'] = list(set(lead.get('emails', []) + site_data['emails']))
+                            # Set primary email if missing
+                            if not lead.get('email') and lead['emails']:
+                                lead['email'] = lead['emails'][0]
+                        
+                        if site_data.get('phones'):
+                            lead['phones'] = list(set(lead.get('phones', []) + site_data['phones']))
+                            # Set primary phone if missing
+                            if not lead.get('phone') and lead['phones']:
+                                lead['phone'] = lead['phones'][0]
+                                
+                        if site_data.get('socials'):
+                            current_socials = lead.get('socials', {})
+                            current_socials.update(site_data['socials'])
+                            lead['socials'] = current_socials
+                            
+                        # Add metadata
+                        if site_data.get('meta_description'):
+                            lead['meta_description'] = site_data.get('meta_description')[:200]
+                except Exception as e:
+                    print(f"   ⚠️ Bridge Scrape Error: {e}")
+
             # --- 3. INDUSTRY VERIFICATION (Content Check) ---
             # ... (Industry verification logic stays same, it uses the page/scraper already)
             # (Truncated for brevity, assuming standard verification continues)

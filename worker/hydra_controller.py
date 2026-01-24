@@ -346,9 +346,9 @@ class HydraController:
                             if (needs_enrichment and not is_person_platform) or platform in ['google_maps', 'duckduckgo']:
                                 print(f"🌉 Bridge: Hardening Lead Value for {len(data_results)} entities...")
                                 bridge = EnrichmentBridge(page)
-                                # Enrich top 10 for performance, can be increased in high-spec environments
-                                enriched = await bridge.enrich_business_leads(data_results[:10])
-                                data_results = enriched + data_results[10:]
+                                # Enrich top 50 (Self-Healing increased from 10)
+                                enriched = await bridge.enrich_business_leads(data_results[:50])
+                                data_results = enriched + data_results[50:]
                             
                             break
                         else:
