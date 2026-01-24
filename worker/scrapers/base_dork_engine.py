@@ -156,6 +156,10 @@ class BaseDorkEngine:
             for link in links:
                 href = await link.get_attribute("href")
                 if href and site_filter in href:
+                    # Filter out DDG Ad/Tracking links
+                    if "/y.js" in href or "duckduckgo.com" in href: 
+                        continue
+                        
                     results.append({
                          "name": await link.inner_text(),
                          "company": self.platform.capitalize(),

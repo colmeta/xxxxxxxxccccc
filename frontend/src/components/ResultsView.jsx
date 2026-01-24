@@ -252,31 +252,58 @@ export default function ResultsView() {
                                             </td>
                                             <td style={{ padding: '1.25rem 1rem' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                                    {r.data_payload?.email && (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem' }}>
-                                                            <span style={{ opacity: 0.6 }}>📧</span>
-                                                            <a href={`mailto:${r.data_payload.email}`} style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none' }}>
-                                                                {r.data_payload.email}
+                                                    {/* Decision Maker Email */}
+                                                    {r.data_payload?.decision_maker_email && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                                                            <span style={{ opacity: 0.6 }}>👤</span>
+                                                            <a href={`mailto:${r.data_payload.decision_maker_email}`} style={{ color: 'hsl(var(--pearl-success))', fontWeight: 'bold', textDecoration: 'none' }}>
+                                                                {r.data_payload.decision_maker_email}
                                                             </a>
                                                         </div>
                                                     )}
-                                                    {r.data_payload?.phone && (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem' }}>
+
+                                                    {/* Generic Emails */}
+                                                    {(r.data_payload?.emails || (r.data_payload?.email ? [r.data_payload.email] : [])).slice(0, 3).map((email, i) => (
+                                                        email !== r.data_payload?.decision_maker_email && (
+                                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                                                                <span style={{ opacity: 0.6 }}>📧</span>
+                                                                <a href={`mailto:${email}`} style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none' }}>
+                                                                    {email}
+                                                                </a>
+                                                            </div>
+                                                        )
+                                                    ))}
+
+                                                    {/* Phones */}
+                                                    {(r.data_payload?.phones || (r.data_payload?.phone ? [r.data_payload.phone] : [])).slice(0, 2).map((phone, i) => (
+                                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
                                                             <span style={{ opacity: 0.6 }}>📞</span>
-                                                            <a href={`tel:${r.data_payload.phone}`} style={{ color: 'rgba(255,255,255,0.9)', textDecoration: 'none' }}>
-                                                                {r.data_payload.phone}
+                                                            <a href={`tel:${phone}`} style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'none' }}>
+                                                                {phone}
                                                             </a>
                                                         </div>
-                                                    )}
-                                                    {r.data_payload?.linkedin_url && (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem' }}>
-                                                            <span style={{ opacity: 0.6 }}>💼</span>
-                                                            <a href={r.data_payload.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none' }}>
-                                                                LinkedIn Profile
+                                                    ))}
+
+                                                    {/* Unique Socials */}
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                                        {r.data_payload?.linkedin_url && (
+                                                            <a href={r.data_payload.linkedin_url} target="_blank" rel="noopener noreferrer" title="LinkedIn" style={{ color: '#0077b5', opacity: 0.9 }}>
+                                                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
                                                             </a>
-                                                        </div>
-                                                    )}
-                                                    {!r.data_payload?.email && !r.data_payload?.phone && !r.data_payload?.linkedin_url && (
+                                                        )}
+                                                        {r.data_payload?.decision_maker_linkedin && r.data_payload.decision_maker_linkedin !== r.data_payload.linkedin_url && (
+                                                            <a href={r.data_payload.decision_maker_linkedin} target="_blank" rel="noopener noreferrer" title="Decision Maker LinkedIn" style={{ color: '#0077b5', opacity: 0.9 }}>
+                                                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                                                            </a>
+                                                        )}
+                                                        {Object.entries(r.data_payload?.socials || {}).map(([network, link], i) => (
+                                                            link && <a key={i} href={link} target="_blank" rel="noopener noreferrer" title={network} style={{ textDecoration: 'none', fontSize: '0.8rem' }}>
+                                                                {network.includes('facebook') ? '📘' : network.includes('twitter') ? '🐦' : network.includes('instagram') ? '📸' : '🔗'}
+                                                            </a>
+                                                        ))}
+                                                    </div>
+
+                                                    {!r.data_payload?.email && !r.data_payload?.emails?.length && !r.data_payload?.phone && !r.data_payload?.phones?.length && !r.data_payload?.linkedin_url && (
                                                         <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontStyle: 'italic' }}>
                                                             No contact info available
                                                         </div>
@@ -401,25 +428,61 @@ export default function ResultsView() {
                                     <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                         Contact Information
                                     </div>
-                                    {r.data_payload?.email && (
+
+                                    {/* DM Email */}
+                                    {r.data_payload?.decision_maker_email && (
                                         <div style={{ marginBottom: '0.5rem' }}>
-                                            <a href={`mailto:${r.data_payload.email}`} style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none', fontSize: '0.9rem' }}>
-                                                📧 {r.data_payload.email}
+                                            <a href={`mailto:${r.data_payload.decision_maker_email}`} style={{ color: 'hsl(var(--pearl-success))', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 'bold' }}>
+                                                👤 {r.data_payload.decision_maker_email} <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>(DM)</span>
                                             </a>
                                         </div>
                                     )}
-                                    {r.data_payload?.phone && (
-                                        <div style={{ marginBottom: '0.5rem' }}>
-                                            <a href={`tel:${r.data_payload.phone}`} style={{ color: 'rgba(255,255,255,0.9)', textDecoration: 'none', fontSize: '0.9rem' }}>
-                                                📞 {r.data_payload.phone}
+
+                                    {/* All Emails */}
+                                    {(r.data_payload?.emails || (r.data_payload?.email ? [r.data_payload.email] : [])).slice(0, 3).map((email, i) => (
+                                        email !== r.data_payload?.decision_maker_email && (
+                                            <div key={i} style={{ marginBottom: '0.3rem' }}>
+                                                <a href={`mailto:${email}`} style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none', fontSize: '0.9rem' }}>
+                                                    📧 {email}
+                                                </a>
+                                            </div>
+                                        )
+                                    ))}
+
+                                    {/* All Phones */}
+                                    {(r.data_payload?.phones || (r.data_payload?.phone ? [r.data_payload.phone] : [])).slice(0, 2).map((phone, i) => (
+                                        <div key={i} style={{ marginBottom: '0.3rem' }}>
+                                            <a href={`tel:${phone}`} style={{ color: 'rgba(255,255,255,0.9)', textDecoration: 'none', fontSize: '0.9rem' }}>
+                                                📞 {phone}
                                             </a>
                                         </div>
-                                    )}
-                                    {r.data_payload?.linkedin_url && (
-                                        <div>
-                                            <a href={r.data_payload.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none', fontSize: '0.9rem' }}>
-                                                💼 View LinkedIn
-                                            </a>
+                                    ))}
+
+                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.8rem' }}>
+                                        {r.data_payload?.linkedin_url && (
+                                            <div>
+                                                <a href={r.data_payload.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none', fontSize: '0.85rem' }}>
+                                                    💼 Company LinkedIn
+                                                </a>
+                                            </div>
+                                        )}
+                                        {r.data_payload?.decision_maker_linkedin && (
+                                            <div>
+                                                <a href={r.data_payload.decision_maker_linkedin} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))', textDecoration: 'none', fontSize: '0.85rem' }}>
+                                                    👤 DM Profile
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Socials */}
+                                    {r.data_payload?.socials && Object.keys(r.data_payload.socials).length > 0 && (
+                                        <div style={{ display: 'flex', gap: '0.8rem', marginTop: '0.5rem' }}>
+                                            {Object.entries(r.data_payload.socials).map(([net, link], i) => (
+                                                <a key={i} href={link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '1.2rem', textDecoration: 'none' }}>
+                                                    {net.includes('facebook') ? '📘' : net.includes('twitter') ? '🐦' : net.includes('instagram') ? '📸' : '🔗'}
+                                                </a>
+                                            ))}
                                         </div>
                                     )}
                                 </div>

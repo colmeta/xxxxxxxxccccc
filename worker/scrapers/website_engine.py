@@ -176,7 +176,20 @@ class WebsiteEngine:
 
         try:
             # 1. Visit Homepage
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=25000)
+            # Optimize: Block heavy resources for stability
+            await self.page.route("**/*", lambda route: route.abort() 
+                if route.request.resource_type in ["image", "media", "font", "stylesheet"] 
+                else route.continue_()
+            )
+
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=25000)
+            except Exception as nav_err:
+                if "crash" in str(nav_err).lower():
+                    print(f"[{self.platform}] ⚠️ Page crashed on {url}. Skipping.")
+                    return [results]
+                raise nav_err
+                
             await Humanizer.random_sleep(1, 2)
             
             content = await self.page.content()
