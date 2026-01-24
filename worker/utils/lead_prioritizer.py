@@ -1,4 +1,4 @@
-from backend.services.supabase_client import get_supabase
+# Lead Prioritizer - scores leads by completeness and quality
 from .gemini_client import gemini_client
 import json
 
