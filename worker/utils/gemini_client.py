@@ -29,9 +29,9 @@ class GeminiClient:
         self.cooldown_period = 300 # 5 minutes for 429s
         
         # Better API key status logging
-        gemini_status = "✓ Active" if self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE" else "✗ Missing/Invalid"
-        groq_status = "✓ Active" if self.groq_key else "✗ Missing"
-        print(f"🤖 AI Integration Status: Gemini {gemini_status}, Groq {groq_status}")
+        gemini_status = "Active" if self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE" else "Missing/Invalid"
+        groq_status = "Active" if self.groq_key else "Missing"
+        print(f"AI Integration Status: Gemini {gemini_status}, Groq {groq_status}")
         
         # Correct Gemini model IDs (Updated for GenAI SDK compatibility)
         self.model_candidates = [

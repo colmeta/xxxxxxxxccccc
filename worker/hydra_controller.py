@@ -20,8 +20,7 @@ from utils.stealth_v2 import stealth_v2
 from utils.humanizer import Humanizer
 from utils.email_verifier import email_verifier
 from utils.lead_prioritizer import lead_prioritizer
-from backend.routers.slack_relay import send_oracle_alert
-from backend.routers.webhook_relay import send_webhook_alert
+# Note: slack/webhook alerts removed - backend-only feature
 from utils.velocity_engine import velocity_engine
 from utils.geocoder import geocoder
 from utils.ghostwriter import ghostwriter
@@ -629,23 +628,23 @@ class HydraController:
                 # 5. THE INVISIBLE HAND: Slack Alerts (Phase 7)
                 if intent_data.get('intent_score', 0) > 85:
                     print(f"   🕊️ The Invisible Hand: Sending Slack Alert for {result_id}...")
-                    asyncio.create_task(send_oracle_alert(
-                        org_id=job_data.get('org_id'),
-                        result_id=result_id,
-                        signal_text=intent_data.get('oracle_signal'),
-                        intent_score=intent_data.get('intent_score'),
-                        lead_data=data,
-                        velocity_signal=velocity_data.get('scaling_signal'),
-                        displacement_script=displacement_data.get('sovereign_script')
-                    ))
+                    # asyncio.create_task(send_oracle_alert(
+                    #     org_id=job_data.get('org_id'),
+                    #     result_id=result_id,
+                    #     signal_text=intent_data.get('oracle_signal'),
+                    #     intent_score=intent_data.get('intent_score'),
+                    #     lead_data=data,
+                    #     velocity_signal=velocity_data.get('scaling_signal'),
+                    #     displacement_script=displacement_data.get('sovereign_script')
+                    # ))
                     
                     # 5b. THE INVISIBLE HAND v2: Generic Webhooks
-                    asyncio.create_task(send_webhook_alert(
-                        org_id=job_data.get('org_id'),
-                        result_id=result_id,
-                        event_type="high_intent_discovery",
-                        lead_data=data
-                    ))
+                    # asyncio.create_task(send_webhook_alert(
+                    #     org_id=job_data.get('org_id'),
+                    #     result_id=result_id,
+                    #     event_type="high_intent_discovery",
+                    #     lead_data=data
+                    # ))
 
                 # 6. RECURSIVE FACT-CHECKING (The Sleuth Protocol)
                 if intent_data.get('intent_score', 0) > 90:
