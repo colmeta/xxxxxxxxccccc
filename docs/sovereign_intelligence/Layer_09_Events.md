@@ -1,0 +1,17 @@
+# Layer 9: Events & Networking (The Social Fabric)
+
+## 🎟️ The Signal
+Physical and virtual attendance. A company attending the "DeepTech Conference on Eventbrite" is an active buyer in that niche. 
+
+## 🎯 Target Customers (Who will buy this data?)
+1.  **Event Organizers**: "Invite the companies that typically attend your competitors' events."
+2.  **Professional Speakers**: Find companies that host high-frequency meetups and pitch your services.
+3.  **Competitor Sales Teams**: Reach out to companies attending a rival's workshop with a "Better Alternative."
+
+## 🛠️ Profitable Search Patterns
+- `site:eventbrite.com "Acme Corp" attend`
+- `site:meetup.com "Blockchain" "Company Name"`
+- `site:lu.ma "AI for Founders" attendees`
+
+## 💎 The "Omega" Advantage
+Standard data is static. This data is **Dynamic & Social**. You are targeting people while they are in "Active Networking Mode."
