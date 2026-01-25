@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { Send, Upload, Command, Terminal } from 'lucide-react'
+import { Send, Upload, Command, Terminal, Sliders } from 'lucide-react'
+import JobCreator from './JobCreator'
 
 export default function OracleControl() {
     const [prompt, setPrompt] = useState('')
     const [loading, setLoading] = useState(false)
     const [history, setHistory] = useState([])
+    const [showAdvanced, setShowAdvanced] = useState(false)
     const scrollRef = useRef(null)
 
     useEffect(() => {
@@ -72,6 +74,15 @@ export default function OracleControl() {
                         Neural Interface V9.0
                     </div>
                 </div>
+
+                <div className="flex-1"></div>
+
+                <button
+                    onClick={() => setShowAdvanced(true)}
+                    className="btn-ghost text-[0.65rem] py-1.5 px-3 border border-white/10 hover:bg-white/10 text-slate-400 hover:text-white"
+                >
+                    <Sliders size={12} className="mr-1" /> MANUAL OVERRIDE
+                </button>
             </div>
 
             {/* Terminal Window */}
@@ -176,6 +187,13 @@ export default function OracleControl() {
                     <Send size={16} className="md:hidden" />
                 </button>
             </form>
+
+            {/* Advanced Modal */}
+            {showAdvanced && (
+                <JobCreator
+                    onClose={() => setShowAdvanced(false)}
+                />
+            )}
         </div>
     )
 }
