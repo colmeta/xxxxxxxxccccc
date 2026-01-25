@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { Zap, Copy, Check, Plus, BookOpen } from 'lucide-react'
 
 export default function DisplacementLibrary() {
     const [selectedScript, setSelectedScript] = useState(null)
@@ -37,87 +37,78 @@ export default function DisplacementLibrary() {
     }
 
     return (
-        <div className="supreme-glass animate-slide-up" style={{ padding: '2rem', marginTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ color: 'hsl(var(--pearl-primary))' }}>⚡</span> SOVEREIGN DISPLACEMENT LIBRARY
+        <div className="animate-slide-up space-y-6">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-black flex items-center gap-3 text-white">
+                    <Zap className="text-pearl" size={24} />
+                    DISPLACEMENT LIBRARY
                 </h2>
-                <button className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}>
-                    + NEW SCRIPT
+                <button className="btn-primary text-xs py-2 px-3">
+                    <Plus size={14} /> NEW SCRIPT
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Sidebar List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="space-y-3">
                     {scripts.map(script => (
                         <div
                             key={script.id}
                             onClick={() => setSelectedScript(script)}
-                            className="glass-panel"
-                            style={{
-                                padding: '1rem',
-                                cursor: 'pointer',
-                                background: selectedScript?.id === script.id ? 'rgba(6, 182, 212, 0.1)' : 'rgba(255,255,255,0.03)',
-                                borderColor: selectedScript?.id === script.id ? 'hsl(var(--pearl-primary))' : 'transparent',
-                                transition: 'all 0.2s'
-                            }}
+                            className={`glass-panel p-4 cursor-pointer border transition-all duration-200 group relative overflow-hidden ${selectedScript?.id === script.id
+                                    ? 'bg-pearl/10 border-pearl/40 shadow-glow'
+                                    : 'bg-white/5 border-transparent hover:bg-white/10'
+                                }`}
                         >
-                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff', marginBottom: '0.3rem' }}>{script.title}</div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>
-                                    {script.category.toUpperCase()}
+                            <div className="absolute top-0 left-0 w-1 h-full bg-pearl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                            <div className={`font-bold text-sm mb-2 ${selectedScript?.id === script.id ? 'text-white' : 'text-slate-300'}`}>
+                                {script.title}
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="bg-white/10 text-slate-400 text-[0.6rem] uppercase font-bold px-2 py-0.5 rounded">
+                                    {script.category}
                                 </span>
-                                <span style={{ fontSize: '0.65rem', color: 'var(--success)', fontWeight: 700 }}>{script.effectiveness} Win Rate</span>
+                                <span className="text-emerald-400 text-xs font-bold">
+                                    {script.effectiveness} Win
+                                </span>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {/* Content Viewer */}
-                <div className="glass-panel" style={{ padding: '2rem', minHeight: '400px', display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.2)' }}>
+                <div className="lg:col-span-2 glass-panel p-0 min-h-[400px] flex flex-col bg-slate-900/50 overflow-hidden">
                     {selectedScript ? (
                         <>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
+                            <div className="p-6 border-b border-white/5 flex justify-between items-start bg-white/5">
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>{selectedScript.title}</h3>
-                                    <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Category: {selectedScript.category}</p>
+                                    <h3 className="text-lg font-black text-white">{selectedScript.title}</h3>
+                                    <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-bold">{selectedScript.category}</p>
                                 </div>
                                 <button
                                     onClick={() => copyToClipboard(selectedScript.content)}
-                                    className="btn-ghost"
-                                    style={{
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        padding: '0.5rem 1rem',
-                                        fontSize: '0.75rem',
-                                        borderRadius: '8px'
-                                    }}
+                                    className="btn-ghost text-xs border border-white/10 hover:bg-white/10"
                                 >
-                                    {copySuccess || '📋 COPY SCRIPT'}
+                                    {copySuccess ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                                    <span className="ml-2">{copySuccess || 'COPY'}</span>
                                 </button>
                             </div>
-                            <div style={{
-                                flex: 1,
-                                background: 'rgba(0,0,0,0.3)',
-                                borderRadius: '12px',
-                                padding: '1.5rem',
-                                fontFamily: 'monospace',
-                                color: 'rgba(255,255,255,0.8)',
-                                lineHeight: '1.6',
-                                whiteSpace: 'pre-wrap',
-                                fontSize: '0.9rem'
-                            }}>
-                                {selectedScript.content}
+
+                            <div className="flex-1 p-6 bg-black/20">
+                                <div className="bg-slate-950 rounded-xl p-6 font-mono text-sm text-slate-300 leading-relaxed border border-white/5 shadow-inner">
+                                    {selectedScript.content}
+                                </div>
                             </div>
-                            <div style={{ marginTop: '1.5rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>
+
+                            <div className="p-4 bg-white/5 border-t border-white/5 text-[0.65rem] text-slate-500 font-mono flex items-center gap-2">
+                                <BookOpen size={12} />
                                 Tip: Variables like {'{{firstName}}'} will be auto-replaced when using the Forge.
                             </div>
                         </>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ fontSize: '2rem', opacity: 0.3 }}>⚡</div>
-                            <p>Select a script to view details</p>
+                        <div className="flex-1 flex flex-col items-center justify-center text-slate-600 gap-4">
+                            <Zap size={48} className="opacity-20" />
+                            <p className="text-sm font-bold opacity-50 uppercase tracking-widest">Select a script to view details</p>
                         </div>
                     )}
                 </div>

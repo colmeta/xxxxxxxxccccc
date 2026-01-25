@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Users, AlertTriangle, Zap, Activity, TrendingUp, DollarSign, Database, Share2, Twitter, Linkedin } from 'lucide-react'
 
 export default function SovereignHub() {
     const [profiles, setProfiles] = useState([])
@@ -20,8 +21,6 @@ export default function SovereignHub() {
 
         if (!error && data) {
             setProfiles(data)
-
-            // Calculate stats
             const growth = data.filter(p => p.metadata?.velocity_data?.is_viral).length
             const displacements = data.filter(p => p.metadata?.displacement_data?.sovereign_script).length
             setStats({
@@ -34,121 +33,116 @@ export default function SovereignHub() {
     }
 
     return (
-        <div className="sovereign-hub animate-fade-in" style={{ marginTop: '1rem' }}>
+        <div className="animate-fade-in space-y-8">
             {/* STATS HUD */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-                <div className="supreme-glass" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Unified Identities</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'hsl(var(--pearl-primary))' }}>{stats.total_sovereign}</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="glass-panel p-6 text-center">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Unified Identities</div>
+                    <div className="text-3xl font-black text-pearl">{stats.total_sovereign}</div>
                 </div>
-                <div className="supreme-glass" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Velocity Alerts</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'hsl(var(--pearl-warning))' }}>{stats.growth_leads}</div>
+                <div className="glass-panel p-6 text-center">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Velocity Alerts</div>
+                    <div className="text-3xl font-black text-amber-500">{stats.growth_leads}</div>
                 </div>
-                <div className="supreme-glass" style={{ padding: '1.5rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Ready for Displacement</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'hsl(var(--pearl-success))' }}>{stats.displacements}</div>
+                <div className="glass-panel p-6 text-center">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Displacement Ready</div>
+                    <div className="text-3xl font-black text-emerald-500">{stats.displacements}</div>
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>
-                    🧠 THE <span style={{ color: 'hsl(var(--pearl-primary))' }}>SOVEREIGN</span> NETWORK
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                    🧠 THE <span className="text-pearl">SOVEREIGN</span> NETWORK
                 </h2>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
-                    AUTO-LINKING ACTIVE • MULTI-NODE SWARM SYNCED
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-widest hidden sm:block">
+                    Auto-Linking Active • Multi-Node Swarm Synced
                 </div>
             </div>
+
             {/* Phase 12: Eternal Forge HUD */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                <div className="supreme-glass animate-fade-in" style={{ padding: '1.5rem', borderLeft: '4px solid #3b82f6' }}>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.5, letterSpacing: '1px', marginBottom: '0.5rem' }}>AUTONOMOUS HEART</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>PEARL-01 DEBATE</div>
-                    <div style={{ fontSize: '0.75rem', color: '#22c55e', marginTop: '0.5rem' }}>● CRITIQUE SYSTEM ACTIVE</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="glass-panel p-6 border-l-4 border-l-blue-500">
+                    <div className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest mb-2">Autonomous Heart</div>
+                    <div className="text-lg font-black text-white">PEARL-01 DEBATE</div>
+                    <div className="text-xs font-bold text-emerald-500 mt-2 flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span> CRITIQUE SYSTEM ACTIVE
+                    </div>
                 </div>
-                <div className="supreme-glass animate-fade-in" style={{ padding: '1.5rem', borderLeft: '4px solid #22c55e' }}>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.5, letterSpacing: '1px', marginBottom: '0.5rem' }}>AUTO-WARMER</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>ACTIVE SCOUTING</div>
-                    <div style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: '0.5rem' }}>Drafting Viral Leaks @ 300s</div>
+                <div className="glass-panel p-6 border-l-4 border-l-emerald-500">
+                    <div className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest mb-2">Auto-Warmer</div>
+                    <div className="text-lg font-black text-white">ACTIVE SCOUTING</div>
+                    <div className="text-xs text-slate-400 mt-2">Drafting Viral Leaks @ 300s</div>
                 </div>
-                <div className="supreme-glass animate-fade-in" style={{ padding: '1.5rem', borderLeft: '4px solid #f59e0b' }}>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.5, letterSpacing: '1px', marginBottom: '0.5rem' }}>MONETIZATION</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 900 }}>FLUTTERWAVE DRAFT</div>
-                    <div style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.5rem' }}>⚡ READY FOR ACTIVATION</div>
+                <div className="glass-panel p-6 border-l-4 border-l-amber-500">
+                    <div className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-widest mb-2">Monetization</div>
+                    <div className="text-lg font-black text-white">FLUTTERWAVE DRAFT</div>
+                    <div className="text-xs font-bold text-amber-500 mt-2 flex items-center gap-1">
+                        <Zap size={12} /> READY FOR ACTIVATION
+                    </div>
                 </div>
             </div>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
-                    <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
+                <div className="py-20 text-center text-slate-500 animate-pulse font-mono text-xs tracking-widest">
                     SYNCING MEGA-PROFILES...
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2rem' }}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {profiles.map((p, i) => (
-                        <div key={p.id} className="supreme-glass animate-slide-up" style={{ padding: '2rem', animationDelay: `${i * 0.1}s`, position: 'relative', overflow: 'hidden' }}>
+                        <div key={p.id} className="glass-panel p-8 relative overflow-hidden group">
                             {/* VELOCITY BADGE */}
                             {p.metadata?.velocity_data?.is_viral && (
-                                <div style={{
-                                    position: 'absolute', top: '10px', right: '-35px', background: 'hsl(var(--pearl-warning))',
-                                    color: '#000', padding: '5px 40px', transform: 'rotate(45deg)', fontSize: '0.6rem', fontWeight: 900
-                                }}>
-                                    VIRAL GROWTH
+                                <div className="absolute top-4 right-[-35px] bg-amber-500 text-black py-1 px-10 rotate-45 text-[0.6rem] font-black uppercase shadow-lg z-10">
+                                    Viral Growth
                                 </div>
                             )}
 
-                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-                                {/* AVATAR PLACEHOLDER */}
-                                <div style={{
-                                    width: '64px', height: '64px', borderRadius: '16px', background: 'linear-gradient(135deg, hsl(var(--pearl-primary)), hsl(var(--pearl-secondary)))',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 900, color: '#000'
-                                }}>
+                            <div className="flex gap-6 items-start">
+                                {/* AVATAR */}
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pearl to-secondary flex items-center justify-center text-2xl font-black text-black shrink-0">
                                     {p.full_name?.[0] || 'P'}
                                 </div>
 
-                                <div style={{ flex: 1 }}>
-                                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>{p.full_name || 'Anonymous Asset'}</h3>
-                                    <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem' }}>{p.title} @ <span style={{ color: '#fff', fontWeight: 700 }}>{p.company}</span></div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="text-xl font-black text-white truncate">{p.full_name || 'Anonymous Asset'}</h3>
+                                    <div className="text-sm text-slate-400 mb-2 truncate">
+                                        {p.title} <span className="text-slate-600">@</span> <span className="text-slate-200 font-bold">{p.company}</span>
+                                    </div>
 
                                     {/* PLATFORM LINKS */}
-                                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-                                        {p.linkedin_url && <span title="LinkedIn Optimized" style={{ opacity: 0.6 }}>🔗</span>}
-                                        {p.twitter_handle && <span title="Twitter Synced" style={{ opacity: 0.6 }}>🐦</span>}
-                                        {p.tiktok_url && <span title="TikTok Active" style={{ opacity: 0.6 }}>🎵</span>}
-                                        {p.ph_username && <span title="Product Hunt Maker" style={{ opacity: 0.6 }}>🐱</span>}
+                                    <div className="flex gap-3 mt-3 opacity-60">
+                                        {p.linkedin_url && <Linkedin size={14} />}
+                                        {p.twitter_handle && <Twitter size={14} />}
+                                        {/* Placeholders for others using generic icons if needed */}
                                     </div>
                                 </div>
                             </div>
 
                             {/* KINETIC VELOCITY HUD */}
-                            <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.4)' }}>
+                            <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/5">
+                                <div className="flex justify-between text-[0.65rem] font-bold uppercase tracking-widest text-slate-500 mb-2">
                                     <span>Growth Velocity</span>
-                                    <span style={{ color: 'hsl(var(--pearl-warning))' }}>{p.metadata?.velocity_data?.scaling_signal || 'Steady'}</span>
+                                    <span className="text-amber-500">{p.metadata?.velocity_data?.scaling_signal || 'Steady'}</span>
                                 </div>
-                                <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                                    <div style={{
-                                        width: `${Math.min(p.metadata?.velocity_data?.growth_rate_pct || 10, 100)}%`,
-                                        height: '100%',
-                                        background: 'linear-gradient(90deg, hsl(var(--pearl-primary)), hsl(var(--pearl-warning)))',
-                                        boxShadow: '0 0 10px rgba(245, 158, 11, 0.4)'
-                                    }}></div>
+                                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-pearl to-amber-500"
+                                        style={{ width: `${Math.min(p.metadata?.velocity_data?.growth_rate_pct || 10, 100)}%` }}
+                                    ></div>
                                 </div>
                             </div>
 
                             {/* DISPLACEMENT INTELLIGENCE */}
                             {p.metadata?.displacement_data?.sovereign_script && (
-                                <div style={{ marginTop: '1.5rem' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: 800, marginBottom: '0.5rem', color: 'hsl(var(--pearl-success))' }}>🧠 DISPLACEMENT OPPORTUNITY: {p.metadata.displacement_data.displacement_target}</div>
-                                    <div style={{
-                                        fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', padding: '1rem',
-                                        borderLeft: '2px solid hsl(var(--pearl-success))', background: 'rgba(34, 197, 94, 0.05)'
-                                    }}>
+                                <div className="mt-6">
+                                    <div className="text-xs font-bold text-emerald-500 mb-2 flex items-center gap-1">
+                                        <Zap size={12} /> DISPLACEMENT OPPORTUNITY
+                                    </div>
+                                    <div className="p-4 bg-emerald-500/5 border-l-2 border-emerald-500 text-xs italic text-slate-400 leading-relaxed rounded-r-lg">
                                         "{p.metadata.displacement_data.sovereign_script.substring(0, 120)}..."
                                     </div>
                                     <button
-                                        className="btn-primary"
-                                        style={{ marginTop: '1rem', width: '100%', padding: '0.75rem', fontSize: '0.7rem' }}
+                                        className="btn-primary w-full mt-4 text-xs py-2"
                                         onClick={() => alert(`FULL DISPLACEMENT SCRIPT:\n\n${p.metadata.displacement_data.sovereign_script}`)}
                                     >
                                         DEPLOY SOVEREIGN SCRIPT
@@ -156,41 +150,24 @@ export default function SovereignHub() {
                                 </div>
                             )}
 
-                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                            <div className="flex gap-2 mt-4">
                                 <button
                                     onClick={async () => {
                                         if (window.confirm(`Inject ${p.full_name} into your connected CRM?`)) {
-                                            try {
-                                                const { data: { session } } = await supabase.auth.getSession()
-                                                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/crm/sync/lead`, {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                        'Authorization': `Bearer ${session?.access_token}`
-                                                    },
-                                                    body: JSON.stringify({
-                                                        vault_id: p.id,
-                                                        crm_type: 'hubspot', // Default
-                                                        api_key: 'DEMO_KEY'
-                                                    })
-                                                })
-                                                if (res.ok) alert("Injection Successful: Intelligence synced to CRM.")
-                                                else alert("CRM Sync Error: Check your settings.")
-                                            } catch (e) { alert("Sync Failed.") }
+                                            const { data: { session } } = await supabase.auth.getSession()
+                                            await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/crm/sync/lead`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+                                                body: JSON.stringify({ vault_id: p.id, crm_type: 'hubspot', api_key: 'DEMO' })
+                                            })
+                                            alert("Injection Successful.")
                                         }
                                     }}
-                                    style={{
-                                        flex: 2, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
-                                        padding: '0.5rem', fontSize: '0.65rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem'
-                                    }}
+                                    className="flex-1 btn-ghost border border-white/10 text-[0.65rem] py-2"
                                 >
-                                    📥 SYNC TO CRM
+                                    <Database size={12} className="mr-1" /> SYNC CRM
                                 </button>
-                                <button style={{
-                                    flex: 1, background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)',
-                                    padding: '0.5rem', fontSize: '0.65rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 700
-                                }}>
+                                <button className="px-3 py-2 rounded-lg border border-white/5 text-slate-500 hover:text-white hover:bg-white/5 text-[0.65rem] font-bold font-mono transition-all">
                                     ID: {p.sovereign_id?.substring(0, 8)}
                                 </button>
                             </div>

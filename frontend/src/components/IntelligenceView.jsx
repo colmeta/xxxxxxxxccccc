@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import EmptyStates, { SkeletonLoader } from './EmptyStates'
-import '../styles/design-tokens.css'
+import VelocityView from './VelocityView'
+import DisplacementLibrary from './DisplacementLibrary'
+import { Brain, Download, Filter, User, MapPin, Factory, Linkedin, Mail, CheckCircle, TrendingUp, Zap, Grid, Activity } from 'lucide-react'
 
 export default function IntelligenceView({ session }) {
+    const [viewMode, setViewMode] = useState('grid') // 'grid', 'velocity', 'scripts'
     const [results, setResults] = useState([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState('all') // 'all', 'high-intent', 'verified'
 
     useEffect(() => {
-        loadIntelligence()
-    }, [filter])
+        if (viewMode === 'grid') {
+            loadIntelligence()
+        }
+    }, [filter, viewMode])
 
     const loadIntelligence = async () => {
         setLoading(true)
@@ -32,7 +37,6 @@ export default function IntelligenceView({ session }) {
             }
 
             const { data, error } = await query
-
             if (error) throw error
             setResults(data || [])
         } catch (error) {
@@ -42,16 +46,15 @@ export default function IntelligenceView({ session }) {
         }
     }
 
+    // CSV Export logic
     const downloadIntelligenceAsCSV = () => {
         if (results.length === 0) return
-
         const headers = ["Name", "Title", "Company", "Industry", "Location", "Email", "LinkedIn", "Intent Score", "Oracle Signal", "Clarity Score", "Velocity"]
         const csvRows = [headers.join(",")]
-
         results.forEach(res => {
             const data = res.data_payload || {}
             const velocity = res.velocity_data || {}
-            const row = [
+            csvRows.push([
                 `"${(data.name || "").replace(/"/g, '""')}"`,
                 `"${(data.title || "").replace(/"/g, '""')}"`,
                 `"${(data.company || "").replace(/"/g, '""')}"`,
@@ -63,276 +66,151 @@ export default function IntelligenceView({ session }) {
                 `"${(res.oracle_signal || "").replace(/"/g, '""')}"`,
                 res.clarity_score || 0,
                 `"${velocity.scaling_signal || "Steady"}"`
-            ]
-            csvRows.push(row.join(","))
+            ].join(","))
         })
-
-        const csvContent = csvRows.join("\n")
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const blob = new Blob([csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' })
         const url = URL.createObjectURL(blob)
         const link = document.createElement("a")
-        link.setAttribute("href", url)
-        link.setAttribute("download", `clarity_pearl_intelligence_${new Date().toISOString().split('T')[0]}.csv`)
-        link.style.visibility = 'hidden'
-        document.body.appendChild(link)
+        link.href = url
+        link.download = `clarity_pearl_intelligence_${new Date().toISOString().split('T')[0]}.csv`
         link.click()
-        document.body.removeChild(link)
-    }
-
-    const getIntentColor = (score) => {
-        if (score >= 85) return 'var(--success)'
-        if (score >= 60) return 'var(--warning)'
-        return 'var(--text-muted)'
-    }
-
-    const getIntentLabel = (score) => {
-        if (score >= 85) return '🔥 HOT LEAD'
-        if (score >= 60) return '⚡ WARM'
-        return '❄️ COLD'
     }
 
     return (
-        <div style={{
-            background: 'rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '16px',
-            padding: '2rem',
-            border: '1px solid rgba(255,255,255,0.05)'
-        }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'hsl(var(--pearl-primary))' }}>
-                    🧠 INTELLIGENCE VIEW
-                </h2>
-                <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+        <div className="space-y-8 mt-4">
+            {/* SUB-NAVIGATION for Intelligence Pillar */}
+            <div className="flex justify-center mb-8">
+                <div className="bg-slate-900/80 p-1.5 rounded-xl border border-white/10 flex gap-1 shadow-lg backdrop-blur-md">
                     <button
-                        onClick={downloadIntelligenceAsCSV}
-                        className="btn-secondary"
-                        style={{
-                            background: 'rgba(255,255,255,0.05)',
-                            color: 'rgba(255,255,255,0.5)',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '8px',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            fontSize: '0.65rem',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
+                        onClick={() => setViewMode('grid')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'grid' ? 'bg-pearl text-black shadow-glow' : 'text-slate-400 hover:text-white'
+                            }`}
                     >
-                        EXPORT CSV
+                        <Grid size={16} /> DATA GRID
                     </button>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {['all', 'high-intent', 'verified'].map(f => (
-                            <button
-                                key={f}
-                                onClick={() => setFilter(f)}
-                                style={{
-                                    background: filter === f ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.05)',
-                                    color: filter === f ? '#000' : 'rgba(255,255,255,0.5)',
-                                    padding: '0.5rem 1rem',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 700,
-                                    textTransform: 'uppercase',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                {f.replace('-', ' ')}
-                            </button>
-                        ))}
-                    </div>
+                    <button
+                        onClick={() => setViewMode('velocity')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'velocity' ? 'bg-pearl text-black shadow-glow' : 'text-slate-400 hover:text-white'
+                            }`}
+                    >
+                        <Activity size={16} /> VELOCITY
+                    </button>
+                    <button
+                        onClick={() => setViewMode('scripts')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'scripts' ? 'bg-pearl text-black shadow-glow' : 'text-slate-400 hover:text-white'
+                            }`}
+                    >
+                        <Zap size={16} /> SCRIPTS
+                    </button>
                 </div>
             </div>
 
-            {loading ? (
-                <SkeletonLoader type="result-card" count={3} />
-            ) : results.length === 0 ? (
-                <EmptyStates
-                    type={filter === 'high-intent' ? 'no-results' : 'no-data'}
-                    title={filter === 'high-intent' ? 'No High-Intent Leads Yet' : null}
-                    description={filter === 'high-intent' ? 'High-intent leads will appear here as they are discovered.' : null}
-                />
-            ) : (
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    {results.map(result => {
-                        const data = result.data_payload || {}
-                        const velocity = result.velocity_data || {}
-                        const displacement = result.displacement_data || {}
+            {/* VIEW CONTENT */}
+            {viewMode === 'grid' && (
+                <div className="animate-slide-up">
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <h2 className="text-xl font-black text-white flex items-center gap-3">
+                            <Brain className="text-pearl" size={24} /> INTELLIGENCE GRID
+                        </h2>
 
-                        return (
-                            <div key={result.id} style={{
-                                background: 'rgba(0,0,0,0.3)',
-                                borderRadius: '12px',
-                                padding: '1.5rem',
-                                border: `1px solid ${result.intent_score >= 80 ? 'var(--success)' : 'var(--border-subtle)'}`,
-                                transition: 'all 0.3s',
-                                cursor: 'pointer'
-                            }}>
-                                {/* Header with Intent */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                                        <div style={{ position: 'relative' }}>
-                                            {data.avatar_url ? (
-                                                <img
-                                                    src={data.avatar_url}
-                                                    alt={data.name}
-                                                    style={{ width: '44px', height: '44px', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--glass-border)' }}
-                                                />
-                                            ) : (
-                                                <div style={{
-                                                    width: '44px',
-                                                    height: '44px',
-                                                    borderRadius: '12px',
-                                                    background: 'linear-gradient(135deg, hsl(var(--pearl-primary)), hsl(var(--pearl-accent)))',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '0.9rem',
-                                                    fontWeight: 900,
-                                                    color: '#000'
-                                                }}>
-                                                    {(data.name || data.company || "U")[0].toUpperCase()}
-                                                </div>
-                                            )}
-                                            {data.logo_url && (
-                                                <img
-                                                    src={data.logo_url}
-                                                    alt="Company Logo"
-                                                    style={{
-                                                        position: 'absolute',
-                                                        bottom: '-4px',
-                                                        right: '-4px',
-                                                        width: '18px',
-                                                        height: '18px',
-                                                        borderRadius: '4px',
-                                                        background: '#fff',
-                                                        border: '1px solid var(--glass-border)',
-                                                        padding: '1.5px'
-                                                    }}
-                                                />
-                                            )}
-                                        </div>
-                                        <div>
-                                            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem', margin: 0 }}>
-                                                {data.name || data.company || 'Unknown Contact'}
-                                            </h3>
-                                            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                                {data.title} {data.company ? `@ ${data.company}` : ''}
-                                                {data.location && <span style={{ padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', fontSize: '0.65rem' }}>📍 {data.location}</span>}
-                                                {data.industry && <span style={{ padding: '2px 6px', background: 'rgba(147,51,234,0.1)', color: '#a855f7', borderRadius: '4px', fontSize: '0.65rem' }}>🏭 {data.industry}</span>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style={{
-                                        background: getIntentColor(result.intent_score) + '15',
-                                        border: `1px solid ${getIntentColor(result.intent_score)}`,
-                                        borderRadius: '8px',
-                                        padding: '0.5rem 1rem',
-                                        textAlign: 'center'
-                                    }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: getIntentColor(result.intent_score) }}>
-                                            {result.intent_score || 0}
-                                        </div>
-                                        <div style={{ fontSize: '0.6rem', color: getIntentColor(result.intent_score), fontWeight: 700 }}>
-                                            {getIntentLabel(result.intent_score)}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Metrics Grid */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                                    {result.verified && (
-                                        <div style={{ background: 'rgba(0,255,100,0.05)', borderRadius: '8px', padding: '0.75rem' }}>
-                                            <div style={{ fontSize: '0.6rem', color: 'rgba(0,255,100,0.6)', marginBottom: '0.25rem' }}>VERIFICATION</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(0,255,100,1)' }}>✅ VERIFIED</div>
-                                        </div>
-                                    )}
-                                    {result.clarity_score > 0 && (
-                                        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '0.75rem' }}>
-                                            <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.25rem' }}>CLARITY SCORE</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'hsl(var(--pearl-primary))' }}>{result.clarity_score}/100</div>
-                                        </div>
-                                    )}
-                                    {velocity.growth_rate_pct > 0 && (
-                                        <div style={{ background: 'rgba(255,200,0,0.05)', borderRadius: '8px', padding: '0.75rem' }}>
-                                            <div style={{ fontSize: '0.6rem', color: 'rgba(255,200,0,0.6)', marginBottom: '0.25rem' }}>VELOCITY</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'rgba(255,200,0,1)' }}>
-                                                📈 +{velocity.growth_rate_pct}%
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Oracle Signal */}
-                                {result.oracle_signal && result.oracle_signal !== 'Baseline' && (
-                                    <div style={{
-                                        background: 'rgba(147,51,234,0.1)',
-                                        border: '1px solid rgba(147,51,234,0.3)',
-                                        borderRadius: '8px',
-                                        padding: '0.75rem',
-                                        marginBottom: '1rem'
-                                    }}>
-                                        <div style={{ fontSize: '0.6rem', color: 'rgba(147,51,234,0.8)', fontWeight: 700, marginBottom: '0.25rem' }}>
-                                            🔮 ORACLE SIGNAL
-                                        </div>
-                                        <div style={{ fontSize: '0.8rem', color: 'rgba(147,51,234,1)', fontWeight: 600 }}>
-                                            {result.oracle_signal}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Displacement Script */}
-                                {displacement.sovereign_script && (
-                                    <details style={{ marginBottom: '1rem' }}>
-                                        <summary style={{
-                                            fontSize: '0.75rem',
-                                            fontWeight: 700,
-                                            color: 'hsl(var(--pearl-primary))',
-                                            cursor: 'pointer',
-                                            padding: '0.5rem',
-                                            background: 'rgba(255,255,255,0.02)',
-                                            borderRadius: '6px'
-                                        }}>
-                                            ⚔️ DISPLACEMENT SCRIPT (Click to expand)
-                                        </summary>
-                                        <div style={{
-                                            marginTop: '0.5rem',
-                                            padding: '1rem',
-                                            background: 'rgba(0,0,0,0.4)',
-                                            borderRadius: '8px',
-                                            fontSize: '0.75rem',
-                                            lineHeight: '1.6',
-                                            color: 'rgba(255,255,255,0.8)',
-                                            fontFamily: 'monospace',
-                                            whiteSpace: 'pre-wrap'
-                                        }}>
-                                            {displacement.sovereign_script}
-                                        </div>
-                                    </details>
-                                )}
-
-                                {/* Contact Info */}
-                                {data.email && (
-                                    <div style={{
-                                        fontSize: '0.75rem',
-                                        color: 'rgba(255,255,255,0.6)',
-                                        display: 'flex',
-                                        gap: '1rem',
-                                        flexWrap: 'wrap'
-                                    }}>
-                                        <span>📧 {data.email}</span>
-                                        {data.linkedin_url && <a href={data.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))' }}>💼 LinkedIn</a>}
-                                        {data.source_url && <a href={data.source_url} target="_blank" rel="noopener noreferrer" style={{ color: 'hsl(var(--pearl-primary))' }}>🌐 Website</a>}
-                                    </div>
-                                )}
+                        <div className="flex gap-2">
+                            <button onClick={downloadIntelligenceAsCSV} className="btn-ghost text-xs border border-white/10">
+                                <Download size={14} /> EXPORT
+                            </button>
+                            <div className="flex bg-slate-800/50 rounded-lg p-1 border border-white/5">
+                                {['all', 'high-intent', 'verified'].map(f => (
+                                    <button
+                                        key={f}
+                                        onClick={() => setFilter(f)}
+                                        className={`px-3 py-1.5 rounded-md text-[0.65rem] font-bold uppercase transition-all ${filter === f ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'
+                                            }`}
+                                    >
+                                        {f.replace('-', ' ')}
+                                    </button>
+                                ))}
                             </div>
-                        )
-                    })}
+                        </div>
+                    </div>
+
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {[1, 2, 3].map(i => <div key={i} className="h-64 glass-panel bg-white/5 animate-pulse"></div>)}
+                        </div>
+                    ) : results.length === 0 ? (
+                        <div className="col-span-full py-12 text-center text-slate-500">
+                            No intelligence data matching filters.
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4">
+                            {results.map(result => {
+                                const data = result.data_payload || {}
+                                const isHot = result.intent_score >= 80
+
+                                return (
+                                    <div key={result.id} className={`glass-panel p-6 border transition-all hover:bg-white/5 ${isHot ? 'border-emerald-500/30' : 'border-white/5'}`}>
+                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+
+                                            {/* Profile Info */}
+                                            <div className="flex items-start gap-4">
+                                                <div className="relative">
+                                                    {data.avatar_url ? (
+                                                        <img src={data.avatar_url} className="w-12 h-12 rounded-xl object-cover ring-1 ring-white/10" />
+                                                    ) : (
+                                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center font-black text-lg text-pearl border border-white/10">
+                                                            {(data.name || "U")[0]}
+                                                        </div>
+                                                    )}
+                                                    {data.logo_url && <img src={data.logo_url} className="absolute -bottom-1 -right-1 w-5 h-5 rounded bg-white p-0.5 border border-slate-900" />}
+                                                </div>
+
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-white leading-tight">{data.name || data.company || 'Unknown Target'}</h3>
+                                                    <div className="text-sm text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
+                                                        {data.title}
+                                                        {data.company && <span className="text-slate-500">@ {data.company}</span>}
+                                                    </div>
+                                                    <div className="flex gap-2 mt-2">
+                                                        {data.location && <span className="badge bg-white/5 text-slate-400 border-white/5 flex items-center gap-1"><MapPin size={10} /> {data.location}</span>}
+                                                        {data.industry && <span className="badge bg-purple-500/10 text-purple-400 border-purple-500/20 flex items-center gap-1"><Factory size={10} /> {data.industry}</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Scores */}
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-center">
+                                                    <div className="text-[0.6rem] text-slate-500 font-bold uppercase tracking-wider mb-1">INTENT</div>
+                                                    <div className={`text-2xl font-black ${isHot ? 'text-emerald-400' : 'text-amber-500'}`}>{result.intent_score}</div>
+                                                </div>
+                                                <div className="w-px h-8 bg-white/10"></div>
+                                                <div className="text-center">
+                                                    <div className="text-[0.6rem] text-slate-500 font-bold uppercase tracking-wider mb-1">CLARITY</div>
+                                                    <div className="text-xl font-bold text-pearl">{result.clarity_score}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Oracle Insight */}
+                                        {result.oracle_signal && result.oracle_signal !== 'Baseline' && (
+                                            <div className="mt-4 p-3 bg-purple-500/5 rounded-lg border border-purple-500/20 flex items-start gap-3">
+                                                <div className="p-1 bg-purple-500/20 rounded text-purple-400"><Brain size={14} /></div>
+                                                <div>
+                                                    <div className="text-[0.65rem] font-bold text-purple-400 uppercase tracking-widest mb-0.5">Oracle Signal</div>
+                                                    <div className="text-sm text-purple-200 font-medium">{result.oracle_signal}</div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
             )}
+
+            {viewMode === 'velocity' && <VelocityView />}
+
+            {viewMode === 'scripts' && <DisplacementLibrary />}
         </div>
     )
 }

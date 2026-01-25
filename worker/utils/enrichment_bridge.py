@@ -121,6 +121,10 @@ class EnrichmentBridge:
                     print(f"🌉 Bridge: DM hunt blocked for {role}. Retrying with PROXY...")
                     person_results = await self.linkedin.scrape(search_query, use_proxy=True)
                 
+                if not person_results:
+                    print(f"🔸 Bridge Miss: No DM profiles found for {role} at {company_name}")
+                    continue
+
                 if person_results:
                     # Filter: Ensure the person actually works at OUR company
                     person = person_results[0]
@@ -142,7 +146,7 @@ class EnrichmentBridge:
                         dm_found = True
                         print(f"💎 Bridge Hit: Found {lead['decision_maker_name']} ({lead['decision_maker_title']})")
                     else:
-                        print(f"🔸 Bridge Miss: Match '{person.get('company')}' != '{company_name}'")
+                        print(f"🔸 Bridge Mismatch: Found '{person.get('company')}' != Target '{company_name}'")
 
             lead['status'] = 'VERIFIED' if dm_found else 'PARTIAL'
             enriched_leads.append(lead)

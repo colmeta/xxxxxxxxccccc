@@ -1,26 +1,19 @@
 import React, { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Rocket, Zap, Target, Search, X } from 'lucide-react'
 
-export default function JobCreator({ session }) {
+export default function JobCreator({ session, onClose }) {
     const [query, setQuery] = useState('')
     const [loading, setLoading] = useState(false)
     const [platform, setPlatform] = useState('linkedin')
     const [boostMode, setBoostMode] = useState(false)
-    const [strategy, setStrategy] = useState('A')
-    const [oneClickMode, setOneClickMode] = useState(false)
-    const [category, setCategory] = useState('')
-    const [excludeDelivered, setExcludeDelivered] = useState(false)
 
     const platforms = [
         { id: 'linkedin', label: 'LinkedIn', icon: '👔' },
-        { id: 'google_news', label: 'News Pulse', icon: '📡' },
-        { id: 'amazon', label: 'E-Commerce', icon: '🛒' },
+        { id: 'google_news', label: 'News', icon: '📡' },
         { id: 'real_estate', label: 'Real Estate', icon: '🏠' },
-        { id: 'job_scout', label: 'Job Scout', icon: '💼' },
         { id: 'reddit', label: 'Reddit', icon: '🗨️' },
-        { id: 'tiktok', label: 'TikTok', icon: '🎵' },
-        { id: 'facebook', label: 'Facebook', icon: '👥' },
-        { id: 'google_maps', label: 'G-Maps', icon: '📍' }
+        { id: 'google_maps', label: 'Maps', icon: '📍' }
     ]
 
     const handleSubmit = async (e) => {
@@ -43,23 +36,15 @@ export default function JobCreator({ session }) {
                     platform: platform,
                     compliance_mode: boostMode ? 'strict' : 'standard',
                     priority: boostMode ? 10 : 1,
-                    ab_test_group: strategy,
-                    search_metadata: {
-                        one_click_agency: oneClickMode,
-                        category: category || null,
-                        exclude_delivered: excludeDelivered
-                    }
+                    search_metadata: { source: 'advanced_modal' }
                 })
             })
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: 'Network error' }))
-                throw new Error(errorData.detail || 'Failed to create job')
-            }
+            if (!response.ok) throw new Error('Mission Rejected')
 
-            setQuery('')
+            onClose && onClose()
+            alert('Mission Launched Successfully 🚀')
         } catch (error) {
-            console.error('Error creating job:', error)
             alert(error.message)
         } finally {
             setLoading(false)
@@ -67,236 +52,80 @@ export default function JobCreator({ session }) {
     }
 
     return (
-        <div className="supreme-glass" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>
-                    <span style={{ color: 'hsl(var(--pearl-primary))' }}>⚡</span> MANUAL CONTROL
-                </h2>
-                <div className="platform-selector" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    {platforms.map(p => (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div className="glass-panel w-full max-w-2xl p-0 overflow-hidden relative">
+                {/* Header */}
+                <div className="p-6 border-b border-white/5 flex justify-between items-center bg-slate-900/50">
+                    <div>
+                        <h2 className="text-lg font-black text-white flex items-center gap-2">
+                            <Target className="text-pearl" size={20} /> ADVANCED MISSION LAUNCHER
+                        </h2>
+                        <p className="text-xs text-slate-400 uppercase tracking-wider font-bold mt-1">Manual Override Control</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                        <X size={20} className="text-slate-400" />
+                    </button>
+                </div>
+
+                <div className="p-8 space-y-8">
+                    {/* Platform Select */}
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Target Frequency</label>
+                        <div className="flex flex-wrap gap-2">
+                            {platforms.map(p => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => setPlatform(p.id)}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${platform === p.id
+                                            ? 'bg-pearl text-black shadow-glow scale-105'
+                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                                        }`}
+                                >
+                                    <span>{p.icon}</span> {p.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Query Input */}
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Mission Parameters</label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="e.g. 'CTOs in Fintech Series A'"
+                                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-slate-600 focus:outline-none focus:border-pearl focus:ring-1 focus:ring-pearl transition-all font-medium"
+                            />
+                            <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600" size={20} />
+                        </div>
+                    </div>
+
+                    {/* Boost Toggle */}
+                    <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                        <div className={`p-2 rounded-lg ${boostMode ? 'bg-amber-500/20 text-amber-500' : 'bg-slate-800 text-slate-600'}`}>
+                            <Zap size={20} fill={boostMode ? "currentColor" : "none"} />
+                        </div>
+                        <div className="flex-1">
+                            <div className="text-sm font-bold text-white">Priority Boost</div>
+                            <div className="text-xs text-slate-400">Allocates 10x worker nodes for speed.</div>
+                        </div>
                         <button
-                            key={p.id}
-                            onClick={() => setPlatform(p.id)}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                borderRadius: '12px',
-                                background: platform === p.id ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.05)',
-                                color: platform === p.id ? '#000' : '#fff',
-                                border: 'none',
-                                cursor: 'pointer',
-                                fontSize: '0.75rem',
-                                fontWeight: 800,
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                boxShadow: platform === p.id ? '0 0 15px rgba(59, 130, 246, 0.5)' : 'none'
-                            }}
+                            onClick={() => setBoostMode(!boostMode)}
+                            className={`w-12 h-6 rounded-full p-1 transition-colors ${boostMode ? 'bg-amber-500' : 'bg-slate-700'}`}
                         >
-                            <span>{p.icon}</span> {p.label}
+                            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${boostMode ? 'translate-x-6' : 'translate-x-0'}`} />
                         </button>
-                    ))}
+                    </div>
 
-                </div>
-            </div>
-
-            <div className="advanced-controls" style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <button
-                    onClick={() => setBoostMode(!boostMode)}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '12px',
-                        background: boostMode ? 'hsl(var(--pearl-warning))' : 'rgba(255,255,255,0.05)',
-                        color: boostMode ? '#000' : 'rgba(255,255,255,0.4)',
-                        border: '1px solid ' + (boostMode ? 'hsl(var(--pearl-warning))' : 'rgba(255,255,255,0.1)'),
-                        cursor: 'pointer',
-                        fontSize: '0.7rem',
-                        fontWeight: 900,
-                        letterSpacing: '1px',
-                        transition: 'all 0.3s'
-                    }}
-                >
-                    🚀 BOOST {boostMode ? 'ON' : 'OFF'}
-                </button>
-
-                <select
-                    value={strategy}
-                    onChange={(e) => setStrategy(e.target.value)}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '12px',
-                        background: 'rgba(255,255,255,0.05)',
-                        color: '#fff',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        fontSize: '0.7rem',
-                        fontWeight: 800,
-                        cursor: 'pointer'
-                    }}
-                >
-                    <option value="A">STRATEGY A (STEALTH)</option>
-                    <option value="B">STRATEGY B (SPEED)</option>
-                    <option value="C">STRATEGY C (MOBILE SWARM)</option>
-                </select>
-
-                <button
-                    onClick={() => setOneClickMode(!oneClickMode)}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '12px',
-                        background: oneClickMode ? 'hsl(var(--nexus-primary))' : 'rgba(255,255,255,0.05)',
-                        color: oneClickMode ? '#000' : '#fff',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        fontSize: '0.7rem',
-                        fontWeight: 900,
-                        cursor: 'pointer'
-                    }}
-                >
-                    🤖 ONE-CLICK AGENCY: {oneClickMode ? 'ACTIVE' : 'OFF'}
-                </button>
-
-                <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '12px',
-                        background: 'rgba(255,255,255,0.05)',
-                        color: '#fff',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        fontSize: '0.7rem',
-                        fontWeight: 800,
-                        cursor: 'pointer'
-                    }}
-                >
-                    <option value="">📂 Auto-Detect Category</option>
-                    <option value="SaaS Companies">💻 SaaS Companies</option>
-                    <option value="C-Level Executives">👔 C-Level Executives</option>
-                    <option value="Marketing Agencies">📢 Marketing Agencies</option>
-                    <option value="Real Estate">🏠 Real Estate</option>
-                    <option value="Finance">💰 Finance</option>
-                    <option value="E-commerce">🛒 E-commerce</option>
-                    <option value="Healthcare">⚕️ Healthcare</option>
-                </select>
-
-                <button
-                    onClick={() => setExcludeDelivered(!excludeDelivered)}
-                    style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '12px',
-                        background: excludeDelivered ? 'hsl(var(--pearl-success))' : 'rgba(255,255,255,0.05)',
-                        color: excludeDelivered ? '#000' : '#fff',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        fontSize: '0.7rem',
-                        fontWeight: 900,
-                        cursor: 'pointer'
-                    }}
-                >
-                    🛡️ EXCLUDE DELIVERED: {excludeDelivered ? 'ON' : 'OFF'}
-                </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="search-container" style={{ display: 'flex', gap: '1rem' }}>
-                <div style={{ flex: 1, position: 'relative' }}>
-                    <input
-                        className="input-cyber"
-                        type="text"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder={`Who are we scouting on ${platform.toUpperCase()} today?`}
-                        style={{
-                            padding: '1.25rem 1.5rem',
-                            paddingLeft: '3.5rem',
-                            borderRadius: '20px',
-                            background: 'rgba(0,0,0,0.3)',
-                            fontSize: '1rem',
-                            border: '1px solid rgba(255,255,255,0.05)',
-                            transition: 'all 0.3s'
-                        }}
-                    />
-                    <span style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.3, fontSize: '1.25rem' }}>🔍</span>
-                </div>
-                <button
-                    className="btn-primary"
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                        minWidth: '200px',
-                        borderRadius: '20px',
-                        fontSize: '0.9rem',
-                        fontWeight: 900,
-                        letterSpacing: '1px',
-                        background: boostMode ? 'linear-gradient(135deg, hsl(var(--pearl-primary)), hsl(var(--pearl-accent)))' : 'var(--pearl-primary)'
-                    }}
-                >
-                    {loading ? <div className="spinner"></div> : 'LAUNCH MISSION'}
-                </button>
-            </form>
-
-            <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: '#fff', marginBottom: '0.5rem' }}>
-                        🕵️ REALITY CHECK: DATA AUDIT
-                    </h3>
-                    <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>
-                        Confirm the accuracy of your Apollo or ZoomInfo lists. We re-verify every lead.
-                    </p>
-                </div>
-                <input
-                    id="audit-upload"
-                    type="file"
-                    accept=".csv"
-                    style={{ display: 'none' }}
-                    onChange={async (e) => {
-                        const file = e.target.files[0]
-                        if (!file) return
-
-                        setLoading(true)
-                        try {
-                            const formData = new FormData()
-                            formData.append('file', file)
-
-                            const { data: { session: currentSession } } = await supabase.auth.getSession()
-                            const token = currentSession?.access_token
-
-                            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/bulk/audit`, {
-                                method: 'POST',
-                                headers: { 'Authorization': `Bearer ${token}` },
-                                body: formData
-                            })
-
-                            if (!res.ok) throw new Error('Audit upload failed')
-                            alert('Reality Check Initialized. Results will appear in your feed.')
-                        } catch (err) {
-                            alert(err.message)
-                        } finally {
-                            setLoading(false)
-                        }
-                    }}
-                />
-                <button
-                    onClick={() => document.getElementById('audit-upload').click()}
-                    style={{
-                        padding: '0.75rem 1.5rem',
-                        borderRadius: '15px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px dashed rgba(255,255,255,0.2)',
-                        color: '#fff',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        transition: 'all 0.3s'
-                    }}
-                >
-                    📁 UPLOAD CSV FOR AUDIT
-                </button>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0.5rem 0' }}>
-                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-                    Shield: Stealth v2.4 (Residential)
-                </div>
-                <div style={{ fontSize: '0.65rem', color: boostMode ? 'hsl(var(--pearl-warning))' : 'rgba(255,255,255,0.3)', fontWeight: 700 }}>
-                    {boostMode ? '⚠️ BOOST MODE: OVERNIGHT PRIORITY HARVESTING ACTIVE' : 'STANDARD PRIORITY'}
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading || !query}
+                        className="btn-primary w-full py-4 text-sm tracking-widest shadow-lg"
+                    >
+                        {loading ? 'INITIALIZING...' : 'LAUNCH MISSION'}
+                    </button>
                 </div>
             </div>
         </div>

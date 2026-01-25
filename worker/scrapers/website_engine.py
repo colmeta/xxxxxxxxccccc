@@ -227,9 +227,14 @@ class WebsiteEngine:
 
             # Extract physical address (for Location)
             try:
-                # Look for address-like patterns in footer or body
-                # Standard US address: City, ST Zip
-                addr_match = re.search(r'([A-Z][a-z]+, [A-Z]{2}\s+\d{5})', text)
+                # Look for address-like patterns (US/Intl)
+                # 1. Standard US: City, ST Zip
+                addr_match = re.search(r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s+[A-Z]{2}\s+\d{5})', text)
+                
+                # 2. Relaxed: City, State (if no zip found)
+                if not addr_match:
+                    addr_match = re.search(r'([A-Z][a-z]+,\s+(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY))', text)
+                
                 if addr_match:
                     results["location"] = addr_match.group(0)
             except: pass
@@ -254,8 +259,21 @@ class WebsiteEngine:
             # 4. Extract Data from all visited pages
             full_text = " ".join(pages_to_scrape)
             
-            # Emails
+            # Method 1: Regex on Text
             emails = set(re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", full_text))
+            
+            # Method 2: DOM Scan for mailto: links (Robust)
+            try:
+                mailto_links = await self.page.query_selector_all("a[href^='mailto:']")
+                for link in mailto_links:
+                    href = await link.get_attribute("href")
+                    if href:
+                        clean_email = href.replace("mailto:", "").split("?")[0].strip()
+                        if "@" in clean_email:
+                            emails.add(clean_email)
+            except Exception as e:
+                print(f"[{self.platform}] ⚠️ Mailto scan error: {e}")
+
             results["emails"] = [e for e in emails if not e.endswith(('.png', '.jpg', '.svg', '.gif', '.webp'))]
             
             # Phones (US/Intl formats)

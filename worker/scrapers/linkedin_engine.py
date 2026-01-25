@@ -284,15 +284,22 @@ class LinkedInEngine:
             return []
 
     def _get_mock_data(self, query):
-        return [{
-            "name": f"Sample Lead ({query})",
-            "title": "CEO & Founder",
-            "company": "Tech Stealth Inc.",
-            "email": "sample@example.com",
-            "source_url": "https://linkedin.com/in/sample",
-            "verified": False,
-            "snippet": "Mock Data (System Blocked)"
-        }]
+        print(f"[{self.platform}] 🔧 Specific person search exhausted. Attempting broad Company Page sweep...")
+        # Fallback 4: Broad Company Search (Never fail completely)
+        try:
+             broad_query = f"{query} company linkedin"
+             # Remove "Founder" or titles to just find the entity
+             if "Founder" in query or "CEO" in query:
+                 company_only = query.split('"')[1] if '"' in query else query
+                 broad_query = f"{company_only} linkedin"
+                 
+             results = await self._search_google(broad_query)
+             if results:
+                 print(f"[{self.platform}] ⚠️ Found Company Page as fallback.")
+                 return results
+        except: pass
+
+        return []
 
 if __name__ == "__main__":
     pass

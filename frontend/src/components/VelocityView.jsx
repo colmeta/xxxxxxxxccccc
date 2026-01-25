@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { Activity, TrendingUp, Users, ArrowUpRight } from 'lucide-react'
 
 export default function VelocityView() {
     const [timeframe, setTimeframe] = useState('7d')
 
-    // Mock data for visualization (would hook up to real backend velocity endpoints)
+    // Mock data
     const metrics = {
         growth: '+124%',
         newLeads: 843,
@@ -13,72 +13,78 @@ export default function VelocityView() {
     }
 
     return (
-        <div className="supreme-glass animate-slide-up" style={{ padding: '2rem', marginTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ color: 'hsl(var(--pearl-primary))' }}>📈</span> VELOCITY ENGINE
+        <div className="animate-slide-up space-y-6">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-black flex items-center gap-3 text-white">
+                    <Activity className="text-pearl" size={24} />
+                    VELOCITY ENGINE
                 </h2>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="flex gap-2 bg-slate-800/50 p-1 rounded-lg border border-white/5">
                     {['24h', '7d', '30d'].map(t => (
                         <button
                             key={t}
                             onClick={() => setTimeframe(t)}
-                            style={{
-                                background: timeframe === t ? 'hsl(var(--pearl-primary))' : 'rgba(255,255,255,0.05)',
-                                color: timeframe === t ? '#000' : '#fff',
-                                border: 'none',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '8px',
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                            }}
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase transition-all ${timeframe === t
+                                    ? 'bg-pearl text-black shadow-glow'
+                                    : 'text-slate-400 hover:text-white'
+                                }`}
                         >
-                            {t.toUpperCase()}
+                            {t}
                         </button>
                     ))}
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Lead Velocity</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>{metrics.growth}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--success)', marginTop: '0.5rem' }}>▲ Trending Up</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="glass-panel p-6 bg-white/5 flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lead Velocity</div>
+                        <TrendingUp size={16} className="text-emerald-400" />
+                    </div>
+                    <div>
+                        <div className="text-4xl font-black text-white mt-4">{metrics.growth}</div>
+                        <div className="text-xs font-bold text-emerald-400 mt-2 flex items-center gap-1">
+                            <ArrowUpRight size={12} /> Trending Up
+                        </div>
+                    </div>
                 </div>
-                <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>New Targets</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: '#fff' }}>{metrics.newLeads}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>In last {timeframe}</div>
+
+                <div className="glass-panel p-6 bg-white/5 flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">New Targets</div>
+                        <Users size={16} className="text-pearl" />
+                    </div>
+                    <div>
+                        <div className="text-4xl font-black text-white mt-4">{metrics.newLeads}</div>
+                        <div className="text-xs text-slate-500 mt-2 font-mono">In last {timeframe}</div>
+                    </div>
                 </div>
-                <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Pipeline Health</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'hsl(var(--pearl-primary))' }}>{metrics.velocity}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Conversion Optimal</div>
+
+                <div className="glass-panel p-6 bg-white/5 flex flex-col justify-between">
+                    <div className="flex justify-between items-start">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Pipeline Health</div>
+                        <Activity size={16} className="text-amber-400" />
+                    </div>
+                    <div>
+                        <div className="text-4xl font-black text-pearl mt-4">{metrics.velocity}</div>
+                        <div className="text-xs text-slate-500 mt-2">Conversion Optimal</div>
+                    </div>
                 </div>
             </div>
 
-            <div style={{ marginTop: '2rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', color: 'rgba(255,255,255,0.8)' }}>Predictive Growth Trajectory</h3>
-                <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    {/* Simple CSS Bar Chart for Visual */}
+            <div className="glass-panel p-8 bg-white/5 border border-white/5">
+                <h3 className="text-sm font-bold text-slate-300 mb-6 uppercase tracking-wider">Predictive Growth Trajectory</h3>
+                <div className="h-48 flex items-end gap-2 sm:gap-4 pb-4 border-b border-white/5">
+                    {/* Visual Bar Chart */}
                     {[40, 55, 45, 70, 85, 95, 120].map((h, i) => (
-                        <div key={i} style={{
-                            flex: 1,
-                            height: `${h}px`,
-                            background: `linear-gradient(to top, hsla(var(--pearl-primary), 0.2), hsla(var(--pearl-primary), 0.6))`,
-                            borderRadius: '4px 4px 0 0',
-                            position: 'relative',
-                            transition: 'all 0.3s'
-                        }}>
-                            <div style={{
-                                position: 'absolute',
-                                bottom: '-25px',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                fontSize: '0.6rem',
-                                color: 'rgba(255,255,255,0.4)'
-                            }}>
+                        <div key={i} className="flex-1 relative group w-full">
+                            <div
+                                style={{ height: `${h}%` }}
+                                className="w-full bg-gradient-to-t from-pearl/20 to-pearl/60 rounded-t-sm group-hover:from-pearl/40 group-hover:to-pearl transition-all duration-300 relative overflow-hidden"
+                            >
+                                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[0.6rem] font-bold text-slate-500">
                                 {['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]}
                             </div>
                         </div>

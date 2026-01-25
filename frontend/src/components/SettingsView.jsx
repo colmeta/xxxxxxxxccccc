@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { Settings, CreditCard, Key, Shield, Wifi, RefreshCw, Lock } from 'lucide-react'
 
 export default function SettingsView({ session }) {
     const [org, setOrg] = useState(null)
@@ -15,7 +16,6 @@ export default function SettingsView({ session }) {
 
     const fetchOrgData = async () => {
         setLoading(true)
-        // 1. Get user profile and active org
         const { data: profile } = await supabase.from('profiles').select('active_org_id').eq('id', session.user.id).single()
 
         if (profile?.active_org_id) {
@@ -23,13 +23,11 @@ export default function SettingsView({ session }) {
             setOrg(orgData)
             setSlackUrl(orgData?.slack_webhook || '')
 
-            // 2. Fetch API Key (hash checking is backend only, so we just show mask if key exists)
             const { data: keys } = await supabase.from('api_keys').select('id, name').eq('org_id', profile.active_org_id)
             if (keys?.length > 0) {
                 setApiKey('••••••••••••••••')
             }
 
-            // 3. Fetch Swarm Status
             const { data: workerData } = await supabase.from('worker_status').select('*').order('last_pulse', { ascending: false })
             if (workerData) setWorkers(workerData)
         }
@@ -49,89 +47,117 @@ export default function SettingsView({ session }) {
         if (!confirm) return
 
         setSaving(true)
-        // In a real app, the backend would handle this to hash the key.
-        // For MVP, we'll call our dispatchMission style endpoint if we had one for keys.
-        // But for now, let's just alert that the backend needs to handle the hashing.
         alert(`CLARITY PEARL API KEY GENERATED:\n\n${newKey}\n\nCOPY THIS NOW. It will not be shown again.`)
         setSaving(false)
     }
 
-    if (loading) return <div style={{ color: 'var(--text-muted)' }}>Synchronizing Enterprise Data...</div>
+    if (loading) return (
+        <div className="text-center p-12 animate-pulse text-slate-500 font-mono tracking-widest text-xs">
+            SYNCHRONIZING ENTERPRISE SETTINGS...
+        </div>
+    )
 
     return (
-        <div className="supreme-glass" style={{ padding: '2.5rem', marginTop: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2rem', color: '#fff' }}>
-                ⚙️ CLARITY PEARL COMMAND CENTER
-            </h2>
+        <div className="space-y-8 animate-slide-up">
+            <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-slate-800 rounded-xl border border-white/5">
+                    <Settings className="text-white" size={24} />
+                </div>
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                    COMMAND CENTER
+                </h2>
+            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Organization Details */}
-                <div>
-                    <h3 style={{ fontSize: '0.8rem', opacity: 0.5, letterSpacing: '2px', marginBottom: '1.5rem' }}>CREDIT STATUS</h3>
-                    <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 900, color: 'hsl(var(--nexus-primary))' }}>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <CreditCard size={14} /> Credit Status
+                    </div>
+                    <div className="glass-panel p-6 bg-white/5">
+                        <div className="text-4xl font-black text-pearl">
                             {org?.credits_monthly - org?.credits_used}
                         </div>
-                        <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.5rem' }}>
-                            Credits remaining for {org?.name} ({org?.plan_tier.toUpperCase()})
+                        <div className="text-xs text-slate-400 mt-2 font-medium">
+                            Credits remaining for <span className="text-white">{org?.name}</span> ({org?.plan_tier?.toUpperCase()})
                         </div>
-                        <div style={{ marginTop: '1.5rem', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                            <div style={{ width: `${(org?.credits_used / org?.credits_monthly) * 100}%`, height: '100%', background: 'hsl(var(--pearl-primary))' }}></div>
+                        <div className="mt-6 h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-pearl shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-1000"
+                                style={{ width: `${(org?.credits_used / org?.credits_monthly) * 100}%` }}
+                            ></div>
                         </div>
                     </div>
                 </div>
 
                 {/* API & Integrity */}
-                <div>
-                    <h3 style={{ fontSize: '0.8rem', opacity: 0.5, letterSpacing: '2px', marginBottom: '1.5rem' }}>CLARITY PEARL API (WHITE-LABEL)</h3>
-                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                        <input
-                            readOnly
-                            value={apiKey}
-                            className="input-cyber"
-                            style={{ flex: 1, background: 'rgba(0,0,0,0.2)', opacity: 0.5 }}
-                        />
-                        <button onClick={generateKey} className="btn-primary" style={{ fontSize: '0.7rem' }}>ROTATE KEY</button>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <Key size={14} /> White-Label API
                     </div>
-                    <p style={{ fontSize: '0.7rem', opacity: 0.4 }}>Use this key to integrate the Intelligence Vault into your 3rd party applications.</p>
+                    <div className="glass-panel p-6 bg-white/5 flex flex-col justify-between h-full">
+                        <div className="flex gap-4">
+                            <input
+                                readOnly
+                                value={apiKey}
+                                className="input-cyber text-center font-mono opacity-50"
+                                placeholder="NO API KEY GENERATED"
+                            />
+                            <button onClick={generateKey} className="btn-primary py-2 px-4 text-xs whitespace-nowrap">
+                                <RefreshCw size={14} /> ROTATE
+                            </button>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-4 leading-relaxed">
+                            Use this key to integrate the Intelligence Vault into your 3rd party applications.
+                            <span className="text-red-400 block mt-1">Warning: Rotating invalidates old keys immediately.</span>
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.05)', margin: '3rem 0' }} />
+            <hr className="border-white/5 my-8" />
 
             {/* DIVINE SWARM orchestration */}
-            <div style={{ marginBottom: '3rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    🛰️ DIVINE SWARM (RESIDENTIAL NODES)
-                    <span style={{ fontSize: '0.6rem', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '2px 8px', borderRadius: '10px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>GLOBAL SYNC ACTIVE</span>
-                </h3>
-                <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '2rem' }}>Monitor and manage the geographic distribution of your high-authority scraping swarm.</p>
+            <div className="space-y-6">
+                <div className="flex justify-between items-end">
+                    <div>
+                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Wifi className="text-emerald-500" size={20} /> DIVINE SWARM
+                        </h3>
+                        <p className="text-sm text-slate-500 mt-1">Active residential nodes and proxy health.</p>
+                    </div>
+                    <span className="badge bg-emerald-500/10 text-emerald-500 border-emerald-500/20">GLOBAL SYNC ACTIVE</span>
+                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {workers.length === 0 ? (
-                        <div style={{ gridColumn: '1/-1', padding: '3rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', color: 'rgba(255,255,255,0.2)' }}>
+                        <div className="col-span-full p-12 text-center bg-white/5 rounded-2xl border border-white/5 text-slate-600">
                             No active nodes detected. Ensure your local worker is running.
                         </div>
                     ) : (
                         workers.map(w => (
-                            <div key={w.worker_id} className="supreme-glass" style={{ padding: '1.5rem', position: 'relative' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                    <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>{w.worker_id}</div>
-                                    <div style={{
-                                        width: '8px', height: '8px', borderRadius: '50%',
-                                        background: (new Date() - new Date(w.last_pulse)) < 60000 ? '#22c55e' : '#ef4444',
-                                        boxShadow: (new Date() - new Date(w.last_pulse)) < 60000 ? '0 0 10px #22c55e' : 'none'
-                                    }}></div>
+                            <div key={w.worker_id} className="glass-panel p-5 relative overflow-hidden">
+                                <div className="flex justify-between mb-4">
+                                    <div className="font-bold text-sm text-white font-mono">{w.worker_id}</div>
+                                    <div className={`w-2 h-2 rounded-full ${new Date() - new Date(w.last_pulse) < 60000 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem' }}>
-                                    <div style={{ opacity: 0.4 }}>LOCATION: <span style={{ color: '#fff' }}>{w.geo_city || 'Unknown'}, {w.geo_country || 'Earth'}</span></div>
-                                    <div style={{ opacity: 0.4 }}>RESIDENTIAL IP: <span style={{ color: '#fff' }}>{w.public_ip || 'Masked'}</span></div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-                                        <span style={{ opacity: 0.4 }}>STEALTH HEALTH</span>
-                                        <span style={{ color: w.stealth_health > 90 ? '#22c55e' : '#f59e0b', fontWeight: 900 }}>{w.stealth_health}%</span>
+                                <div className="space-y-2 text-xs">
+                                    <div className="flex justify-between text-slate-400">
+                                        <span>LOCATION</span>
+                                        <span className="text-white font-mono">{w.geo_city || 'Unknown'}, {w.geo_country || 'Earth'}</span>
                                     </div>
-                                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-                                        <div style={{ width: `${w.stealth_health}%`, height: '100%', background: w.stealth_health > 90 ? '#22c55e' : '#f59e0b' }}></div>
+                                    <div className="flex justify-between text-slate-400">
+                                        <span>IP ADDR</span>
+                                        <span className="text-white font-mono">{w.public_ip || 'Masked'}</span>
+                                    </div>
+                                    <div className="mt-3 pt-3 border-t border-white/5">
+                                        <div className="flex justify-between mb-1">
+                                            <span className="text-[0.6rem] font-bold text-slate-500">STEALTH HEALTH</span>
+                                            <span className={`text-xs font-bold ${w.stealth_health > 90 ? 'text-emerald-500' : 'text-amber-500'}`}>{w.stealth_health}%</span>
+                                        </div>
+                                        <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                                            <div className={`h-full ${w.stealth_health > 90 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${w.stealth_health}%` }}></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -140,80 +166,25 @@ export default function SettingsView({ session }) {
                 </div>
             </div>
 
-            {/* The Sovereign Extension */}
-            <div style={{ marginBottom: '3rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    🧩 THE SOVEREIGN EXTENSION (LEGACY BRIDGE)
-                    <span style={{ fontSize: '0.6rem', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', padding: '2px 8px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)' }}>MV3 COMPLIANT</span>
-                </h3>
-                <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '1.5rem' }}>Inject the Sovereign HUD directly into LinkedIn and Twitter profiles to see intelligence without leaving your workflow.</p>
-
-                <div className="supreme-glass" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
-                        BRIDGE STATUS: <span style={{ color: 'hsl(var(--pearl-primary))' }}>LISTENING ON PORT 8000</span>
-                    </div>
-                    <button
-                        onClick={() => alert("EXTENSION SETUP:\n1. Open Chrome Extensions\n2. Enable Developer Mode\n3. Click 'Load Unpacked'\n4. Select the 'extension/' directory in your Data Intelligence folder.")}
-                        className="btn-ghost"
-                        style={{ fontSize: '0.7rem' }}
-                    >
-                        SETUP INSTRUCTIONS
-                    </button>
-                </div>
-            </div>
-
-            <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.05)', margin: '3rem 0' }} />
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
-                {/* AUTO-WARMER CONTROL */}
-                <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem' }}>🔥 THE ARCHITECT'S FORGE (AUTO-WARMING)</h3>
-                    <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '1.5rem' }}>Pearl automatically drafts outbound scripts when viral growth ({">"}50%) is detected.</p>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{
-                            width: '40px', height: '24px', background: '#22c55e', borderRadius: '12px',
-                            position: 'relative', cursor: 'pointer', opacity: 0.8
-                        }}>
-                            <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '3px', right: '3px' }}></div>
-                        </div>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#22c55e' }}>AUTONOMOUS MODE ACTIVE</span>
-                    </div>
-                </div>
-
-                {/* FLUTTERWAVE BILLING */}
-                <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem' }}>💰 FLUTTERWAVE CREDIT FORGE</h3>
-                    <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '1.5rem' }}>Instantly top up your scraping capacity using local currency or USD.</p>
-
-                    <button
-                        onClick={() => alert("FLUTTERWAVE BRIDGE: Initializing Secure Sandbox Payment... (Phase 12 Verification required)")}
-                        className="btn-primary"
-                        style={{ background: 'linear-gradient(90deg, #fbbf24, #f59e0b)', border: 'none', color: '#000' }}
-                    >
-                        TOP UP CREDITS (FLUTTERWAVE)
-                    </button>
-                </div>
-            </div>
-
-            <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.05)', margin: '3rem 0' }} />
+            <hr className="border-white/5 my-8" />
 
             {/* The Invisible Hand */}
-            <div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.5rem' }}>🕊️ THE INVISIBLE HAND (SLACK RELAY)</h3>
-                <p style={{ fontSize: '0.8rem', opacity: 0.5, marginBottom: '1.5rem' }}>Receive real-time Oracle signals (80%+ intent) directly in your Slack workspace.</p>
+            <div className="max-w-3xl">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-2">
+                    <Shield className="text-purple-500" size={20} /> THE INVISIBLE HAND
+                </h3>
+                <p className="text-sm text-slate-500 mb-6">Receive real-time Oracle signals (80%+ intent) directly in your Slack workspace.</p>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="flex gap-4">
                     <input
                         type="text"
                         placeholder="https://hooks.slack.com/services/..."
                         value={slackUrl}
                         onChange={(e) => setSlackUrl(e.target.value)}
-                        className="input-cyber"
-                        style={{ flex: 1 }}
+                        className="input-cyber flex-1"
                     />
-                    <button onClick={saveSlack} disabled={saving} className="btn-primary">
-                        {saving ? 'CONFIGURING...' : 'ACTIVATE RELAY'}
+                    <button onClick={saveSlack} disabled={saving} className="btn-primary min-w-[150px]">
+                        {saving ? 'SAVING...' : 'ACTIVATE RELAY'}
                     </button>
                 </div>
             </div>

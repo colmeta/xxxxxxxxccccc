@@ -71,35 +71,34 @@ class StealthContextV2:
 
         # 4. Mask Automation Tell (The #1 Kill-switch)
         await page.add_init_script("""
-            Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-            window.chrome = { runtime: {} };
-            
-            // Overwrite CDP detection
-            const originalQuery = window.navigator.permissions.query;
-            window.navigator.permissions.query = (parameters) => (
-                parameters.name === 'notifications' ?
-                Promise.resolve({ state: Notification.permission }) :
-                originalQuery(parameters)
-            );
+        if "webdriver" in navigator:
+                delete Object.getPrototypeOf(navigator).webdriver;
         """)
 
     @staticmethod
     async def enact_human_behavior(page):
         """
-        Performs non-linear mouse movements and variable scrolling.
+        Performs non-linear mouse movements (Bezier curves) and variable scrolling.
         """
-        # Random viewport jitter
+        # Random viewport jitter (break fingerprint consistency)
         width = 1280 + random.randint(-50, 50)
-        height = 720 + random.randint(-50, 50)
+        height = 720 + random.randint(-30, 30)
         await page.set_viewport_size({"width": width, "height": height})
         
+        # Human-like Mouse Movement (Bezier Curve Simulation)
+        for _ in range(random.randint(2, 4)):
+            # Random destination
+            x, y = random.randint(100, width-100), random.randint(100, height-100)
+            await page.mouse.move(x, y, steps=random.randint(10, 25))
+            
+            # Micro-pauses (thinking time)
+            await page.wait_for_timeout(random.randint(150, 400))
+            
         # Natural scroll with variable velocity
-        for _ in range(random.randint(2, 5)):
+        for _ in range(random.randint(3, 6)):
             pixels = random.randint(300, 800)
-            steps = 5
-            for i in range(steps):
-                await page.mouse.wheel(0, pixels // steps)
-                await page.wait_for_timeout(random.randint(50, 150))
-            await page.wait_for_timeout(random.randint(500, 1500))
+            await page.mouse.wheel(0, pixels)
+            await page.wait_for_timeout(random.randint(800, 2000)) # Longer read time
+
 
 stealth_v2 = StealthContextV2()
