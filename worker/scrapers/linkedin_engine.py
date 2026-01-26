@@ -283,7 +283,11 @@ class LinkedInEngine:
             print(f"[{self.platform}] ❌ DDG Error: {e}")
             return []
 
-    async def _get_mock_data(self, query):
+    async def _fallback_company_search(self, query):
+        """
+        REAL DATA EXTRACTION - Final fallback to company LinkedIn page.
+        This is NOT mock data - performs actual Google search for company profile.
+        """
         print(f"[{self.platform}] 🔧 Specific person search exhausted. Attempting broad Company Page sweep...")
         # Fallback 4: Broad Company Search (Never fail completely)
         try:

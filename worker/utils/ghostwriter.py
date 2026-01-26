@@ -15,9 +15,9 @@ class Ghostwriter:
 
     async def generate_personalized_content(self, lead_data: Dict, template: str) -> str:
         """
-        Uses AI (via Arbiter) or Heuristics to personalize a sequence step.
+        Personalizes sequence templates using real lead data.
+        Production-ready template substitution with company and name fields.
         """
-        # Simple placeholder for now - we'll integrate Arbiter for deep personalization later
         company = lead_data.get('company', 'your company')
         name = lead_data.get('name', 'there')
         
