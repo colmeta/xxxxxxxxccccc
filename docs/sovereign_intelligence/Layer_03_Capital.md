@@ -14,4 +14,22 @@ Money is the ultimate intent signal. A company that just raised $50M (Crunchbase
 - `site:wellfound.com/company "Acme" people hiring`
 
 ## 💎 The "Omega" Advantage
-We bypass the expensive $10k/year Bloomberg/Pitchbook licenses by using **Dorked Public Filings**. You are selling "High-Net-Worth" data for the price of a standard lead.
+
+## 🌊 Zero Vacuum Strategy (100% Coverage Plan)
+
+### Free Sources Implemented
+- [x] SEC EDGAR API (Live 10-K/Q Filings)
+- [x] UK Companies House (Live Status)
+- [x] Crunchbase (Basic)
+- [x] Wellfound (AngelList)
+
+### Paid Sources Reserve (Future)
+- PitchBook ($2000/mo)
+- CB Insights ($999/mo)
+- Dealroom ($220/mo)
+
+## 🎯 Expanded Market Opportunities
+1. **Investment Banks**: Deal sourcing for M&A.
+2. **Commercial Real Estate**: Finding rapidly growing tenants.
+3. **Enterprise Software Vendors**: Target companies that just raised Series B.
+4. **Executive Search Firms**: Placing CFOs/CTOs in funded startups.

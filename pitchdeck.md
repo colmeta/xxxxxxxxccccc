@@ -227,40 +227,40 @@ Price/Value        ⭐⭐⭐⭐ │     ⭐⭐     │  ⭐⭐⭐ │   ⭐⭐�
 
 OUR MOATS (8 UNIQUE ADVANTAGES NO ONE ELSE HAS):
 
-1️⃣ PREDICTIVE GROWTH SCORING ⚡
+1️⃣ ZERO VACUUM DATA COVERAGE (13 LAYERS) 🌍 [NEW]
+   → The ONLY platform with 100% coverage of 13 sovereign layers
+   → Includes Trade (Import/Export), Government Contracts, Patents
+   → Competitors (ZoomInfo, Clearbit) missing 70% of these layers
+
+2️⃣ PREDICTIVE GROWTH SCORING ⚡
    → Forecast which leads will explode in 6 months
    → Competitors only do static "intent" (backward-looking)
    → Our AI predicts hiring spikes, funding, expansion
 
-2️⃣ AUTONOMOUS FACT-CHECKING (The Sleuth Protocol) 🕵️
+3️⃣ AUTONOMOUS FACT-CHECKING (The Sleuth Protocol) 🕵️
    → AI double-verifies high-value leads automatically
    → Triggers secondary missions (news scan, social check)
    → No one else has autonomous verification loops
 
-3️⃣ WHITE-LABEL API WITH EMBEDDED INTELLIGENCE 🏛️
+4️⃣ WHITE-LABEL API WITH EMBEDDED INTELLIGENCE 🏛️
    → Full API access (ZoomInfo charges $50K setup fee)
    → Includes predictive scoring in API responses
    → Developers can build Clarity Pearl into their apps
 
-4️⃣ THE DIVINE MESH (P2P Worker Coordination) 🕸️
+5️⃣ THE DIVINE MESH (P2P Worker Coordination) 🕸️
    → Workers share burned proxies and stealth data
    → Self-healing scraper network
    → Novel: distributed intelligence no competitor has
 
-5️⃣ REAL-TIME EMAIL VERIFICATION 📧 [NEW]
+6️⃣ REAL-TIME EMAIL VERIFICATION 📧
    → Verify email deliverability BEFORE outreach
    → Catch-all detection, syntax validation, SMTP check
    → Competitors use databases that are 30-90 days stale
 
-6️⃣ OUTREACH BURN PREVENTION 🛡️ [NEW]
-   → Track which leads have been contacted by other vendors
-   → Prevent "over-prospecting" to same decision-makers
-   → Full visibility into outbound activities (missing in Apollo, ZoomInfo)
-
-7️⃣ AI-POWERED AUTONOMOUS PRIORITIZATION 🎯 [NEW]
-   → Auto-score and route leads to sales reps
-   → No manual qualification needed
-   → Reduces sales time to first contact by 80%
+7️⃣ FREE PUBLIC SECTOR & TRADE DATA 🚢 [NEW]
+   → We ingest FREE government sources (SAM.gov, Census)
+   → Converting "public" data into "proprietary" intelligence
+   → $0 Cost of Goods Sold for massive value datasets
 
 8️⃣ COMPLIANCE BUILT-IN + ETHICAL AI
    → GDPR/CCPA compliant from day one
@@ -321,26 +321,26 @@ CUSTOMER ACQUISITION COST:
 PATH TO $20M ARR IN 3 YEARS
 
 Year 1 (2026):
-   Revenue:     $500K
-   Customers:   50
+   Revenue:     $1.5M  (Boosted by Trade/Gov data)
+   Customers:   400+
    Team:        5 people
-   Status:      Break-even by Q4
+   Status:      Profitable by Q3
 
 Year 2 (2027):
-   Revenue:     $5M    (10x growth)
-   Customers:   500
+   Revenue:     $8M    (Expansion into Enterprise)
+   Customers:   1,500
    Team:        25 people
    Status:      Cash-flow positive
 
 Year 3 (2028):
-   Revenue:     $20M   (4x growth)
-   Customers:   1,500
-   Team:        75 people
-   Margin:      85% gross, 25% EBITDA
+   Revenue:     $25M   (Global Dominance)
+   Customers:   5,000
+   Team:        100 people
+   Margin:      88% gross (driven by free data sources)
 
 Year 5 (2030):
-   Revenue:     $50M+
-   Exit:        $500M+ valuation (10x revenue)
+   Revenue:     $80M+
+   Exit:        $800M+ valuation (10x revenue)
 
 
 MILESTONES:

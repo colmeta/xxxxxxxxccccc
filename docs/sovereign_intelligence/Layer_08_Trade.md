@@ -15,4 +15,22 @@ Tracking **Bill of Lading** (BOL) records provides "Ground Truth" for physical b
 - `site:panjiva.com "Nike" suppliers`
 
 ## 💎 The "Omega" Advantage
-Standard scrapers see a website. We see their **Supply Chain**. Knowing what a company imports tells you their **Production Capacity** before they ever release a product.
+
+## 🌊 Zero Vacuum Strategy (100% Coverage Plan)
+
+### Free Sources Implemented
+- [x] USA Trade Online (US Census API)
+- [x] UN Comtrade (Public API)
+- [x] Export.gov Trade Leads
+
+### Paid Sources Reserve (Future)
+- ImportGenius ($299/mo)
+- Panjiva ($995/mo)
+- Descartes Datamyne
+- Xeneta (Freight Rates)
+
+## 🎯 Expanded Market Opportunities
+1. **Freight Forwarders**: "We see you import 20 containers/month from Ningbo; we can beat your rate."
+2. **Sourcing Agents**: "Your supplier in Vietnam has quality issues; here are 3 alternatives."
+3. **Trade Finance**: Factoring and Letter of Credit services for importers.
+4. **Market Analysts**: Tracking commodity flow trends (e.g., Lithium for EVs).

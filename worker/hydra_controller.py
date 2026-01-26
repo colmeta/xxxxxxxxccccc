@@ -322,6 +322,34 @@ class HydraController:
                             from scrapers.facebook_engine_v2 import FacebookEngineV2
                             engine = FacebookEngineV2(page)
                             data_results = await engine.scrape(query)
+                        elif platform == 'trade':
+                            from scrapers.trade_data_engine import TradeDataEngine
+                            engine = TradeDataEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['gov', 'government', 'contracts']:
+                            from scrapers.government_contracts_engine import GovernmentContractsEngine
+                            engine = GovernmentContractsEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['patent', 'patents', 'innovation', 'ip']:
+                            from scrapers.patent_intelligence_engine import PatentIntelligenceEngine
+                            engine = PatentIntelligenceEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['event', 'events', 'networking', 'meetup']:
+                            from scrapers.events_networking_engine import EventsNetworkingEngine
+                            engine = EventsNetworkingEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['reputation', 'reviews', 'trust', 'ratings']:
+                            from scrapers.reputation_engine import ReputationEngine
+                            engine = ReputationEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['capital', 'finance', 'sec', 'funding']:
+                            from scrapers.capital_growth_engine import CapitalGrowthEngine
+                            engine = CapitalGrowthEngine(page)
+                            data_results = await engine.scrape(query)
+                        elif platform in ['academic', 'research', 'papers', 'science']:
+                            from scrapers.academic_research_engine import AcademicResearchEngine
+                            engine = AcademicResearchEngine(page)
+                            data_results = await engine.scrape(query)
                         elif platform == "generic" and not query.startswith("http"):
                             from scrapers.base_dork_engine import BaseDorkEngine
                             # Use Global Radar for general search queries to find a list of candidates

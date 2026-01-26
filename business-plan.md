@@ -14,15 +14,16 @@
 The web is chaotic, but AI agents need order. Current data providers ("scrapers") are fragile, legally risky, and deliver hallucination-prone data. Enterprises cannot build reliable agents on unreliable data feeds.
 
 ### The Pearl Solution
-We are not just scraping; we are **verifying**. We build the "Sensory Infrastructure" that feeds the AI economy. Our platform combines:
-1.  **The Hydra Protocol:** A multi-redundant collection network (Playwright + API + Mobile Farms) that cannot be blocked.
-2.  **The Arbiter:** An AI truth-engine that cross-references data to eliminate hallucinations.
-3.  **White Hat Compliance:** A GDPR/CCPA-first architecture that insulates our clients from legal risk.
+We are not just scraping; we are **dominating**. We build the "Sovereign Intelligence Architecture" that feeds the AI economy. Our platform combines:
+1.  **Zero Vacuum Coverage:** 100% data extraction across 13 Sovereign Layers (Trade, Gov, Patents, etc.).
+2.  **The Hydra Protocol:** A multi-redundant collection network that cannot be blocked.
+3.  **The Arbiter:** An AI truth-engine that cross-references data to eliminate hallucinations.
+4.  **White Hat Compliance:** A GDPR/CCPA-first architecture that insulates our clients from legal risk.
 
 ### Financial Targets
--   **Year 1:** $1M ARR (Focus: Trusted B2B Feed)
--   **Year 2:** $10M ARR (Expansion: Commercial Commerce)
--   **Exit:** $1B+ Acquisition by an AI Giant (OpenAI, Anthropic, Salesforce) needing a "Ground Truth" layer.
+-   **Year 1:** $1.5M ARR (Profitability via Free Data arbitrage)
+-   **Year 2:** $8M ARR (Enterprise expansion)
+-   **Exit:** $1B+ Acquisition by an AI Giant (OpenAI, Anthropic, Salesforce).
 
 ---
 
@@ -42,16 +43,16 @@ We are not just scraping; we are **verifying**. We build the "Sensory Infrastruc
 
 ## 3. PRODUCT STRATEGY
 
-### Core Product: The "Sensory Feed"
-*   **Input:** "Find all hiring managers for SaaS companies in Austin."
+### Core Product: The "Sovereign Feed"
+*   **Input:** "Find all hiring managers for SaaS companies in Austin + their patents + government contracts."
 *   **Process:**
-    1.  **Hydra Collection:** Scrape LinkedIn, Company Site, News Signal.
-    2.  **Arbiter Verification:** "Is John Smith still there? Check the 'Team' page."
+    1.  **Hydra Collection:** Scrape LinkedIn (Layer 5), Patents (Layer 6), SAM.gov (Layer 11).
+    2.  **Arbiter Verification:** Cross-reference funding (Layer 3) with growth signals (Layer 5).
     3.  **Compliance Check:** "Is this data on a DNC list? Opted out?"
 *   **Output:** A legally vetted, 99.9% accurate JSON-LD packet for the client's AI Agent.
 
 ### Feature Roadmap
-*   **Phase 1 (Active):** B2B Sales Feed + Hydra Protocol (Redundant Proxies).
+*   **Phase 1 (Active):** 13-Layer Data Vacuum (Trade, Gov, Patents, Social).
 *   **Phase 2 (Active):** The Arbiter Agent (Automatic Truth Verification).
 *   **Phase 3 (Active):** CRM Integration & Outreach Automation Suite.
 *   **Phase 4 (Next):** "Data Insurance" (Legal Indemnification for Enterprise Users).

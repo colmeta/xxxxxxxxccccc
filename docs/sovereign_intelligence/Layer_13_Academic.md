@@ -14,4 +14,22 @@ Scientific publication and depth. If a biotech firm is published on **Google Sch
 - `site:pubmed.ncbi.nlm.nih.gov "Moderna" oncology`
 
 ## 💎 The "Omega" Advantage
-This is the **Highest Frontier**. While others scrape the "Surface Web," we scrape the **"Knowledge Web."** You are selling the elite scientific mind of the industry.
+
+## 🌊 Zero Vacuum Strategy (100% Coverage Plan)
+
+### Free Sources Implemented
+- [x] PubMed API (Med/Bio)
+- [x] arXiv API (CS/Physics)
+- [x] Semantic Scholar
+- [x] ResearchGate
+
+### Paid Sources Reserve (Future)
+- Web of Science
+- Scopus (Elsevier)
+- DeepDyve
+
+## 🎯 Expanded Market Opportunities
+1. **Pharmaceutical Sales**: Targeting labs publishing on specific pathways.
+2. **University Recruiters**: Finding PhD candidates.
+3. **Scientific Instrument Vendors**: Selling microscopes/sequencers to active labs.
+4. **Venture Studios**: Finding IP to commercialize from universities.
