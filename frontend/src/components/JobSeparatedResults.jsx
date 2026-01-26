@@ -120,20 +120,25 @@ export default function JobSeparatedResults() {
             <div className="space-y-6">
                 {jobGroups.map((job, idx) => (
                     <div key={job.id} className="glass-panel p-8 bg-black/40 border-white/5 hover:border-pearl/20 transition-all group relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
-                            <Folder size={120} strokeWidth={0.5} className="text-pearl" />
+                        <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:opacity-[0.08] transition-opacity duration-1000 rotate-12">
+                            <Database size={180} strokeWidth={0.5} className="text-pearl" />
                         </div>
 
-                        {/* Slab Header */}
-                        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 border-b border-white/5 pb-6 mb-8">
-                            <div className="space-y-1">
-                                <div className="text-xl font-display font-black text-white tracking-widest uppercase">
-                                    {job.category || job.target_query}
+                        {/* Slab Header - Mission Profile */}
+                        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-pearl/10 pb-8 mb-10 relative z-10">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-2 w-2 rounded-full bg-pearl animate-pulse shadow-[0_0_8px_#00F0FF]"></div>
+                                    <h3 className="text-2xl font-display font-black text-white tracking-[0.2em] uppercase">
+                                        {job.category || job.target_query}
+                                    </h3>
                                 </div>
-                                <div className="flex items-center gap-4 text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">
-                                    <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(job.created_at).toLocaleDateString()}</span>
-                                    <span className="flex items-center gap-1"><Zap size={10} className="text-pearl" /> {job.results.length} NODES</span>
-                                    <span className="flex items-center gap-1"><Target size={10} /> {job.target_platform.toUpperCase()}</span>
+                                <div className="flex flex-wrap items-center gap-6 text-[0.65rem] font-mono text-slate-500 uppercase tracking-widest bg-black/40 px-4 py-2 rounded-lg border border-white/5">
+                                    <span className="flex items-center gap-2 hover:text-pearl transition-colors cursor-default"><Calendar size={12} /> {new Date(job.created_at).toLocaleDateString()}</span>
+                                    <div className="w-[1px] h-3 bg-white/10"></div>
+                                    <span className="flex items-center gap-2 text-white"><Zap size={12} className="text-pearl animate-bounce-slow" /> {job.results.length} INTEL_NODES</span>
+                                    <div className="w-[1px] h-3 bg-white/10"></div>
+                                    <span className="flex items-center gap-2 hover:text-white transition-colors cursor-default"><Target size={12} /> PLATFORM: {job.target_platform.toUpperCase()}</span>
                                 </div>
                             </div>
 
@@ -161,27 +166,49 @@ export default function JobSeparatedResults() {
                                     </div>
 
                                     <div className="relative z-10">
-                                        <div className="text-[0.8rem] font-black text-white group-hover/item:text-pearl transition-colors truncate mb-1 flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
-                                            {r.data_payload?.name || 'NODE_UNNAMED'}
-                                        </div>
-                                        <div className="text-[0.6rem] font-mono text-slate-500 truncate uppercase tracking-widest mb-4">
-                                            {r.data_payload?.title || 'CLASS_NULL'}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-black border border-pearl/20 flex items-center justify-center text-sm font-black text-pearl/80 group-hover/item:border-pearl/50 transition-all shadow-lg">
+                                                    {(r.data_payload?.name || "X")[0]}
+                                                </div>
+                                                <div>
+                                                    <div className="text-[0.9rem] font-black text-white group-hover/item:text-pearl transition-colors truncate max-w-[140px] leading-none mb-1">
+                                                        {r.data_payload?.name || 'NODE_UNNAMED'}
+                                                    </div>
+                                                    <div className="text-[0.55rem] font-mono text-slate-500 uppercase tracking-widest truncate max-w-[140px]">
+                                                        {r.data_payload?.title || 'CLASS_NULL'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="px-2 py-1 rounded bg-pearl/5 border border-pearl/10 text-[0.5rem] font-bold text-pearl uppercase tracking-widest">RANK: SOVEREIGN</div>
                                         </div>
 
-                                        {/* READABLE CONTACT INTEL */}
-                                        <div className="space-y-2 mb-4 bg-black/40 p-3 rounded-xl border border-white/5">
-                                            <div className="flex items-center gap-3 text-[0.65rem] text-slate-300">
-                                                <div className="p-1 rounded bg-pearl/10 text-pearl"><Mail size={10} /></div>
-                                                <span className="truncate font-mono">{r.data_payload?.email || 'OFFLINE'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-[0.65rem] text-slate-300">
-                                                <div className="p-1 rounded bg-blue-500/10 text-blue-400"><Smartphone size={10} /></div>
-                                                <span className="truncate font-mono">{r.data_payload?.phone || 'N/A'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-[0.65rem] text-slate-300">
-                                                <div className="p-1 rounded bg-amber-500/10 text-amber-400"><Globe size={10} /></div>
-                                                <span className="truncate font-mono">{r.data_payload?.location || 'Unknown'}</span>
+                                        {/* READABLE CONTACT INTEL - HIGH CONTRAST HUD */}
+                                        <div className="grid grid-cols-1 gap-2 mb-6">
+                                            <div className="flex flex-col gap-1.5 p-3.5 rounded-2xl bg-black/60 border border-white/5 group-hover/item:border-pearl/20 transition-all duration-500 shadow-inner">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3 text-[0.7rem] font-mono text-white/90">
+                                                        <Mail size={12} className="text-emerald-400" />
+                                                        <span className="truncate">{r.data_payload?.email || 'OFFLINE'}</span>
+                                                    </div>
+                                                    <div className="text-[0.45rem] font-black text-slate-700 tracking-tighter uppercase">SECURE_LINK</div>
+                                                </div>
+                                                <div className="h-px bg-white/5 w-full"></div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3 text-[0.7rem] font-mono text-white/90">
+                                                        <Smartphone size={12} className="text-pearl" />
+                                                        <span className="truncate">{r.data_payload?.phone || 'UNREACHABLE'}</span>
+                                                    </div>
+                                                    <div className="text-[0.45rem] font-black text-slate-700 tracking-tighter uppercase">COMM_READY</div>
+                                                </div>
+                                                <div className="h-px bg-white/5 w-full"></div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3 text-[0.7rem] font-mono text-white/90">
+                                                        <Globe size={12} className="text-amber-400" />
+                                                        <span className="truncate">{r.data_payload?.location || 'GLOBAL_NODE'}</span>
+                                                    </div>
+                                                    <div className="text-[0.45rem] font-black text-slate-700 tracking-tighter uppercase">GEO_VERIFIED</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

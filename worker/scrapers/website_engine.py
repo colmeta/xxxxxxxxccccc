@@ -177,10 +177,16 @@ class WebsiteEngine:
         try:
             # 1. Visit Homepage
             # Optimize: Block heavy resources for stability
-            await self.page.route("**/*", lambda route: route.abort() 
-                if route.request.resource_type in ["image", "media", "font", "stylesheet"] 
-                else route.continue_()
-            )
+            async def handle_route(route):
+                try:
+                    if route.request.resource_type in ["image", "media", "font", "stylesheet"]:
+                        await route.abort()
+                    else:
+                        await route.continue_()
+                except:
+                    pass # Page or request likely closed/finished already
+
+            await self.page.route("**/*", handle_route)
 
             try:
                 await self.page.goto(url, wait_until="domcontentloaded", timeout=25000)

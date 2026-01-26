@@ -90,8 +90,8 @@ export default function IntelligenceView({ session }) {
                             key={item.id}
                             onClick={() => setViewMode(item.id)}
                             className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-[0.65rem] font-display font-black tracking-widest transition-all duration-300 ${viewMode === item.id
-                                    ? 'bg-pearl text-black shadow-neon scale-105 active:scale-95'
-                                    : 'text-slate-500 hover:text-white hover:bg-white/5'
+                                ? 'bg-pearl text-black shadow-neon scale-105 active:scale-95'
+                                : 'text-slate-500 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <item.icon size={14} />
@@ -123,8 +123,8 @@ export default function IntelligenceView({ session }) {
                                         key={f}
                                         onClick={() => setFilter(f)}
                                         className={`px-4 py-1.5 rounded-md text-[0.6rem] font-black uppercase tracking-widest transition-all ${filter === f
-                                                ? 'bg-white/10 text-white shadow-inner'
-                                                : 'text-slate-500 hover:text-slate-400'
+                                            ? 'bg-white/10 text-white shadow-inner'
+                                            : 'text-slate-500 hover:text-slate-400'
                                             }`}
                                     >
                                         {f.replace('-', '_')}
@@ -165,82 +165,78 @@ export default function IntelligenceView({ session }) {
                                 const isHot = result.intent_score >= 80
 
                                 return (
-                                    <div key={result.id} className={`glass-panel p-6 border group hover:scale-[1.02] transition-all duration-300 relative overflow-hidden ${isHot ? 'border-emerald-500/30 bg-emerald-500/[0.02]' : 'border-white/5 bg-white/[0.01]'
-                                        }`}>
-                                        {/* Status Glow */}
-                                        <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity ${isHot ? 'text-emerald-500' : 'text-pearl'}`}>
-                                            <Brain size={120} strokeWidth={0.5} className="translate-x-12 -translate-y-12" />
-                                        </div>
+                                    <div key={result.id} className={`glass-panel p-0 border group hover:-translate-y-2 transition-all duration-500 relative overflow-hidden flex flex-col ${isHot ? 'border-emerald-500/30' : 'border-white/5 shadow-glass'}`}>
 
-                                        <div className="relative z-10 flex flex-col h-full">
-                                            {/* Top Identity Block */}
-                                            <div className="flex gap-4 items-start mb-6">
-                                                <div className="relative shrink-0">
-                                                    <div className="w-14 h-14 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
-                                                        {data.avatar_url ? (
-                                                            <img src={data.avatar_url} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-slate-800 to-black flex items-center justify-center font-display font-black text-xl text-white/30">
-                                                                {(data.name || "U")[0]}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    {result.verified && (
-                                                        <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 rounded-lg border-2 border-black">
-                                                            <ShieldCheck size={10} className="text-black" />
-                                                        </div>
-                                                    )}
+                                        {/* Card Header (Profile Stripe) */}
+                                        <div className={`h-24 bg-gradient-to-br from-white/5 to-transparent relative overflow-hidden p-6 ${isHot ? 'bg-emerald-500/5' : ''}`}>
+                                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                <Brain size={80} strokeWidth={0.5} className="rotate-12" />
+                                            </div>
+                                            <div className="relative z-10 flex gap-4">
+                                                <div className="w-12 h-12 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center text-lg font-black text-white shadow-lg backdrop-blur-sm group-hover:border-pearl/40 transition-all">
+                                                    {(data.name || 'X')[0]}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <h3 className="text-lg font-bold text-white leading-tight truncate group-hover:text-pearl transition-colors">
-                                                        {data.name || data.company || 'REDACTED_NODE'}
-                                                    </h3>
-                                                    <p className="text-[0.65rem] font-mono text-slate-500 uppercase tracking-wider mt-1 truncate">
-                                                        {data.title || 'Unknown Asset'}
-                                                    </p>
-                                                    <div className="text-[0.6rem] font-black text-white/30 truncate mt-0.5">{data.company}</div>
+                                                    <h3 className="text-lg font-bold text-white leading-tight group-hover:text-pearl transition-colors truncate">{data.name || 'REDACTED'}</h3>
+                                                    <div className="text-[0.6rem] text-slate-400 font-mono mt-0.5 truncate uppercase tracking-widest">{data.company || 'UNKNOWN_CORP'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Card Body - Intel Slab */}
+                                        <div className="p-6 flex-1 flex flex-col gap-5 border-t border-white/5 bg-black/20">
+
+                                            {/* CONTACT HUD */}
+                                            <div className="flex flex-col gap-1.5 p-3.5 rounded-2xl bg-black/40 border border-white/5 group-hover:border-pearl/20 transition-all duration-500 shadow-inner">
+                                                <div className="flex items-center justify-between text-[0.7rem] font-mono">
+                                                    <div className="flex items-center gap-3 text-emerald-400 font-bold">
+                                                        <Mail size={12} />
+                                                        <span className="truncate max-w-[120px]">{data.email || 'OFFLINE'}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="h-px bg-white/5 w-full"></div>
+                                                <div className="flex items-center justify-between text-[0.7rem] font-mono">
+                                                    <div className="flex items-center gap-3 text-pearl font-bold">
+                                                        <Smartphone size={12} />
+                                                        <span className="truncate max-w-[120px]">{data.phone || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="h-px bg-white/5 w-full"></div>
+                                                <div className="flex items-center justify-between text-[0.7rem] font-mono">
+                                                    <div className="flex items-center gap-3 text-amber-400 font-bold">
+                                                        <Globe size={12} />
+                                                        <span className="truncate max-w-[120px]">{data.location || 'GLOBAL'}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* Info Matrix */}
-                                            <div className="grid grid-cols-2 gap-2 mb-6">
-                                                <div className="p-2 rounded bg-black/30 border border-white/5">
-                                                    <div className="text-[0.55rem] font-bold text-slate-600 tracking-tighter mb-1 uppercase">LOC_COORDINATES</div>
-                                                    <div className="text-[0.65rem] text-slate-400 font-mono truncate">{data.location || 'GLOBAL'}</div>
+                                            {/* Intent Gauge */}
+                                            <div className="space-y-1.5 px-1">
+                                                <div className="flex justify-between text-[0.6rem] font-black uppercase tracking-widest text-slate-500">
+                                                    <span>INTENT_VELOCITY</span>
+                                                    <span className={isHot ? 'text-emerald-500' : 'text-amber-500'}>{result.intent_score}%</span>
                                                 </div>
-                                                <div className="p-2 rounded bg-black/30 border border-white/5">
-                                                    <div className="text-[0.55rem] font-bold text-slate-600 tracking-tighter mb-1 uppercase">SECTOR_TYPE</div>
-                                                    <div className="text-[0.65rem] text-slate-400 font-mono truncate">{data.industry || 'PRIVATE'}</div>
+                                                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={`h-full transition-all duration-1000 ${isHot ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-amber-500 shadow-[0_0_10px_#f59e0b]'}`}
+                                                        style={{ width: `${result.intent_score}%` }}
+                                                    ></div>
                                                 </div>
                                             </div>
 
                                             <div className="flex-1"></div>
 
-                                            {/* Oracle Signal Ribbon */}
-                                            {result.oracle_signal && result.oracle_signal !== 'Baseline' && (
-                                                <div className="mb-6 p-3 bg-pearl/5 border-l-2 border-pearl rounded-r text-[0.65rem] font-mono text-pearl/80 italic leading-relaxed">
-                                                    "{result.oracle_signal}"
-                                                </div>
-                                            )}
-
-                                            {/* Footer Metrics */}
-                                            <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                                                <div className="flex flex-col">
-                                                    <span className="text-[0.5rem] font-black text-slate-600 uppercase tracking-widest">INTENT_LEVEL</span>
-                                                    <span className={`text-lg font-display font-black leading-none mt-1 ${isHot ? 'text-emerald-500' : 'text-amber-500'}`}>
-                                                        {result.intent_score}%
-                                                    </span>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    {data.linkedin_url && (
-                                                        <a href={data.linkedin_url} target="_blank" className="p-2 rounded-lg bg-white/5 border border-white/10 text-slate-500 hover:text-pearl transition-colors">
-                                                            <Linkedin size={14} />
-                                                        </a>
-                                                    )}
-                                                    <button className="p-2 rounded-lg bg-white/5 border border-white/5 text-slate-500 hover:text-white transition-colors">
-                                                        <Mail size={14} />
-                                                    </button>
-                                                </div>
+                                            {/* Actions */}
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => data.linkedin_url && window.open(data.linkedin_url, '_blank')}
+                                                    className="flex-1 py-2 rounded-lg bg-white/5 hover:bg-pearl/10 border border-white/10 hover:border-pearl/30 text-[0.6rem] font-black tracking-[0.2em] text-slate-400 hover:text-pearl transition-all uppercase flex items-center justify-center gap-2"
+                                                >
+                                                    <Linkedin size={10} /> SEARCH_PROFILE
+                                                </button>
+                                                <button className="flex-1 py-2 rounded-lg bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 text-[0.6rem] font-black tracking-[0.2em] text-slate-400 hover:text-emerald-500 transition-all uppercase flex items-center justify-center gap-2">
+                                                    <CheckCircle size={10} /> VERIFY
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
