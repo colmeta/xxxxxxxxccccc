@@ -10,6 +10,7 @@ import OracleControl from './components/OracleControl'
 import SovereignHub from './components/SovereignHub'
 import LiveFeed from './components/LiveFeed'
 import ResultsView from './components/ResultsView'
+import JobSeparatedResults from './components/JobSeparatedResults'
 import IntelligenceView from './components/IntelligenceView'
 import GlobalMapView from './components/GlobalMapView'
 import SettingsView from './components/SettingsView'
@@ -106,7 +107,7 @@ function App() {
                 } />
 
                 {/* PILLAR 2: THE VAULT */}
-                <Route path="/vault" element={<ResultsView />} />
+                <Route path="/vault" element={<JobSeparatedResults />} />
 
                 {/* PILLAR 3: INTELLIGENCE */}
                 <Route path="/intelligence" element={<IntelligenceView session={session} />} />

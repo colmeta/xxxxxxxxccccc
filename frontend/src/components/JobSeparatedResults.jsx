@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { Folder, Database, Download, CheckCircle2, Calendar, Target, ChevronRight, Activity, Filter, RefreshCw, Zap } from 'lucide-react'
+import { Folder, Database, Download, CheckCircle2, Calendar, Target, ChevronRight, Activity, Filter, RefreshCw, Zap, Mail, Smartphone, Globe, Linkedin } from 'lucide-react'
 
 export default function JobSeparatedResults() {
     const [jobGroups, setJobGroups] = useState([])
@@ -152,23 +152,53 @@ export default function JobSeparatedResults() {
                             </div>
                         </div>
 
-                        {/* Preview HUD */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {job.results.slice(0, 6).map(r => (
-                                <div key={r.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col justify-between">
-                                    <div>
-                                        <div className="text-[0.7rem] font-black text-white hover:text-pearl transition-colors truncate mb-1">
+                        {/* Preview HUD - Intelligence Slabs */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {job.results.slice(0, 50).map(r => (
+                                <div key={r.id} className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-pearl/40 hover:bg-white/[0.06] transition-all duration-500 group/item flex flex-col justify-between relative overflow-hidden backdrop-blur-md">
+                                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover/item:opacity-30 transition-opacity">
+                                        <Zap size={40} className="text-pearl" />
+                                    </div>
+
+                                    <div className="relative z-10">
+                                        <div className="text-[0.8rem] font-black text-white group-hover/item:text-pearl transition-colors truncate mb-1 flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
                                             {r.data_payload?.name || 'NODE_UNNAMED'}
                                         </div>
-                                        <div className="text-[0.6rem] font-mono text-slate-500 truncate uppercase tracking-widest mb-3">
+                                        <div className="text-[0.6rem] font-mono text-slate-500 truncate uppercase tracking-widest mb-4">
                                             {r.data_payload?.title || 'CLASS_NULL'}
                                         </div>
+
+                                        {/* READABLE CONTACT INTEL */}
+                                        <div className="space-y-2 mb-4 bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <div className="flex items-center gap-3 text-[0.65rem] text-slate-300">
+                                                <div className="p-1 rounded bg-pearl/10 text-pearl"><Mail size={10} /></div>
+                                                <span className="truncate font-mono">{r.data_payload?.email || 'OFFLINE'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-[0.65rem] text-slate-300">
+                                                <div className="p-1 rounded bg-blue-500/10 text-blue-400"><Smartphone size={10} /></div>
+                                                <span className="truncate font-mono">{r.data_payload?.phone || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-[0.65rem] text-slate-300">
+                                                <div className="p-1 rounded bg-amber-500/10 text-amber-400"><Globe size={10} /></div>
+                                                <span className="truncate font-mono">{r.data_payload?.location || 'Unknown'}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center bg-black/40 p-2 rounded-lg border border-white/5">
-                                        <span className="text-[0.5rem] font-black text-slate-600 uppercase tracking-widest">Score</span>
-                                        <span className={`text-[0.65rem] font-mono font-black ${r.clarity_score > 80 ? 'text-emerald-500' : 'text-pearl'}`}>
-                                            {r.clarity_score}%
-                                        </span>
+
+                                    <div className="flex justify-between items-center bg-black/60 p-2.5 rounded-xl border border-white/10 relative z-10 mt-auto">
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-[0.5rem] font-black text-slate-600 uppercase tracking-widest">CLARITY</div>
+                                            <div className={`text-[0.7rem] font-mono font-black ${r.clarity_score > 80 ? 'text-emerald-500' : 'text-pearl'}`}>
+                                                {r.clarity_score}%
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => window.open(r.data_payload?.linkedin_url || r.data_payload?.source_url, '_blank')}
+                                            className="p-1.5 rounded bg-white/5 text-slate-500 hover:text-pearl hover:bg-white/10 transition-all"
+                                        >
+                                            <Linkedin size={12} />
+                                        </button>
                                     </div>
                                 </div>
                             ))}
