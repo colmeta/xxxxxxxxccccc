@@ -7,7 +7,7 @@ google-generativeai
 jsonschema
 requests
 aiohttp==3.9.1
-httpx==2.31.0
+httpx
 feedparser==6.0.10
 google-genai>=0.1.0
 dnspython>=2.6.0
