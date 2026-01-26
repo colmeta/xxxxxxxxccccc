@@ -12,6 +12,16 @@ class TechStackEngine:
         self.page = page
         self.dork_engine = BaseDorkEngine(page, "tech_sleuth")
 
+    async def scrape(self, url):
+        """
+        Standard interface wrapper for unified_tech_enrich.
+        """
+        # Create a mock lead object to reuse unified logic
+        lead = {"website": url}
+        result = await self.unified_tech_enrich(lead)
+        # Return as list to match other engines
+        return [result]
+
     async def scrape_builtwith_patterns(self, domain):
         """
         Uses discovery dorking to mimic BuiltWith profiles.

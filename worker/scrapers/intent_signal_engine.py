@@ -12,6 +12,14 @@ class IntentSignalEngine:
         self.page = page
         self.dork_engine = BaseDorkEngine(page, "intent_oracle")
 
+    async def scrape(self, company_name):
+        """
+        Standard interface wrapper.
+        """
+        lead = {"name": company_name}
+        result = await self.calculate_intent_multiplier(lead)
+        return [result]
+
     async def scrape_hiring_signals(self, company_name):
         """
         Dorks Indeed and LinkedIn Jobs.

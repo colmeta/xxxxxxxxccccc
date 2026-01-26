@@ -139,7 +139,29 @@ class EnrichmentBridge:
                             current_socials.update(site_data['socials'])
                             lead['socials'] = current_socials
                 except Exception as e:
+                except Exception as e:
                     print(f"   ⚠️ Website mining error: {e}")
+
+            # ========== EMAIL PATTERN GENERATION (High-Yield Fallback) ==========
+            # If we have a website but NO email, generate standard patterns
+            if lead.get('website') and not lead.get('email'):
+                try:
+                    import urllib.parse
+                    domain = urllib.parse.urlparse(lead['website']).netloc.replace('www.', '')
+                    if domain:
+                        # Generate "educated guess" patterns
+                        patterns = [
+                            f"info@{domain}",
+                            f"contact@{domain}",
+                            f"hello@{domain}",
+                            f"support@{domain}"
+                        ]
+                        # Assign the first one as a high-probability contact
+                        lead['email'] = patterns[0]
+                        lead['email_source'] = "pattern_generated"
+                        lead['email_confidence'] = "Medium"
+                        print(f"   📧 Generated email pattern: {lead['email']}")
+                except: pass
 
             # ========== LAYER 2: REPUTATION (Clutch, G2, Trustpilot) ==========
             print(f"   ⭐ Layer 2: Checking reputation for {company_name}...")
