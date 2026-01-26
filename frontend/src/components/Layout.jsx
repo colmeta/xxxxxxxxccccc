@@ -88,8 +88,12 @@ export default function Layout({ children, session }) {
                             ${isActive ? 'text-pearl' : 'text-slate-500'}
                         `}
                     >
-                        <item.icon size={20} className={isActive ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]' : ''} />
-                        <span className="text-[0.5rem] font-bold tracking-wider">{item.label.split(' ')[0]}</span>
+                        {({ isActive }) => (
+                            <>
+                                <item.icon size={20} className={isActive ? 'drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]' : ''} />
+                                <span className="text-[0.5rem] font-bold tracking-wider">{item.label.split(' ')[0]}</span>
+                            </>
+                        )}
                     </NavLink>
                 ))}
             </nav>
