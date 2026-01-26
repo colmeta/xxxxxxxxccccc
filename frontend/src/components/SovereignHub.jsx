@@ -132,12 +132,6 @@ export default function SovereignHub() {
                                     <div className="bg-white/5 rounded px-2 py-1.5 border border-white/5">
                                         LOCATION: <span className="text-slate-300 block mt-0.5 truncate">{p.location || 'GLOBAL'}</span>
                                     </div>
-                                    <div className="bg-white/5 rounded px-2 py-1.5 border border-white/5">
-                                        EMAIL: <span className="text-emerald-500 block mt-0.5 truncate font-bold">{p.email || 'OFFLINE'}</span>
-                                    </div>
-                                    <div className="bg-white/5 rounded px-2 py-1.5 border border-white/5">
-                                        PHONE: <span className="text-pearl block mt-0.5 truncate font-bold">{p.phone || 'N/A'}</span>
-                                    </div>
                                 </div>
 
                                 {/* Velocity Bar */}

@@ -120,25 +120,20 @@ export default function JobSeparatedResults() {
             <div className="space-y-6">
                 {jobGroups.map((job, idx) => (
                     <div key={job.id} className="glass-panel p-8 bg-black/40 border-white/5 hover:border-pearl/20 transition-all group relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none group-hover:opacity-[0.08] transition-opacity duration-1000 rotate-12">
-                            <Database size={180} strokeWidth={0.5} className="text-pearl" />
+                        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                            <Folder size={120} strokeWidth={0.5} className="text-pearl" />
                         </div>
 
-                        {/* Slab Header - Mission Profile */}
-                        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 border-b border-pearl/10 pb-8 mb-10 relative z-10">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-2 w-2 rounded-full bg-pearl animate-pulse shadow-[0_0_8px_#00F0FF]"></div>
-                                    <h3 className="text-2xl font-display font-black text-white tracking-[0.2em] uppercase">
-                                        {job.category || job.target_query}
-                                    </h3>
+                        {/* Slab Header */}
+                        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 border-b border-white/5 pb-6 mb-8">
+                            <div className="space-y-1">
+                                <div className="text-xl font-display font-black text-white tracking-widest uppercase">
+                                    {job.category || job.target_query}
                                 </div>
-                                <div className="flex flex-wrap items-center gap-6 text-[0.65rem] font-mono text-slate-500 uppercase tracking-widest bg-black/40 px-4 py-2 rounded-lg border border-white/5">
-                                    <span className="flex items-center gap-2 hover:text-pearl transition-colors cursor-default"><Calendar size={12} /> {new Date(job.created_at).toLocaleDateString()}</span>
-                                    <div className="w-[1px] h-3 bg-white/10"></div>
-                                    <span className="flex items-center gap-2 text-white"><Zap size={12} className="text-pearl animate-bounce-slow" /> {job.results.length} INTEL_NODES</span>
-                                    <div className="w-[1px] h-3 bg-white/10"></div>
-                                    <span className="flex items-center gap-2 hover:text-white transition-colors cursor-default"><Target size={12} /> PLATFORM: {job.target_platform.toUpperCase()}</span>
+                                <div className="flex items-center gap-4 text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">
+                                    <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(job.created_at).toLocaleDateString()}</span>
+                                    <span className="flex items-center gap-1"><Zap size={10} className="text-pearl" /> {job.results.length} NODES</span>
+                                    <span className="flex items-center gap-1"><Target size={10} /> {job.target_platform.toUpperCase()}</span>
                                 </div>
                             </div>
 
@@ -157,14 +152,10 @@ export default function JobSeparatedResults() {
                             </div>
                         </div>
 
-                        {/* Preview HUD - Intelligence Slabs */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {job.results.slice(0, 50).map(r => (
-                                <div key={r.id} className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-pearl/40 hover:bg-white/[0.06] transition-all duration-500 group/item flex flex-col justify-between relative overflow-hidden backdrop-blur-md">
-                                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover/item:opacity-30 transition-opacity">
-                                        <Zap size={40} className="text-pearl" />
-                                    </div>
-
+                        {/* Preview HUD */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {job.results.slice(0, 6).map(r => (
+                                <div key={r.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex flex-col justify-between">
                                     <div className="relative z-10">
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-3">
@@ -212,20 +203,11 @@ export default function JobSeparatedResults() {
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className="flex justify-between items-center bg-black/60 p-2.5 rounded-xl border border-white/10 relative z-10 mt-auto">
-                                        <div className="flex items-center gap-2">
-                                            <div className="text-[0.5rem] font-black text-slate-600 uppercase tracking-widest">CLARITY</div>
-                                            <div className={`text-[0.7rem] font-mono font-black ${r.clarity_score > 80 ? 'text-emerald-500' : 'text-pearl'}`}>
-                                                {r.clarity_score}%
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => window.open(r.data_payload?.linkedin_url || r.data_payload?.source_url, '_blank')}
-                                            className="p-1.5 rounded bg-white/5 text-slate-500 hover:text-pearl hover:bg-white/10 transition-all"
-                                        >
-                                            <Linkedin size={12} />
-                                        </button>
+                                    <div className="flex justify-between items-center bg-black/40 p-2 rounded-lg border border-white/5">
+                                        <span className="text-[0.5rem] font-black text-slate-600 uppercase tracking-widest">Score</span>
+                                        <span className={`text-[0.65rem] font-mono font-black ${r.clarity_score > 80 ? 'text-emerald-500' : 'text-pearl'}`}>
+                                            {r.clarity_score}%
+                                        </span>
                                     </div>
                                 </div>
                             ))}

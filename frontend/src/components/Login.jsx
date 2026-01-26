@@ -44,11 +44,10 @@ export default function Login() {
 
             <div className="glass-panel w-full max-w-md p-8 md:p-12 relative z-10 flex flex-col items-center">
 
-                {/* Brand Header */}
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-black/50 border border-pearl/30 shadow-neon mb-6 relative group">
-                        <div className="absolute inset-0 bg-pearl/20 blur-lg rounded-full animate-pulse"></div>
-                        <Disc className="w-10 h-10 text-pearl animate-spin-slow relative z-10" strokeWidth={1.5} />
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-black/50 border border-pearl/30 shadow-neon mb-6 relative group transition-all duration-500 hover:border-pearl/60">
+                        <div className="absolute inset-0 bg-pearl/20 blur-xl rounded-full animate-pulse group-hover:bg-pearl/30 transition-all"></div>
+                        <img src="/logo-cp.png" alt="CP Shield" className="w-14 h-14 relative z-10 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)] group-hover:scale-110 transition-transform duration-500" />
                     </div>
 
                     <h1 className="text-4xl font-display font-black tracking-tighter text-white mb-2 uppercase">

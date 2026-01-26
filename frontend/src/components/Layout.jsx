@@ -37,12 +37,11 @@ export default function Layout({ children, session }) {
                 onMouseEnter={() => setIsSidebarOpen(true)}
                 onMouseLeave={() => setIsSidebarOpen(false)}
             >
-                {/* LOGO */}
+                {/* LOGO - CP SHIELD */}
                 <div className="p-5 flex items-center justify-center border-b border-white/5 h-20">
                     <div className="relative flex items-center justify-center w-10 h-10 group-hover:scale-110 transition-transform duration-300">
-                        {/* Logo Icon Placeholder */}
                         <div className="absolute inset-0 bg-pearl/20 blur-md rounded-full"></div>
-                        <Disc className={`w-8 h-8 text-pearl ${isSidebarOpen ? 'animate-spin-slow' : ''}`} strokeWidth={1.5} />
+                        <img src="/logo-cp.png" alt="CP" className="w-8 h-8 relative z-10 drop-shadow-[0_0_8px_rgba(0,240,255,0.3)]" />
                     </div>
                 </div>
 

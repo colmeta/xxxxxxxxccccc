@@ -184,7 +184,7 @@ class WebsiteEngine:
                     else:
                         await route.continue_()
                 except:
-                    pass # Page or request likely closed/finished already
+                    pass # Request likely finished or page closed
 
             await self.page.route("**/*", handle_route)
 
