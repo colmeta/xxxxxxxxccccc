@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import EmptyStates, { SkeletonLoader } from './EmptyStates'
 import VelocityView from './VelocityView'
 import DisplacementLibrary from './DisplacementLibrary'
-import { Brain, Download, Filter, User, MapPin, Factory, Linkedin, Mail, CheckCircle, TrendingUp, Zap, Grid, Activity, ShieldCheck, Cpu } from 'lucide-react'
+import { Brain, Download, Filter, User, MapPin, Factory, Linkedin, Mail, CheckCircle, TrendingUp, Zap, Grid, Activity, ShieldCheck, Cpu, Smartphone, Globe } from 'lucide-react'
 
 export default function IntelligenceView({ session }) {
     const [viewMode, setViewMode] = useState('grid') // 'grid', 'velocity', 'scripts'
