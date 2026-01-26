@@ -4,124 +4,133 @@
 
 @layer base {
   body {
-    @apply bg-background text-white font-sans antialiased overflow-x-hidden;
-    background-image:
-      radial-gradient(circle at 15% 50%, rgba(6, 182, 212, 0.08), transparent 25%),
-      radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.08), transparent 25%);
-    background-attachment: fixed;
+    @apply bg-background text-white font-sans antialiased overflow-x-hidden selection:bg-pearl selection:text-black;
+    /* Deep Space Gradient + Noise Texture handled via background-image if needed, or simple CSS radial */
+    background: radial-gradient(circle at 50% 0%, #0a0a0a, #000000);
   }
 
-  /* Custom Scrollbar */
+  /* Custom Scrollbar - Sleek & Minimal */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-background;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-700 rounded-full hover:bg-slate-600 transition-colors;
+    @apply bg-white/10 rounded-full hover:bg-pearl/50 transition-colors;
   }
 }
 
 @layer components {
 
   /* 
-   * GLASSMORPHISM UTILITIES 
-   * Replaces .supreme-glass and .glass-panel
+   * THE VOID CARD
+   * Advanced glassmorphism with inner light and depth
    */
   .glass-panel {
-    @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-glass rounded-2xl transition-all duration-300;
+    @apply bg-glass backdrop-blur-xl border border-glass-border shadow-glass rounded-2xl relative overflow-hidden transition-all duration-500;
+  }
+
+  .glass-panel::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-500 pointer-events-none;
+  }
+
+  .glass-panel:hover::before {
+    @apply opacity-100;
   }
 
   .glass-panel:hover {
-    @apply bg-card/70 border-white/20 -translate-y-[2px] shadow-glow;
+    @apply shadow-neon border-pearl/30 -translate-y-1;
+    --tw-shadow-color: rgba(0, 240, 255, 0.2);
   }
 
   /* 
    * CYBER INPUTS 
-   * Replaces .input-cyber
+   * "Alive" inputs that glow on focus
    */
   .input-cyber {
-    @apply bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-pearl focus:ring-1 focus:ring-pearl transition-all w-full;
+    @apply bg-obsidian-light border border-white/5 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-pearl/50 focus:shadow-neon transition-all w-full font-mono text-sm;
+    --tw-shadow-color: rgba(0, 240, 255, 0.3);
   }
 
   /* 
-   * BUTTONS 
-   * Replaces .btn-primary, .btn-secondary
+   * BUTTONS - TACTILE TRIGGERS
    */
   .btn-primary {
-    @apply bg-pearl text-black font-bold uppercase tracking-wider px-6 py-3 rounded-xl hover:shadow-glow hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
+    @apply relative overflow-hidden bg-pearl/10 border border-pearl/50 text-pearl font-bold uppercase tracking-widest px-8 py-3 rounded-lg hover:bg-pearl hover:text-black hover:shadow-neon-strong active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-md;
+    --tw-shadow-color: rgba(0, 240, 255, 0.6);
   }
 
   .btn-ghost {
-    @apply bg-white/5 border border-white/10 text-white font-semibold px-4 py-2 rounded-xl hover:bg-white/10 transition-all flex items-center gap-2;
+    @apply bg-transparent border border-white/5 text-slate-400 font-medium px-4 py-2 rounded-lg hover:text-white hover:border-white/20 hover:bg-white/5 transition-all flex items-center gap-2 uppercase tracking-wider text-xs;
   }
 
   .btn-danger {
-    @apply bg-red-500/10 text-red-500 border border-red-500/20 px-4 py-2 rounded-xl hover:bg-red-500/20 hover:border-red-500/50 transition-all font-semibold uppercase tracking-wide text-xs;
+    @apply bg-red-500/5 text-red-500 border border-red-500/20 px-4 py-2 rounded-lg hover:bg-red-500/20 hover:shadow-neon hover:border-red-500 transition-all font-bold uppercase tracking-wider text-xs;
+    --tw-shadow-color: rgba(255, 0, 60, 0.4);
   }
 
   /* 
-   * STATUS BADGES 
+   * STATUS BADGES - HOLOGRAPHIC
    */
   .badge {
-    @apply px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border;
+    @apply px-3 py-1 rounded-sm text-[10px] font-bold uppercase tracking-[0.2em] border backdrop-blur-md;
   }
 
   .badge-success {
-    @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/20;
+    @apply bg-accent-success/10 text-accent-success border-accent-success/20 shadow-[0_0_10px_rgba(0, 255, 148, 0.1)];
   }
 
   .badge-warning {
-    @apply bg-amber-500/10 text-amber-400 border-amber-500/20;
+    @apply bg-accent-gold/10 text-accent-gold border-accent-gold/20 shadow-[0_0_10px_rgba(255, 215, 0, 0.1)];
   }
 
   .badge-pearl {
-    @apply bg-pearl/10 text-pearl border-pearl/20;
+    @apply bg-pearl/10 text-pearl border-pearl/30 shadow-[0_0_15px_rgba(0, 240, 255, 0.15)];
   }
 
   .badge-error {
-    @apply bg-red-500/10 text-red-400 border-red-500/20;
+    @apply bg-accent-alert/10 text-accent-alert border-accent-alert/20 shadow-[0_0_10px_rgba(255, 0, 60, 0.1)];
   }
 
   /* 
    * LAYOUT UTILITIES 
    */
   .section-header {
-    @apply flex items-center justify-between mb-6;
+    @apply flex items-center justify-between mb-8 border-b border-white/5 pb-4;
   }
 
   .section-title {
-    @apply text-xl font-bold flex items-center gap-2 text-white;
+    @apply text-2xl font-display font-bold flex items-center gap-3 text-white tracking-wider;
+  }
+
+  /* 
+   * UTILITY CLASSES 
+   */
+  .text-glow {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  }
+
+  .border-glow {
+    box-shadow: 0 0 5px var(--tw-border-opacity) var(--tw-border-color);
   }
 }
 
-/* Animations */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin 3s linear infinite;
-}
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
+/* Animations that Tailwind config doesn't cover easily */
+@keyframes grid-move {
+  0% {
     transform: translateY(0);
   }
+
+  100% {
+    transform: translateY(40px);
+  }
 }
 
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+.animate-grid {
+  animation: grid-move 20s linear infinite;
 }

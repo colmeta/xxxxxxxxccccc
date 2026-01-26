@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { Settings, CreditCard, Key, Shield, Wifi, RefreshCw, Lock } from 'lucide-react'
+import { Settings, CreditCard, Key, Shield, Wifi, RefreshCw, Lock, Activity, Cpu, Globe, Link2, Save } from 'lucide-react'
 
 export default function SettingsView({ session }) {
     const [org, setOrg] = useState(null)
@@ -37,156 +37,156 @@ export default function SettingsView({ session }) {
     const saveSlack = async () => {
         setSaving(true)
         const { error } = await supabase.from('organizations').update({ slack_webhook: slackUrl }).eq('id', org.id)
-        if (!error) alert('Invisible Hand (Slack) Activated.')
+        if (!error) alert('PROTOCOL_SAVED: Stealth Relay (Slack) Enabled.')
         setSaving(false)
     }
 
     const generateKey = async () => {
         const newKey = `nx_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
-        const confirm = window.confirm("Generate a new Clarity Pearl API Key? This will replace your existing one.")
+        const confirm = window.confirm("Generate a new Tactical API Key? This will replace your existing one.")
         if (!confirm) return
 
         setSaving(true)
-        alert(`CLARITY PEARL API KEY GENERATED:\n\n${newKey}\n\nCOPY THIS NOW. It will not be shown again.`)
+        alert(`API_KEY_GENERATED:\n\n${newKey}\n\nCOPY THIS NOW. It will not be shown again.`)
         setSaving(false)
     }
 
     if (loading) return (
-        <div className="text-center p-12 animate-pulse text-slate-500 font-mono tracking-widest text-xs">
-            SYNCHRONIZING ENTERPRISE SETTINGS...
+        <div className="h-[400px] flex items-center justify-center">
+            <div className="text-pearl font-mono text-xs tracking-[0.5em] animate-pulse">SYNCHRONIZING_COMMAND_LATICE...</div>
         </div>
     )
 
     return (
-        <div className="space-y-8 animate-slide-up">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 bg-slate-800 rounded-xl border border-white/5">
-                    <Settings className="text-white" size={24} />
+        <div className="space-y-12 animate-slide-up">
+
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-8">
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-display font-black text-white tracking-widest flex items-center gap-4">
+                        COMMAND <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">CENTER</span>
+                    </h2>
+                    <div className="flex items-center gap-2 text-[0.55rem] font-mono text-slate-500 uppercase tracking-widest">
+                        <Cpu size={12} className="text-pearl" />
+                        <span>ENTREPRISE_NODE_CONFIG // ORG_ID: {org?.id?.slice(0, 8)}</span>
+                    </div>
                 </div>
-                <h2 className="text-2xl font-black text-white tracking-tight">
-                    COMMAND CENTER
-                </h2>
+
+                <div className="flex gap-4">
+                    <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">
+                        PLAN_TIER: <span className="text-pearl">{org?.plan_tier || 'PRO_ELITE'}</span>
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Organization Details */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <CreditCard size={14} /> Credit Status
+
+                {/* Credit Slab */}
+                <div className="glass-panel p-8 border-pearl/10 bg-black/40 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                        <CreditCard size={120} strokeWidth={0.5} className="text-pearl" />
                     </div>
-                    <div className="glass-panel p-6 bg-white/5">
-                        <div className="text-4xl font-black text-pearl">
-                            {org?.credits_monthly - org?.credits_used}
+
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-2 rounded-lg bg-pearl/10 text-pearl"><CreditCard size={18} /></div>
+                        <h3 className="text-sm font-display font-black text-white tracking-widest uppercase">NODE_CREDITS</h3>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="flex items-end gap-4">
+                            <div className="text-6xl font-display font-black text-white tracking-tighter">
+                                {org?.credits_monthly - org?.credits_used}
+                            </div>
+                            <div className="text-[0.6rem] font-mono font-bold text-slate-500 uppercase tracking-widest mb-2 pb-1">Remaining_Calculated</div>
                         </div>
-                        <div className="text-xs text-slate-400 mt-2 font-medium">
-                            Credits remaining for <span className="text-white">{org?.name}</span> ({org?.plan_tier?.toUpperCase()})
-                        </div>
-                        <div className="mt-6 h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-pearl shadow-[0_0_10px_rgba(6,182,212,0.5)] transition-all duration-1000"
-                                style={{ width: `${(org?.credits_used / org?.credits_monthly) * 100}%` }}
-                            ></div>
+
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-[0.55rem] font-mono text-slate-500 uppercase">
+                                <span>Utilization</span>
+                                <span>{((org?.credits_used / org?.credits_monthly) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div
+                                    className="h-full bg-gradient-to-r from-pearl to-white shadow-glow transition-all duration-1000"
+                                    style={{ width: `${(org?.credits_used / org?.credits_monthly) * 100}%` }}
+                                ></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* API & Integrity */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <Key size={14} /> White-Label API
+                {/* API Key Slab */}
+                <div className="glass-panel p-8 border-white/5 bg-white/[0.02] relative overflow-hidden group">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-2 rounded-lg bg-white/5 text-slate-400"><Key size={18} /></div>
+                        <h3 className="text-sm font-display font-black text-white tracking-widest uppercase">TACTICAL_ACCESS_KEYS</h3>
                     </div>
-                    <div className="glass-panel p-6 bg-white/5 flex flex-col justify-between h-full">
+
+                    <div className="space-y-6">
                         <div className="flex gap-4">
                             <input
                                 readOnly
                                 value={apiKey}
-                                className="input-cyber text-center font-mono opacity-50"
-                                placeholder="NO API KEY GENERATED"
+                                className="flex-1 bg-black/40 border border-white/5 rounded-xl px-4 py-3 font-mono text-xs text-pearl outline-none focus:border-pearl/40 transition-all text-center"
+                                placeholder="NO_KEY_DETECTED"
                             />
-                            <button onClick={generateKey} className="btn-primary py-2 px-4 text-xs whitespace-nowrap">
+                            <button onClick={generateKey} className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-[0.6rem] font-black tracking-widest text-slate-400 hover:text-white hover:border-pearl/30 hover:bg-white/10 transition-all uppercase flex items-center gap-2">
                                 <RefreshCw size={14} /> ROTATE
                             </button>
                         </div>
-                        <p className="text-xs text-slate-500 mt-4 leading-relaxed">
-                            Use this key to integrate the Intelligence Vault into your 3rd party applications.
-                            <span className="text-red-400 block mt-1">Warning: Rotating invalidates old keys immediately.</span>
+                        <p className="text-[0.6rem] font-mono text-slate-600 uppercase leading-relaxed tracking-widest italic">
+                            Integration active for white-label intelligence vault exposure.
+                            <span className="text-red-500 block mt-1 underline underline-offset-4">ROTATION_INVALIDATES_ALL_ACTIVE_SESSIONS.</span>
                         </p>
                     </div>
                 </div>
             </div>
 
-            <hr className="border-white/5 my-8" />
-
-            {/* DIVINE SWARM orchestration */}
-            <div className="space-y-6">
-                <div className="flex justify-between items-end">
-                    <div>
-                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                            <Wifi className="text-emerald-500" size={20} /> DIVINE SWARM
-                        </h3>
-                        <p className="text-sm text-slate-500 mt-1">Active residential nodes and proxy health.</p>
-                    </div>
-                    <span className="badge bg-emerald-500/10 text-emerald-500 border-emerald-500/20">GLOBAL SYNC ACTIVE</span>
+            {/* The Invisible Hand (Slack Relay) */}
+            <div className="glass-panel p-8 border-purple-500/10 bg-purple-500/[0.02] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                    <Shield size={120} strokeWidth={0.5} className="text-purple-500" />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {workers.length === 0 ? (
-                        <div className="col-span-full p-12 text-center bg-white/5 rounded-2xl border border-white/5 text-slate-600">
-                            No active nodes detected. Ensure your local worker is running.
+                <div className="flex items-center gap-3 mb-8">
+                    <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all"><Shield size={18} /></div>
+                    <h3 className="text-sm font-display font-black text-white tracking-widest uppercase">STEALTH_RELAY_PROTOCOL</h3>
+                </div>
+
+                <div className="max-w-3xl space-y-6">
+                    <p className="text-[0.65rem] font-mono text-slate-400 leading-relaxed uppercase tracking-wider">
+                        Configure high-intent Oracle signals (&gt;80% score) to broadcast directly to your secure communications layer.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1 bg-black/60 border border-white/5 rounded-2xl p-4 flex items-center gap-4 group/input focus-within:border-purple-500/40 transition-all">
+                            <Link2 size={16} className="text-slate-700 group-focus-within/input:text-purple-500 transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="https://hooks.slack.com/services/..."
+                                value={slackUrl}
+                                onChange={(e) => setSlackUrl(e.target.value)}
+                                className="flex-1 bg-transparent border-none outline-none font-mono text-xs text-purple-400 placeholder:text-slate-800"
+                            />
                         </div>
-                    ) : (
-                        workers.map(w => (
-                            <div key={w.worker_id} className="glass-panel p-5 relative overflow-hidden">
-                                <div className="flex justify-between mb-4">
-                                    <div className="font-bold text-sm text-white font-mono">{w.worker_id}</div>
-                                    <div className={`w-2 h-2 rounded-full ${new Date() - new Date(w.last_pulse) < 60000 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`}></div>
-                                </div>
-                                <div className="space-y-2 text-xs">
-                                    <div className="flex justify-between text-slate-400">
-                                        <span>LOCATION</span>
-                                        <span className="text-white font-mono">{w.geo_city || 'Unknown'}, {w.geo_country || 'Earth'}</span>
-                                    </div>
-                                    <div className="flex justify-between text-slate-400">
-                                        <span>IP ADDR</span>
-                                        <span className="text-white font-mono">{w.public_ip || 'Masked'}</span>
-                                    </div>
-                                    <div className="mt-3 pt-3 border-t border-white/5">
-                                        <div className="flex justify-between mb-1">
-                                            <span className="text-[0.6rem] font-bold text-slate-500">STEALTH HEALTH</span>
-                                            <span className={`text-xs font-bold ${w.stealth_health > 90 ? 'text-emerald-500' : 'text-amber-500'}`}>{w.stealth_health}%</span>
-                                        </div>
-                                        <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                                            <div className={`h-full ${w.stealth_health > 90 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${w.stealth_health}%` }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
+                        <button
+                            onClick={saveSlack}
+                            disabled={saving}
+                            className="bg-purple-600 text-white font-display font-bold px-8 py-4 rounded-2xl text-[0.6rem] tracking-[0.3em] hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] hover:scale-105 active:scale-95 transition-all uppercase flex items-center justify-center gap-2"
+                        >
+                            <Save size={14} /> {saving ? 'SYNCING...' : 'ACTIVATE_RELAY'}
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <hr className="border-white/5 my-8" />
-
-            {/* The Invisible Hand */}
-            <div className="max-w-3xl">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-2">
-                    <Shield className="text-purple-500" size={20} /> THE INVISIBLE HAND
-                </h3>
-                <p className="text-sm text-slate-500 mb-6">Receive real-time Oracle signals (80%+ intent) directly in your Slack workspace.</p>
-
-                <div className="flex gap-4">
-                    <input
-                        type="text"
-                        placeholder="https://hooks.slack.com/services/..."
-                        value={slackUrl}
-                        onChange={(e) => setSlackUrl(e.target.value)}
-                        className="input-cyber flex-1"
-                    />
-                    <button onClick={saveSlack} disabled={saving} className="btn-primary min-w-[150px]">
-                        {saving ? 'SAVING...' : 'ACTIVATE RELAY'}
-                    </button>
+            {/* Footnote HUD */}
+            <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-[0.5rem] font-mono text-slate-700 uppercase tracking-[0.5em]">
+                <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-neon-sm"></div>
+                    SOUVEREIGN_SYSTEM_OPERATIONAL
                 </div>
+                <div>VER_V2.9.4_GOD_MODE_ACTIVE</div>
             </div>
         </div>
     )

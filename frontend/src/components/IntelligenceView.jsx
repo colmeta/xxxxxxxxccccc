@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import EmptyStates, { SkeletonLoader } from './EmptyStates'
 import VelocityView from './VelocityView'
 import DisplacementLibrary from './DisplacementLibrary'
-import { Brain, Download, Filter, User, MapPin, Factory, Linkedin, Mail, CheckCircle, TrendingUp, Zap, Grid, Activity } from 'lucide-react'
+import { Brain, Download, Filter, User, MapPin, Factory, Linkedin, Mail, CheckCircle, TrendingUp, Zap, Grid, Activity, ShieldCheck, Cpu } from 'lucide-react'
 
 export default function IntelligenceView({ session }) {
     const [viewMode, setViewMode] = useState('grid') // 'grid', 'velocity', 'scripts'
@@ -46,7 +46,6 @@ export default function IntelligenceView({ session }) {
         }
     }
 
-    // CSV Export logic
     const downloadIntelligenceAsCSV = () => {
         if (results.length === 0) return
         const headers = ["Name", "Title", "Company", "Industry", "Location", "Email", "LinkedIn", "Intent Score", "Oracle Signal", "Clarity Score", "Velocity"]
@@ -77,129 +76,173 @@ export default function IntelligenceView({ session }) {
     }
 
     return (
-        <div className="space-y-8 mt-4">
-            {/* SUB-NAVIGATION for Intelligence Pillar */}
-            <div className="flex justify-center mb-8">
-                <div className="bg-slate-900/80 p-1.5 rounded-xl border border-white/10 flex gap-1 shadow-lg backdrop-blur-md">
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'grid' ? 'bg-pearl text-black shadow-glow' : 'text-slate-400 hover:text-white'
-                            }`}
-                    >
-                        <Grid size={16} /> DATA GRID
-                    </button>
-                    <button
-                        onClick={() => setViewMode('velocity')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'velocity' ? 'bg-pearl text-black shadow-glow' : 'text-slate-400 hover:text-white'
-                            }`}
-                    >
-                        <Activity size={16} /> VELOCITY
-                    </button>
-                    <button
-                        onClick={() => setViewMode('scripts')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'scripts' ? 'bg-pearl text-black shadow-glow' : 'text-slate-400 hover:text-white'
-                            }`}
-                    >
-                        <Zap size={16} /> SCRIPTS
-                    </button>
+        <div className="space-y-6 animate-slide-up">
+
+            {/* TACTICAL SUB-NAV */}
+            <div className="flex justify-center">
+                <div className="bg-black/40 backdrop-blur-xl p-1 rounded-xl border border-white/5 flex gap-1 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                    {[
+                        { id: 'grid', label: 'NEURAL GRID', icon: Grid },
+                        { id: 'velocity', label: 'TRAJECTORY', icon: Activity },
+                        { id: 'scripts', label: 'DISPLACEMENT', icon: Zap },
+                    ].map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setViewMode(item.id)}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-[0.65rem] font-display font-black tracking-widest transition-all duration-300 ${viewMode === item.id
+                                    ? 'bg-pearl text-black shadow-neon scale-105 active:scale-95'
+                                    : 'text-slate-500 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <item.icon size={14} />
+                            {item.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
             {/* VIEW CONTENT */}
             {viewMode === 'grid' && (
-                <div className="animate-slide-up">
-                    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <h2 className="text-xl font-black text-white flex items-center gap-3">
-                            <Brain className="text-pearl" size={24} /> INTELLIGENCE GRID
-                        </h2>
+                <div className="space-y-6">
+                    {/* Header Controls */}
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-6">
+                        <div className="space-y-1">
+                            <h2 className="text-3xl font-display font-black text-white tracking-widest flex items-center gap-4">
+                                INTELLIGENCE <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">LATTICE</span>
+                            </h2>
+                            <div className="flex items-center gap-2 text-[0.55rem] font-mono text-slate-500 uppercase tracking-widest">
+                                <ShieldCheck size={12} className="text-pearl" />
+                                <span>CROSS-LAYER VALIDATION ACTIVE // {results.length} NODES IDENTIFIED</span>
+                            </div>
+                        </div>
 
-                        <div className="flex gap-2">
-                            <button onClick={downloadIntelligenceAsCSV} className="btn-ghost text-xs border border-white/10">
-                                <Download size={14} /> EXPORT
-                            </button>
-                            <div className="flex bg-slate-800/50 rounded-lg p-1 border border-white/5">
+                        <div className="flex gap-4">
+                            <div className="flex bg-black/40 rounded-lg p-1 border border-white/5">
                                 {['all', 'high-intent', 'verified'].map(f => (
                                     <button
                                         key={f}
                                         onClick={() => setFilter(f)}
-                                        className={`px-3 py-1.5 rounded-md text-[0.65rem] font-bold uppercase transition-all ${filter === f ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-slate-300'
+                                        className={`px-4 py-1.5 rounded-md text-[0.6rem] font-black uppercase tracking-widest transition-all ${filter === f
+                                                ? 'bg-white/10 text-white shadow-inner'
+                                                : 'text-slate-500 hover:text-slate-400'
                                             }`}
                                     >
-                                        {f.replace('-', ' ')}
+                                        {f.replace('-', '_')}
                                     </button>
                                 ))}
                             </div>
+                            <button
+                                onClick={downloadIntelligenceAsCSV}
+                                className="px-4 py-1.5 border border-white/10 rounded-lg text-[0.6rem] font-black tracking-widest text-slate-500 hover:text-white hover:border-pearl/30 transition-all uppercase"
+                            >
+                                <Download size={12} className="inline mr-2" /> EXPORT_LATTICE
+                            </button>
                         </div>
                     </div>
 
                     {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {[1, 2, 3].map(i => <div key={i} className="h-64 glass-panel bg-white/5 animate-pulse"></div>)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <div key={i} className="h-64 glass-panel bg-white/[0.02] border-white/5 animate-pulse relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                                </div>
+                            ))}
                         </div>
                     ) : results.length === 0 ? (
-                        <div className="col-span-full py-12 text-center text-slate-500">
-                            No intelligence data matching filters.
+                        <div className="py-32 flex flex-col items-center justify-center gap-6 border border-dashed border-white/5 rounded-3xl bg-black/20">
+                            <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center text-slate-700">
+                                <Cpu size={40} strokeWidth={1} />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-lg font-display font-black text-slate-500 tracking-[0.2em] uppercase">No Intelligence Secured</p>
+                                <p className="text-[0.65rem] font-mono text-slate-600 mt-2">Adjust filters or initialize a sweep in Mission Control.</p>
+                            </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {results.map(result => {
                                 const data = result.data_payload || {}
                                 const isHot = result.intent_score >= 80
 
                                 return (
-                                    <div key={result.id} className={`glass-panel p-6 border transition-all hover:bg-white/5 ${isHot ? 'border-emerald-500/30' : 'border-white/5'}`}>
-                                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                                    <div key={result.id} className={`glass-panel p-6 border group hover:scale-[1.02] transition-all duration-300 relative overflow-hidden ${isHot ? 'border-emerald-500/30 bg-emerald-500/[0.02]' : 'border-white/5 bg-white/[0.01]'
+                                        }`}>
+                                        {/* Status Glow */}
+                                        <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity ${isHot ? 'text-emerald-500' : 'text-pearl'}`}>
+                                            <Brain size={120} strokeWidth={0.5} className="translate-x-12 -translate-y-12" />
+                                        </div>
 
-                                            {/* Profile Info */}
-                                            <div className="flex items-start gap-4">
-                                                <div className="relative">
-                                                    {data.avatar_url ? (
-                                                        <img src={data.avatar_url} className="w-12 h-12 rounded-xl object-cover ring-1 ring-white/10" />
-                                                    ) : (
-                                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center font-black text-lg text-pearl border border-white/10">
-                                                            {(data.name || "U")[0]}
+                                        <div className="relative z-10 flex flex-col h-full">
+                                            {/* Top Identity Block */}
+                                            <div className="flex gap-4 items-start mb-6">
+                                                <div className="relative shrink-0">
+                                                    <div className="w-14 h-14 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-center overflow-hidden shadow-lg">
+                                                        {data.avatar_url ? (
+                                                            <img src={data.avatar_url} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-gradient-to-br from-slate-800 to-black flex items-center justify-center font-display font-black text-xl text-white/30">
+                                                                {(data.name || "U")[0]}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {result.verified && (
+                                                        <div className="absolute -bottom-1 -right-1 p-1 bg-emerald-500 rounded-lg border-2 border-black">
+                                                            <ShieldCheck size={10} className="text-black" />
                                                         </div>
                                                     )}
-                                                    {data.logo_url && <img src={data.logo_url} className="absolute -bottom-1 -right-1 w-5 h-5 rounded bg-white p-0.5 border border-slate-900" />}
                                                 </div>
-
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-white leading-tight">{data.name || data.company || 'Unknown Target'}</h3>
-                                                    <div className="text-sm text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
-                                                        {data.title}
-                                                        {data.company && <span className="text-slate-500">@ {data.company}</span>}
-                                                    </div>
-                                                    <div className="flex gap-2 mt-2">
-                                                        {data.location && <span className="badge bg-white/5 text-slate-400 border-white/5 flex items-center gap-1"><MapPin size={10} /> {data.location}</span>}
-                                                        {data.industry && <span className="badge bg-purple-500/10 text-purple-400 border-purple-500/20 flex items-center gap-1"><Factory size={10} /> {data.industry}</span>}
-                                                    </div>
+                                                <div className="min-w-0">
+                                                    <h3 className="text-lg font-bold text-white leading-tight truncate group-hover:text-pearl transition-colors">
+                                                        {data.name || data.company || 'REDACTED_NODE'}
+                                                    </h3>
+                                                    <p className="text-[0.65rem] font-mono text-slate-500 uppercase tracking-wider mt-1 truncate">
+                                                        {data.title || 'Unknown Asset'}
+                                                    </p>
+                                                    <div className="text-[0.6rem] font-black text-white/30 truncate mt-0.5">{data.company}</div>
                                                 </div>
                                             </div>
 
-                                            {/* Scores */}
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-center">
-                                                    <div className="text-[0.6rem] text-slate-500 font-bold uppercase tracking-wider mb-1">INTENT</div>
-                                                    <div className={`text-2xl font-black ${isHot ? 'text-emerald-400' : 'text-amber-500'}`}>{result.intent_score}</div>
+                                            {/* Info Matrix */}
+                                            <div className="grid grid-cols-2 gap-2 mb-6">
+                                                <div className="p-2 rounded bg-black/30 border border-white/5">
+                                                    <div className="text-[0.55rem] font-bold text-slate-600 tracking-tighter mb-1 uppercase">LOC_COORDINATES</div>
+                                                    <div className="text-[0.65rem] text-slate-400 font-mono truncate">{data.location || 'GLOBAL'}</div>
                                                 </div>
-                                                <div className="w-px h-8 bg-white/10"></div>
-                                                <div className="text-center">
-                                                    <div className="text-[0.6rem] text-slate-500 font-bold uppercase tracking-wider mb-1">CLARITY</div>
-                                                    <div className="text-xl font-bold text-pearl">{result.clarity_score}</div>
+                                                <div className="p-2 rounded bg-black/30 border border-white/5">
+                                                    <div className="text-[0.55rem] font-bold text-slate-600 tracking-tighter mb-1 uppercase">SECTOR_TYPE</div>
+                                                    <div className="text-[0.65rem] text-slate-400 font-mono truncate">{data.industry || 'PRIVATE'}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-1"></div>
+
+                                            {/* Oracle Signal Ribbon */}
+                                            {result.oracle_signal && result.oracle_signal !== 'Baseline' && (
+                                                <div className="mb-6 p-3 bg-pearl/5 border-l-2 border-pearl rounded-r text-[0.65rem] font-mono text-pearl/80 italic leading-relaxed">
+                                                    "{result.oracle_signal}"
+                                                </div>
+                                            )}
+
+                                            {/* Footer Metrics */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[0.5rem] font-black text-slate-600 uppercase tracking-widest">INTENT_LEVEL</span>
+                                                    <span className={`text-lg font-display font-black leading-none mt-1 ${isHot ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                                        {result.intent_score}%
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {data.linkedin_url && (
+                                                        <a href={data.linkedin_url} target="_blank" className="p-2 rounded-lg bg-white/5 border border-white/10 text-slate-500 hover:text-pearl transition-colors">
+                                                            <Linkedin size={14} />
+                                                        </a>
+                                                    )}
+                                                    <button className="p-2 rounded-lg bg-white/5 border border-white/5 text-slate-500 hover:text-white transition-colors">
+                                                        <Mail size={14} />
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* Oracle Insight */}
-                                        {result.oracle_signal && result.oracle_signal !== 'Baseline' && (
-                                            <div className="mt-4 p-3 bg-purple-500/5 rounded-lg border border-purple-500/20 flex items-start gap-3">
-                                                <div className="p-1 bg-purple-500/20 rounded text-purple-400"><Brain size={14} /></div>
-                                                <div>
-                                                    <div className="text-[0.65rem] font-bold text-purple-400 uppercase tracking-widest mb-0.5">Oracle Signal</div>
-                                                    <div className="text-sm text-purple-200 font-medium">{result.oracle_signal}</div>
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
                                 )
                             })}
@@ -209,7 +252,6 @@ export default function IntelligenceView({ session }) {
             )}
 
             {viewMode === 'velocity' && <VelocityView />}
-
             {viewMode === 'scripts' && <DisplacementLibrary />}
         </div>
     )

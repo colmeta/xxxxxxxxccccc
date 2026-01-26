@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Activity, Target, ShieldCheck, Zap, BarChart3, TrendingUp, Cpu, Globe } from 'lucide-react'
 
 export default function AnalyticsDashboard() {
     const [stats, setStats] = useState({
@@ -12,7 +13,6 @@ export default function AnalyticsDashboard() {
 
     useEffect(() => {
         fetchStats()
-        // Auto-refresh every 30s
         const interval = setInterval(fetchStats, 30000)
         return () => clearInterval(interval)
     }, [])
@@ -23,7 +23,6 @@ export default function AnalyticsDashboard() {
             const token = currentSession?.access_token
 
             if (!token) {
-                // Mock for dev if no auth
                 setLoading(false)
                 return
             }
@@ -46,101 +45,106 @@ export default function AnalyticsDashboard() {
     }
 
     return (
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-            <h2 className="text-gradient" style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span>📊</span> LIVE INTELLIGENCE FEED
-            </h2>
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-pearl/10 pb-6">
+                <div className="space-y-1">
+                    <h2 className="text-2xl font-display font-black text-white tracking-widest flex items-center gap-3">
+                        <BarChart3 className="text-pearl" size={24} />
+                        SENSORY <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">TELEMETRY</span>
+                    </h2>
+                    <div className="flex items-center gap-2 text-[0.55rem] font-mono text-slate-500 uppercase tracking-widest">
+                        <Activity size={12} className="text-emerald-500 animate-pulse" />
+                        <span>LIVE INTELLIGENCE STREAM // CALIBRATED_TO_SOURCE</span>
+                    </div>
+                </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                <StatCard
-                    label="TOTAL TARGETS ACQUIRED"
-                    value={stats.total_leads}
-                    icon="🎯"
-                    trend="+12% this hour"
-                    color="var(--primary)"
-                />
-                <StatCard
-                    label="VERIFIED INTELLIGENCE"
-                    value={stats.verified_leads}
-                    icon="✅"
-                    trend={`${stats.success_rate}% Success Rate`}
-                    color="#10b981"
-                />
-                <StatCard
-                    label="AVERAGE CLARITY SCORE"
-                    value={`${stats.avg_clarity}%`}
-                    icon="💎"
-                    trend="High Fidelity"
-                    color="#8b5cf6"
-                />
-                <StatCard
-                    label="ACTIVE AGENTS"
-                    value="4"
-                    icon="🤖"
-                    trend="Hydra Nodes Online"
-                    color="#f59e0b"
-                />
-            </div>
-
-            <div style={{ marginTop: '2rem' }}>
-                <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Active Engine Status</h3>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <EngineBadge name="LinkedIn" status="operational" />
-                    <EngineBadge name="Google Maps" status="operational" />
-                    <EngineBadge name="Twitter Radar" status="active" />
-                    <EngineBadge name="Startup Watch" status="active" />
-                    <EngineBadge name="Website Crawler" status="standby" />
+                <div className="flex gap-2">
+                    <EngineStatus name="LinkedIn" status="operational" />
+                    <EngineStatus name="Maps" status="active" />
+                    <EngineStatus name="News" status="standby" />
                 </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatSlab
+                    label="NODES_ACQUIRED"
+                    value={stats.total_leads}
+                    icon={Target}
+                    trend="+12%_DELTA"
+                    color="text-pearl"
+                    glow="shadow-pearl/20"
+                />
+                <StatSlab
+                    label="VERIFIED_INTEL"
+                    value={stats.verified_leads}
+                    icon={ShieldCheck}
+                    trend={`${stats.success_rate}%_CONFIDENCE`}
+                    color="text-emerald-400"
+                    glow="shadow-emerald-500/10"
+                />
+                <StatSlab
+                    label="MEAN_CLARITY"
+                    value={`${stats.avg_clarity}%`}
+                    icon={Zap}
+                    trend="HIGH_FIDELITY"
+                    color="text-pearl"
+                    glow="shadow-pearl/20"
+                />
+                <StatSlab
+                    label="ACTIVE_HYDRA"
+                    value="04"
+                    icon={Cpu}
+                    trend="MAX_YIELD"
+                    color="text-amber-400"
+                    glow="shadow-amber-500/10"
+                />
+            </div>
         </div>
     )
 }
 
-function StatCard({ label, value, icon, trend, color }) {
+function StatSlab({ label, value, icon: Icon, trend, color, glow }) {
     return (
-        <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1.5rem',
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem'
-        }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{label}</span>
-                <span style={{ fontSize: '1.5rem' }}>{icon}</span>
+        <div className={`glass-panel p-6 border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-pearl/20 transition-all duration-300 group overflow-hidden relative`}>
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Icon size={48} />
             </div>
-            <div style={{ fontSize: '2rem', fontWeight: 700, color: color }}>
+
+            <div className="flex justify-between items-start mb-4">
+                <span className="text-[0.6rem] font-black text-slate-500 uppercase tracking-widest">{label}</span>
+                <div className={`p-1.5 rounded-lg bg-white/5 ${color} group-hover:shadow-glow transition-all`}>
+                    <Icon size={14} />
+                </div>
+            </div>
+
+            <div className={`text-3xl font-display font-black text-white tracking-widest mb-1`}>
                 {value}
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <span style={{ color: color }}>↗</span> {trend}
+
+            <div className="flex items-center gap-1.5 mt-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-[0.55rem] font-mono font-bold text-slate-400 uppercase tracking-widest">
+                    {trend}
+                </span>
             </div>
         </div>
     )
 }
 
-function EngineBadge({ name, status }) {
-    const getColor = (s) => {
-        if (s === 'operational') return '#10b981'
-        if (s === 'active') return '#3b82f6'
-        return '#f59e0b'
-    }
+function EngineStatus({ name, status }) {
+    const isOperational = status === 'operational'
+    const isActive = status === 'active'
 
     return (
-        <div style={{
-            padding: '0.25rem 0.75rem',
-            borderRadius: '1rem',
-            background: 'rgba(255,255,255,0.05)',
-            border: `1px solid ${getColor(status)}44`,
-            fontSize: '0.75rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-        }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: getColor(status) }}></div>
-            {name}
+        <div className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/5 flex items-center gap-2 group hover:border-pearl/20 transition-colors">
+            <div className={`w-1.5 h-1.5 rounded-full ${isOperational ? 'bg-emerald-500 shadow-glow' :
+                    isActive ? 'bg-pearl shadow-glow' :
+                        'bg-slate-700'
+                }`}></div>
+            <span className="text-[0.55rem] font-black text-slate-500 group-hover:text-white transition-colors uppercase tracking-widest">
+                {name}
+            </span>
         </div>
     )
 }
+

@@ -14,15 +14,17 @@ To run the "Zero Vacuum" engines at full power, you need the following keys.
 
 ---
 
-## ⚠️ HIGHLY RECOMMENDED (Massive Quality Boost)
+## ⚡ PERFORMANCE BOOSTERS (Optional)
 
-| Service | Purpose | Cost | Why You Want It | Envar Name |
-|---------|---------|------|-----------------|------------|
-| **SAM.gov** | Layer 11 Gov Contracts | **FREE** | Cleaner data than scraping | `SAM_API_KEY` |
-| **Eventbrite** | Layer 9 Events | **FREE** | Hourly sync of new events | `EVENTBRITE_API_KEY` |
-| **USPTO** | Layer 6 Patents | **FREE** | Faster patent lookups | `USPTO_API_KEY` |
-| **Hunter.io** | Email Discovery | Free Tier | Finding CEO emails | `HUNTER_API_KEY` |
-| **Bright Data / IPRoyal** | Residential Proxies | $10/mo | **Prevents Blocking** | `PROXY_URL` |
+*The system works without these (using Scrapers), but these keys make it faster and bulletproof.*
+
+| Service | Purpose | Value Add | Envar Name |
+|---------|---------|-----------|------------|
+| **SAM.gov API** | Gov Contracts | **10x Speed**. Bypasses slow scraping. | `SAM_API_KEY` |
+| **USPTO API** | Patent Search | **Stability**. APIs don't break if site changes. | `USPTO_API_KEY` |
+| **Eventbrite** | Events | **Volume**. Get 1000s of events instantly. | `EVENTBRITE_API_KEY` |
+| **Hunter.io** | Email Finding | **Accuracy**. Verified CEO emails. | `HUNTER_API_KEY` |
+| **WebShare.io** | Proxies | **Anti-Ban Protection**. 10 Free IP Addresses. | `PROXY_URL` |
 
 ---
 

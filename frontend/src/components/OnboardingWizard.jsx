@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import '../styles/design-tokens.css'
+import { Globe, ShieldCheck, Target, Zap, Cpu, ArrowRight, UserPlus, Brain, Rocket, ChevronRight, Activity, Terminal } from 'lucide-react'
 
 export default function OnboardingWizard({ session, onComplete }) {
     const [step, setStep] = useState(1)
@@ -10,7 +10,6 @@ export default function OnboardingWizard({ session, onComplete }) {
     const [creatingMission, setCreatingMission] = useState(false)
     const [missionId, setMissionId] = useState(null)
 
-    // Check if onboarding was already completed
     useEffect(() => {
         const completed = localStorage.getItem('onboarding_completed')
         if (completed === 'true') {
@@ -18,16 +17,11 @@ export default function OnboardingWizard({ session, onComplete }) {
         }
     }, [])
 
-    // Save progress
-    useEffect(() => {
-        localStorage.setItem('onboarding_step', step.toString())
-    }, [step])
-
     const goals = [
-        { id: 'sales', label: 'Sales Leads (B2B)', icon: '💼', example: 'SaaS CEOs in Austin raising Series A' },
-        { id: 'product', label: 'Product Research', icon: '🛍️', example: 'Top Shopify stores in fashion niche' },
-        { id: 'competitor', label: 'Competitor Intel', icon: '🔍', example: 'Companies using competitor XYZ' },
-        { id: 'real-estate', label: 'Real Estate Leads', icon: '🏠', example: 'Commercial properties in NYC' }
+        { id: 'sales', label: 'B2B LEAD_GEN', icon: Globe, example: 'SaaS CEOs in Austin raising Series A' },
+        { id: 'product', label: 'R&D_INTEL', icon: Brain, example: 'Top Shopify stores in fashion niche' },
+        { id: 'competitor', label: 'MARKET_DISPLACEMENT', icon: Target, example: 'Companies using competitor XYZ' },
+        { id: 'real-estate', label: 'ASSET_ACQUISITION', icon: Activity, example: 'Commercial properties in NYC' }
     ]
 
     const handleGoalSelect = (goal) => {
@@ -46,7 +40,7 @@ export default function OnboardingWizard({ session, onComplete }) {
                     org_id: session.user.user_metadata?.active_org_id,
                     target_query: missionQuery,
                     target_platform: platform,
-                    priority: 5, // High priority for first mission
+                    priority: 5,
                     status: 'queued'
                 })
                 .select()
@@ -57,7 +51,7 @@ export default function OnboardingWizard({ session, onComplete }) {
             setStep(4)
         } catch (error) {
             console.error('Mission creation error:', error)
-            alert('Error creating mission. Please try again.')
+            alert('Initialization Error. Please retry.')
         } finally {
             setCreatingMission(false)
         }
@@ -71,253 +65,218 @@ export default function OnboardingWizard({ session, onComplete }) {
     const progress = (step / 5) * 100
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.95)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 10000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '2rem',
-            animation: 'fade-in 0.3s'
-        }}>
-            {/* Progress Bar */}
-            <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '4px',
-                background: 'rgba(255,255,255,0.1)'
-            }}>
-                <div style={{
-                    height: '100%',
-                    width: `${progress}%`,
-                    background: 'linear-gradient(90deg, hsl(var(--pearl-primary)), hsl(var(--pearl-accent)))',
-                    transition: 'width 0.5s'
-                }} />
+        <div className="fixed inset-0 z-[10000] bg-[#020205] flex items-center justify-center p-6 overflow-hidden">
+
+            {/* AMBIENT BACKGROUND FX */}
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
+                <div className="h-full bg-pearl shadow-[0_0_15px_#fff] transition-all duration-700 ease-out" style={{ width: `${progress}%` }}></div>
             </div>
 
-            {/* Modal */}
-            <div className="glass-card-premium animate-scale-in" style={{
-                maxWidth: '600px',
-                width: '100%',
-                padding: '3rem',
-                textAlign: 'center'
-            }}>
-                {/* Step 1: Welcome */}
-                {step === 1 && (
-                    <>
-                        <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>👋</div>
-                        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem', background: 'linear-gradient(to right, hsl(var(--pearl-primary)), hsl(var(--pearl-accent)))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Welcome to Clarity Pearl!
-                        </h1>
-                        <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.7)', marginBottom: '2rem', lineHeight: '1.6' }}>
-                            The Ultimate Sales Intelligence Platform<br />Powered by AI & Global Data Swarm
-                        </p>
-                        <button onClick={() => setStep(2)} className="btn-premium" style={{ fontSize: '1rem', padding: '1rem 2rem' }}>
-                            Let's Get Started →
-                        </button>
-                    </>
-                )}
+            {/* STARFIELD / GRID PARALLAX */}
+            <div className="absolute inset-0 bg-hero-pattern opacity-40 animate-pulse-slow"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)]"></div>
 
-                {/* Step 2: Choose Goal */}
-                {step === 2 && (
-                    <>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
-                            What do you want to find?
-                        </h2>
-                        <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
-                            Choose your primary use case
-                        </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-                            {goals.map(goal => (
-                                <button
-                                    key={goal.id}
-                                    onClick={() => handleGoalSelect(goal.id)}
-                                    className="interactive-card"
-                                    style={{
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '12px',
-                                        padding: '1.5rem',
-                                        textAlign: 'left',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{goal.icon}</div>
-                                    <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>
-                                        {goal.label}
-                                    </div>
-                                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
-                                        e.g. "{goal.example}"
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </>
-                )}
+            {/* MAIN CONTAINER */}
+            <div className="max-w-4xl w-full relative z-10 flex flex-col items-center">
 
-                {/* Step 3: Create First Mission */}
-                {step === 3 && (
-                    <>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
-                            Create Your First Mission
-                        </h2>
-                        <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
-                            Tell the Oracle what to find
-                        </p>
-                        <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '0.5rem' }}>
-                                What are you looking for?
-                            </label>
-                            <textarea
-                                value={missionQuery}
-                                onChange={(e) => setMissionQuery(e.target.value)}
-                                placeholder="e.g., SaaS CEOs in Austin raising Series A funding"
-                                rows={4}
-                                style={{
-                                    width: '100%',
-                                    padding: '1rem',
-                                    background: 'rgba(0,0,0,0.3)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: '12px',
-                                    color: '#fff',
-                                    fontSize: '0.95rem',
-                                    resize: 'vertical',
-                                    marginBottom: '1rem'
-                                }}
-                            />
-                            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '0.5rem' }}>
-                                Platform
-                            </label>
-                            <select
-                                value={platform}
-                                onChange={(e) => setPlatform(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '1rem',
-                                    background: 'rgba(0,0,0,0.3)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: '12px',
-                                    color: '#fff',
-                                    fontSize: '0.95rem',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <option value="linkedin">LinkedIn</option>
-                                <option value="google_maps">Google Maps</option>
-                                <option value="producthunt">Product Hunt</option>
-                                <option value="tiktok">TikTok</option>
-                                <option value="google_news">Google News</option>
-                            </select>
-                        </div>
-                        <button
-                            onClick={handleCreateMission}
-                            disabled={creatingMission || !missionQuery.trim()}
-                            className="btn-premium"
-                            style={{ fontSize: '1rem', padding: '1rem 2rem' }}
-                        >
-                            {creatingMission ? '⏳ Creating...' : '🚀 Launch Mission'}
-                        </button>
-                    </>
-                )}
+                {/* STEP COUNTER HUD */}
+                <div className="mb-12 flex items-center gap-4 text-[0.6rem] font-mono font-black text-slate-700 tracking-[0.5em] uppercase">
+                    <span className={step >= 1 ? 'text-pearl' : ''}>01_INIT</span>
+                    <div className="w-8 h-[1px] bg-white/10"></div>
+                    <span className={step >= 2 ? 'text-pearl' : ''}>02_GOAL</span>
+                    <div className="w-8 h-[1px] bg-white/10"></div>
+                    <span className={step >= 3 ? 'text-pearl' : ''}>03_SWEEP</span>
+                    <div className="w-8 h-[1px] bg-white/10"></div>
+                    <span className={step >= 4 ? 'text-pearl' : ''}>04_PROTO</span>
+                    <div className="w-8 h-[1px] bg-white/10"></div>
+                    <span className={step >= 5 ? 'text-pearl' : ''}>05_DEPLOY</span>
+                </div>
 
-                {/* Step 4: Watch Hydra Work */}
-                {step === 4 && (
-                    <>
-                        <div className="animate-pulse-glow" style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🛸</div>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
-                            Hydra is Searching...
-                        </h2>
-                        <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
-                            Our global swarm is scanning {platform} for your targets
-                        </p>
-                        <div style={{
-                            background: 'rgba(0,0,0,0.3)',
-                            borderRadius: '12px',
-                            padding: '1.5rem',
-                            textAlign: 'left',
-                            marginBottom: '2rem'
-                        }}>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
-                                <div className="spinner" />
-                                <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>
-                                    ✅ Mission queued successfully
+                <div className="w-full glass-panel p-12 lg:p-16 border-pearl/10 shadow-[inner_0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-pearl/20 to-transparent"></div>
+
+                    {/* Step 1: Welcome Initiation */}
+                    {step === 1 && (
+                        <div className="text-center animate-slide-up">
+                            <div className="mb-10 relative inline-block">
+                                <div className="absolute -inset-8 bg-pearl/10 blur-3xl rounded-full animate-pulse-slow"></div>
+                                <div className="p-6 rounded-[2rem] bg-black/40 border border-pearl/20 relative z-10 shadow-glow">
+                                    <ShieldCheck size={64} className="text-pearl" strokeWidth={1} />
                                 </div>
                             </div>
-                            <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>
-                                🔍 Workers will claim your job in seconds
-                            </div>
-                            <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>
-                                🧠 AI will verify and score each lead
-                            </div>
-                            <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
-                                📊 Results will appear in the Intelligence View
+                            <h1 className="text-4xl lg:text-5xl font-display font-black text-white tracking-widest mb-6">
+                                SOVEREIGN <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">INITIATION</span>
+                            </h1>
+                            <p className="text-sm font-mono text-slate-400 max-w-lg mx-auto leading-relaxed mb-12 uppercase tracking-wide">
+                                You have gained access to the Sensory Lattice. <br />
+                                <span className="opacity-40">Initialize your neural credentials to begin global synchronization.</span>
+                            </p>
+                            <button
+                                onClick={() => setStep(2)}
+                                className="bg-pearl text-black font-display font-bold py-4 px-12 rounded-xl text-xs tracking-[0.3em] hover:shadow-neon hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto group"
+                            >
+                                START_SYNC <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 2: Strategic Goal Choice */}
+                    {step === 2 && (
+                        <div className="animate-slide-up">
+                            <h2 className="text-2xl font-display font-black text-white tracking-widest text-center mb-12">
+                                SELECT <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">PRIMARY_OBJECTIVE</span>
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {goals.map(goal => (
+                                    <button
+                                        key={goal.id}
+                                        onClick={() => handleGoalSelect(goal.id)}
+                                        className="p-6 rounded-2xl bg-black/40 border border-white/5 hover:border-pearl/40 hover:bg-white/[0.03] transition-all text-left group/goal relative overflow-hidden"
+                                    >
+                                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover/goal:opacity-20 transition-opacity">
+                                            <goal.icon size={80} strokeWidth={0.5} />
+                                        </div>
+                                        <div className="flex items-center gap-4 mb-3 relative z-10">
+                                            <div className="p-2 rounded-lg bg-white/5 text-pearl group-hover/goal:bg-pearl group-hover/goal:text-black transition-all">
+                                                <goal.icon size={18} />
+                                            </div>
+                                            <span className="text-[0.65rem] font-black text-white tracking-widest uppercase">NODE_{goal.id}</span>
+                                        </div>
+                                        <div className="text-lg font-bold text-slate-300 group-hover/goal:text-white transition-colors relative z-10 uppercase tracking-tight">{goal.label}</div>
+                                        <div className="text-[0.6rem] font-mono text-slate-600 mt-2 italic group-hover/goal:text-slate-400 transition-colors relative z-10">e.g. "{goal.example}"</div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                        <button onClick={() => setStep(5)} className="btn-premium" style={{ fontSize: '1rem', padding: '1rem 2rem' }}>
-                            Continue →
-                        </button>
-                    </>
-                )}
+                    )}
 
-                {/* Step 5: Complete */}
-                {step === 5 && (
-                    <>
-                        <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🎉</div>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1rem', color: '#fff' }}>
-                            You're All Set!
-                        </h2>
-                        <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '2rem', lineHeight: '1.6' }}>
-                            Your mission is running. Check the <strong style={{ color: 'hsl(var(--pearl-primary))' }}>Live Feed</strong> to watch progress in real-time, or visit <strong style={{ color: 'hsl(var(--pearl-primary))' }}>Intelligence View</strong> to see results.
-                        </p>
-                        <div style={{
-                            background: 'rgba(147,51,234,0.1)',
-                            border: '1px solid rgba(147,51,234,0.3)',
-                            borderRadius: '12px',
-                            padding: '1.5rem',
-                            textAlign: 'left',
-                            marginBottom: '2rem'
-                        }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'rgba(147,51,234,1)', marginBottom: '0.5rem' }}>
-                                💡 PRO TIPS
+                    {/* Step 3: Mission Definition Terminal */}
+                    {step === 3 && (
+                        <div className="animate-slide-up">
+                            <h2 className="text-2xl font-display font-black text-white tracking-widest text-center mb-12">
+                                INITIALIZE <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">FIRST_SWEEP</span>
+                            </h2>
+                            <div className="max-w-2xl mx-auto space-y-8">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">
+                                        <span>INPUT_QUERY_PARAMS</span>
+                                        <Terminal size={12} />
+                                    </div>
+                                    <textarea
+                                        value={missionQuery}
+                                        onChange={(e) => setMissionQuery(e.target.value)}
+                                        placeholder="e.g. SaaS CEOs in Austin raising Series A..."
+                                        className="w-full bg-black/60 border border-white/10 rounded-2xl p-6 font-mono text-sm text-pearl outline-none focus:border-pearl/40 transition-all placeholder:text-slate-800 shadow-[inner_0_0_20px_rgba(0,0,0,0.5)] h-32"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div className="space-y-3">
+                                        <span className="text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">TARGET_PLATFORM</span>
+                                        <select
+                                            value={platform}
+                                            onChange={(e) => setPlatform(e.target.value)}
+                                            className="w-full bg-black/60 border border-white/10 rounded-xl p-4 font-mono text-xs text-white outline-none focus:border-pearl/40 cursor-pointer appearance-none"
+                                        >
+                                            <option value="linkedin">LINKEDIN_CORE</option>
+                                            <option value="google_maps">MAPS_INTEL</option>
+                                            <option value="producthunt">LAUNCH_RADAR</option>
+                                            <option value="tiktok">VIRAL_SIGNALS</option>
+                                            <option value="google_news">GLOBAL_NEWS_FEED</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex items-end">
+                                        <button
+                                            onClick={handleCreateMission}
+                                            disabled={creatingMission || !missionQuery.trim()}
+                                            className="w-full bg-white text-black font-display font-bold py-4 rounded-xl text-[0.6rem] tracking-[0.3em] hover:shadow-neon transition-all flex items-center justify-center gap-2 group disabled:opacity-30 uppercase"
+                                        >
+                                            {creatingMission ? <Activity size={14} className="animate-spin" /> : <Rocket size={14} className="group-hover:-translate-y-1 transition-transform" />}
+                                            LAUNCH_MISSION
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <ul style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.8', paddingLeft: '1.5rem', margin: 0 }}>
-                                <li>High-intent leads (score &gt; 80) are auto-prioritized</li>
-                                <li>Connect a CRM webhook for auto-sync</li>
-                                <li>Monitor the Swarm Observatory to see global workers</li>
-                                <li>Use Bulk Mission Control for CSV uploads</li>
-                            </ul>
                         </div>
-                        <button onClick={handleComplete} className="btn-premium" style={{ fontSize: '1rem', padding: '1rem 2rem' }}>
-                            Explore Clarity Pearl →
-                        </button>
-                    </>
-                )}
+                    )}
 
-                {/* Skip Button (bottom-right) */}
+                    {/* Step 4: Swarm Deployment Visual */}
+                    {step === 4 && (
+                        <div className="text-center animate-slide-up">
+                            <div className="mb-10 relative inline-block">
+                                <div className="absolute -inset-16 bg-pearl/20 blur-[100px] rounded-full animate-pulse-slow"></div>
+                                <div className="p-8 rounded-full bg-black/40 border border-pearl/20 relative z-10 shadow-glow animate-spin-slow">
+                                    <Cpu size={64} className="text-pearl" strokeWidth={1} />
+                                </div>
+                            </div>
+                            <h2 className="text-3xl font-display font-black text-white tracking-[0.2em] mb-4 uppercase">SWARM_DEPLOYED</h2>
+                            <p className="text-[0.6rem] font-mono text-pearl/50 mb-12 tracking-[0.3em] uppercase">Workers successfully claimed mission #{missionId?.slice(0, 8)}</p>
+
+                            <div className="max-w-md mx-auto bg-black/40 border border-white/5 rounded-2xl p-6 text-left space-y-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-neon-sm"></div>
+                                    <span className="text-[0.65rem] font-mono text-slate-400">TELEMETRY_LINK_ESTABLISHED</span>
+                                </div>
+                                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-emerald-500 w-1/3 animate-pulse"></div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    <div className="flex flex-col">
+                                        <span className="text-[0.5rem] font-black text-slate-600 uppercase">Latency</span>
+                                        <span className="text-xs font-mono text-white">42ms</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[0.5rem] font-black text-slate-600 uppercase">Verification</span>
+                                        <span className="text-xs font-mono text-white">Neural_V3</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onClick={() => setStep(5)} className="mt-12 text-[0.65rem] font-display font-black text-pearl tracking-[0.5em] underline underline-offset-8 hover:text-white transition-colors uppercase">
+                                PROCEED_TO_GRID
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Step 5: Final Ready State */}
+                    {step === 5 && (
+                        <div className="text-center animate-slide-up">
+                            <div className="mb-10 p-6 rounded-[2rem] bg-black/40 border border-emerald-500/20 relative inline-block shadow-glow-sm">
+                                <Rocket size={64} className="text-emerald-500" strokeWidth={1} />
+                            </div>
+                            <h2 className="text-4xl font-display font-black text-white tracking-widest mb-6">ALL_SYSTEMS_GO</h2>
+                            <p className="text-sm font-mono text-slate-400 max-w-lg mx-auto leading-relaxed mb-12 uppercase tracking-wide opacity-60">
+                                Calibration complete. Your sensory dashboard is now fully synchronized with the global data hive.
+                            </p>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto mb-12">
+                                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] text-left">
+                                    <div className="text-[0.5rem] font-black text-pearl uppercase mb-2">PRO_TIP_01</div>
+                                    <div className="text-[0.65rem] text-slate-400 font-mono italic leading-relaxed">"High-intent nodes (>80%) are highlighted in your Neural Lattice."</div>
+                                </div>
+                                <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] text-left">
+                                    <div className="text-[0.5rem] font-black text-emerald-500 uppercase mb-2">PRO_TIP_02</div>
+                                    <div className="text-[0.65rem] text-slate-400 font-mono italic leading-relaxed">"Use the Displacement Archive to deploy tactile outreach protocols."</div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleComplete}
+                                className="bg-emerald-500 text-black font-display font-bold py-5 px-16 rounded-2xl text-[0.7rem] tracking-[0.4em] hover:shadow-neon hover:scale-105 active:scale-95 transition-all uppercase"
+                            >
+                                ENTER_CLARITY_PEARL
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* SKIP BUTTON */}
                 {step > 1 && step < 5 && (
                     <button
                         onClick={handleComplete}
-                        style={{
-                            position: 'absolute',
-                            bottom: '1rem',
-                            right: '1rem',
-                            background: 'none',
-                            border: 'none',
-                            color: 'rgba(255,255,255,0.4)',
-                            fontSize: '0.75rem',
-                            cursor: 'pointer',
-                            textDecoration: 'underline'
-                        }}
+                        className="mt-8 text-[0.55rem] font-mono font-bold text-slate-600 hover:text-white transition-colors uppercase tracking-[0.3em]"
                     >
-                        Skip for now
+                        BYPASS_INITIATION
                     </button>
                 )}
             </div>

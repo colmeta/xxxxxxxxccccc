@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import EmptyStates, { SkeletonLoader } from './EmptyStates'
-import '../styles/design-tokens.css'
+import { Link2, Zap, Save, RefreshCw, BookOpen, ShieldCheck, Terminal, History, ChevronRight, Activity, Cpu } from 'lucide-react'
 
 export default function CRMHub({ session, orgId }) {
     const [crmLogs, setCrmLogs] = useState([])
@@ -55,9 +54,9 @@ export default function CRMHub({ session, orgId }) {
                 .eq('id', orgId)
 
             if (error) throw error
-            alert('✅ Webhook saved! High-intent leads will auto-notify.')
+            alert('PROTOCOL_SAVED: Webhook endpoint verified.')
         } catch (error) {
-            alert('Error saving webhook: ' + error.message)
+            alert('SAVE_ERROR: ' + error.message)
         }
     }
 
@@ -74,204 +73,142 @@ export default function CRMHub({ session, orgId }) {
             })
 
             const data = await response.json()
-            alert(`✅ Synced ${data.count || 0} leads to CRM`)
+            alert(`SYNC_SUCCESS: ${data.count || 0} nodes transferred to CRM.`)
             loadCRMLogs()
         } catch (error) {
-            alert('Sync error: ' + error.message)
+            alert('SYNC_ERROR: ' + error.message)
         } finally {
             setSyncing(false)
         }
     }
 
-    const getStatusColor = (status) => {
-        if (status === 'success') return 'rgba(0,255,100,1)'
-        if (status === 'pending') return 'rgba(255,200,0,1)'
-        return 'rgba(255,100,100,1)'
-    }
-
     return (
-        <div style={{
-            background: 'rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '16px',
-            padding: '2rem',
-            border: '1px solid rgba(255,255,255,0.05)'
-        }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1rem', color: 'hsl(var(--pearl-primary))' }}>
-                🔗 CRM INTEGRATION HUB
-            </h2>
-            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '2rem' }}>
-                Connect your CRM and automation tools via webhooks (free forever)
-            </p>
+        <div className="space-y-8 animate-slide-up">
 
-            {/* Webhook Configuration */}
-            <div style={{
-                background: 'rgba(0,0,0,0.3)',
-                borderRadius: '12px',
-                padding: '1.5rem',
-                marginBottom: '2rem',
-                border: '1px solid rgba(255,255,255,0.05)'
-            }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'rgba(255,255,255,0.8)', marginBottom: '1rem' }}>
-                    ⚡ Webhook Automation
-                </h3>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginBottom: '1rem', lineHeight: '1.6' }}>
-                    Connect to <strong>Slack</strong>, <strong>Make.com</strong>, <strong>Zapier</strong>, or any webhook-compatible tool.
-                    We'll send high-intent leads automatically.
+            {/* HUD Header */}
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-8">
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-display font-black text-white tracking-widest flex items-center gap-4">
+                        SYNC <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">VORTEX</span>
+                    </h2>
+                    <div className="flex items-center gap-2 text-[0.55rem] font-mono text-slate-500 uppercase tracking-widest">
+                        <Link2 size={12} className="text-pearl" />
+                        <span>INTEGRATION LAYER ACTIVE // CROSS-SYSTEM SYNCHRONIZATION</span>
+                    </div>
                 </div>
 
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    <div>
-                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: '0.5rem' }}>
-                            Webhook URL (Slack / Make.com / Zapier)
-                        </label>
-                        <input
-                            type="url"
-                            value={webhookUrl}
-                            onChange={(e) => setWebhookUrl(e.target.value)}
-                            placeholder="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
-                            style={{
-                                width: '100%',
-                                padding: '0.75rem',
-                                background: 'rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '8px',
-                                color: '#fff',
-                                fontSize: '0.8rem',
-                                fontFamily: 'monospace'
-                            }}
-                        />
-                    </div>
-
-                    <button
-                        onClick={saveWebhook}
-                        style={{
-                            background: 'linear-gradient(135deg, hsl(var(--pearl-primary)) 0%, hsl(var(--pearl-accent)) 100%)',
-                            color: '#fff',
-                            padding: '0.75rem 1.5rem',
-                            borderRadius: '8px',
-                            border: 'none',
-                            fontSize: '0.8rem',
-                            fontWeight: 800,
-                            cursor: 'pointer',
-                            textTransform: 'uppercase'
-                        }}
-                    >
-                        💾 Save Webhook
-                    </button>
-                </div>
-
-                {/* Setup Guide */}
-                <details style={{ marginTop: '1rem' }}>
-                    <summary style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        color: 'hsl(var(--pearl-primary))',
-                        cursor: 'pointer',
-                        padding: '0.5rem',
-                        background: 'rgba(255,255,255,0.02)',
-                        borderRadius: '6px'
-                    }}>
-                        📚 How to connect Make.com / Zapier
-                    </summary>
-                    <div style={{
-                        marginTop: '0.75rem',
-                        padding: '1rem',
-                        background: 'rgba(0,0,0,0.3)',
-                        borderRadius: '8px',
-                        fontSize: '0.75rem',
-                        lineHeight: '1.8',
-                        color: 'rgba(255,255,255,0.7)'
-                    }}>
-                        <strong>Make.com:</strong>
-                        <ol style={{ marginLeft: '1.5rem', marginTop: '0.5rem' }}>
-                            <li>Create a new scenario</li>
-                            <li>Add "Webhooks" → "Custom Webhook" trigger</li>
-                            <li>Copy the webhook URL</li>
-                            <li>Paste above and save</li>
-                            <li>Add actions: HubSpot, Salesforce, Google Sheets, etc.</li>
-                        </ol>
-                        <br />
-                        <strong>Zapier:</strong>
-                        <ol style={{ marginLeft: '1.5rem', marginTop: '0.5rem' }}>
-                            <li>Create a new Zap</li>
-                            <li>Trigger: "Webhooks by Zapier" → "Catch Hook"</li>
-                            <li>Copy the webhook URL</li>
-                            <li>Continue as URL appeared above</li>
-                        </ol>
-                    </div>
-                </details>
-            </div>
-
-            {/* Manual Sync Button */}
-            <div style={{ marginBottom: '2rem' }}>
                 <button
                     onClick={triggerManualSync}
                     disabled={syncing}
-                    style={{
-                        background: syncing ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        color: syncing ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.8)',
-                        padding: '1rem 2rem',
-                        borderRadius: '12px',
-                        fontSize: '0.85rem',
-                        fontWeight: 800,
-                        cursor: syncing ? 'not-allowed' : 'pointer',
-                        width: '100%',
-                        textTransform: 'uppercase',
-                        transition: 'all 0.3s'
-                    }}
+                    className="w-full md:w-auto bg-pearl text-black font-display font-bold py-3 px-8 rounded-xl text-xs tracking-widest hover:shadow-neon hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
                 >
-                    {syncing ? '⏳ SYNCING...' : '🔄 MANUAL CRM SYNC'}
+                    {syncing ? <RefreshCw size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                    MANUAL_SYNC_OVERRIDE
                 </button>
             </div>
 
-            {/* Injection Logs */}
-            <div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'rgba(255,255,255,0.8)', marginBottom: '1rem' }}>
-                    📊 Sync History
-                </h3>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
-                {loading ? (
-                    <SkeletonLoader type="list-item" count={3} />
-                ) : crmLogs.length === 0 ? (
-                    <EmptyStates type="no-crm-logs" />
-                ) : (
-                    <div style={{ display: 'grid', gap: '0.75rem' }}>
-                        {crmLogs.map(log => (
-                            <div key={log.id} style={{
-                                background: 'rgba(255,255,255,0.03)',
-                                borderRadius: '8px',
-                                padding: '1rem',
-                                border: `1px solid ${getStatusColor(log.status)}30`,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff', marginBottom: '0.25rem' }}>
-                                        {log.crm_name || 'Webhook'} Sync
+                {/* Integration Controls */}
+                <div className="xl:col-span-2 space-y-8">
+
+                    {/* Webhook Terminal */}
+                    <div className="glass-panel p-8 bg-black/40 border-pearl/10 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                            <Zap size={120} strokeWidth={0.5} className="text-pearl" />
+                        </div>
+
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="p-2 rounded-lg bg-pearl/10 text-pearl"><Zap size={18} /></div>
+                            <h3 className="text-sm font-display font-black text-white tracking-widest uppercase">AUTOMATION_PROTOCOL</h3>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="p-6 rounded-2xl bg-black/60 border border-white/5 space-y-4">
+                                <div className="flex justify-between items-center text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">
+                                    <span>WEBHOOK_ENDPOINT_URL</span>
+                                    <Terminal size={12} />
+                                </div>
+                                <input
+                                    type="url"
+                                    value={webhookUrl}
+                                    onChange={(e) => setWebhookUrl(e.target.value)}
+                                    placeholder="https://hooks.slack.com/..."
+                                    className="w-full bg-transparent border-b border-white/10 py-2 font-mono text-sm text-pearl focus:border-pearl/40 outline-none transition-all placeholder:text-slate-800"
+                                />
+                                <button
+                                    onClick={saveWebhook}
+                                    className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-[0.65rem] font-black tracking-widest text-slate-400 hover:text-white hover:border-pearl/30 hover:bg-white/10 transition-all flex items-center justify-center gap-2 uppercase"
+                                >
+                                    <Save size={14} /> PERSIST_PROTOCOL
+                                </button>
+                            </div>
+
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-pearl/5 border border-pearl/10">
+                                <BookOpen size={16} className="text-pearl mt-1 shrink-0" />
+                                <div className="text-[0.65rem] font-mono text-slate-400 leading-relaxed italic">
+                                    Integration active for: Slack, Make.com, Zapier, Webflow, and custom REST endpoints. High-intent nodes (>80%) trigger automatic transmission.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Setup Guide Tiles */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
+                            <div className="text-[0.6rem] font-black text-pearl uppercase tracking-widest mb-4">MAKE.COM_SETUP</div>
+                            <ul className="text-[0.6rem] font-mono text-slate-500 space-y-2 uppercase">
+                                <li className="flex gap-2 items-center"><ChevronRight size={10} /> INITIALIZE_SCENARIO</li>
+                                <li className="flex gap-2 items-center"><ChevronRight size={10} /> SELECT_WEBHOOK_TRIGGER</li>
+                                <li className="flex gap-2 items-center"><ChevronRight size={10} /> BIND_ENDPOINT_ABOVE</li>
+                            </ul>
+                        </div>
+                        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
+                            <div className="text-[0.6rem] font-black text-emerald-500 uppercase tracking-widest mb-4">PRO_PROTOCOL</div>
+                            <ul className="text-[0.6rem] font-mono text-slate-500 space-y-2 uppercase">
+                                <li className="flex gap-2 items-center"><ChevronRight size={10} /> ENABLE_AUTO_PRIORITY</li>
+                                <li className="flex gap-2 items-center"><ChevronRight size={10} /> SYNC_CRM_METADATA</li>
+                                <li className="flex gap-2 items-center"><ChevronRight size={10} /> BROADCAST_TO_SLACK</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sync History */}
+                <div className="glass-panel p-8 bg-black/40 border-white/5 flex flex-col">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-2 rounded-lg bg-white/5 text-slate-400"><History size={18} /></div>
+                        <h3 className="text-sm font-display font-black text-white tracking-widest uppercase">SYNC_HISTORY</h3>
+                    </div>
+
+                    <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2 max-h-[600px]">
+                        {crmLogs.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center gap-4 opacity-20">
+                                <Cpu size={48} strokeWidth={1} />
+                                <span className="text-[0.6rem] font-mono tracking-widest">NO_LOGS_DETECTED</span>
+                            </div>
+                        ) : (
+                            crmLogs.map(log => (
+                                <div key={log.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 group hover:border-pearl/20 transition-all relative overflow-hidden">
+                                    {/* Side status strip */}
+                                    <div className={`absolute top-0 left-0 w-0.5 h-full ${log.status === 'success' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-red-500 shadow-[0_0_10px_#ef4444]'}`}></div>
+
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-[0.65rem] font-black text-white uppercase tracking-widest">{log.crm_name || 'WEBHOOK'}_PUSH</span>
+                                        <span className={`text-[0.55rem] font-mono px-2 py-0.5 rounded border ${log.status === 'success' ? 'text-emerald-500 border-emerald-500/20' : 'text-red-500 border-red-500/20'
+                                            }`}>
+                                            {log.status}
+                                        </span>
                                     </div>
-                                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>
+                                    <div className="flex items-center gap-2 text-[0.55rem] font-mono text-slate-600">
+                                        <Activity size={10} />
                                         {new Date(log.created_at).toLocaleString()}
                                     </div>
                                 </div>
-                                <div style={{
-                                    background: getStatusColor(log.status) + '15',
-                                    border: `1px solid ${getStatusColor(log.status)}`,
-                                    borderRadius: '6px',
-                                    padding: '0.5rem 1rem',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 700,
-                                    color: getStatusColor(log.status),
-                                    textTransform: 'uppercase'
-                                }}>
-                                    {log.status}
-                                </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     )

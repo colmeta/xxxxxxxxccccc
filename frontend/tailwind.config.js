@@ -7,50 +7,75 @@ export default {
     theme: {
         extend: {
             colors: {
-                background: '#020617', // Deep Ocean
-                card: 'rgba(15, 23, 42, 0.95)',
-                input: 'rgba(30, 41, 59, 0.8)',
+                // The Void Palette
+                background: '#000000', // True Void
+                void: '#030014', // Deep Space
 
-                pearl: {
-                    DEFAULT: 'hsl(190, 100%, 50%)', // Electric Cyan
-                    50: 'hsl(190, 100%, 95%)',
-                    100: 'hsl(190, 100%, 90%)',
-                    200: 'hsl(190, 100%, 80%)',
-                    300: 'hsl(190, 100%, 70%)',
-                    400: 'hsl(190, 100%, 60%)',
-                    500: 'hsl(190, 100%, 50%)', // Primary
-                    600: 'hsl(190, 100%, 40%)',
-                    700: 'hsl(190, 100%, 30%)',
-                    800: 'hsl(190, 100%, 20%)',
-                    900: 'hsl(190, 100%, 10%)',
+                // Glass-morphism bases
+                glass: {
+                    DEFAULT: 'rgba(255, 255, 255, 0.03)',
+                    hover: 'rgba(255, 255, 255, 0.08)',
+                    border: 'rgba(255, 255, 255, 0.08)',
                 },
-                secondary: {
-                    DEFAULT: 'hsl(200, 90%, 60%)', // Soft Sky
+
+                // Identity Colors - Neon Bioluminescence
+                pearl: {
+                    DEFAULT: '#00F0FF', // Cyber Cyan
+                    glow: '#00F0FF80',
+                    dim: '#003840',
+                },
+                obsidian: {
+                    DEFAULT: '#0F1115',
+                    light: '#1A1D26',
+                    dark: '#050608',
                 },
                 accent: {
-                    DEFAULT: 'hsl(217, 91%, 60%)', // Professional Blue
+                    purple: '#7000FF',
+                    gold: '#FFD700',
+                    alert: '#FF003C',
+                    success: '#00FF94',
                 },
-                success: 'hsl(150, 100%, 50%)', // Sharp Emerald
-                warning: 'hsl(35, 100%, 55%)',  // Amber
-                danger: 'hsl(0, 90%, 60%)',     // Red
+
+                // Semantic
+                surface: {
+                    DEFAULT: '#050608',
+                    light: '#0F1218',
+                }
             },
             fontFamily: {
                 sans: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
                 mono: ['JetBrains Mono', 'monospace'],
+                display: ['Orbitron', 'sans-serif'], // For headers if available, else fallback
             },
             boxShadow: {
-                'glow': '0 0 20px hsla(190, 100%, 50%, 0.3)',
+                'neon': '0 0 20px -5px var(--tw-shadow-color)',
+                'neon-strong': '0 0 40px -10px var(--tw-shadow-color)',
                 'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                'inner-light': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
             },
             animation: {
-                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'shine': 'shine 2s infinite',
+                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'scanline': 'scanline 8s linear infinite',
+                'float': 'float 6s ease-in-out infinite',
+                'glow-pulse': 'glow-pulse 3s ease-in-out infinite',
             },
             keyframes: {
-                shine: {
-                    '0%': { backgroundPosition: '-100% 0' },
-                    '100%': { backgroundPosition: '200% 0' },
+                scanline: {
+                    '0%': { transform: 'translateY(-100%)' },
+                    '100%': { transform: 'translateY(100%)' },
+                },
+                float: {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-10px)' },
+                },
+                'glow-pulse': {
+                    '0%, 100%': { boxShadow: '0 0 20px -5px rgba(0, 240, 255, 0.3)' },
+                    '50%': { boxShadow: '0 0 30px -5px rgba(0, 240, 255, 0.6)' },
                 }
+            },
+            backgroundImage: {
+                'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                'grid-pattern': "linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)",
             }
         },
     },

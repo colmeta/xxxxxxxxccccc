@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import EmptyStates, { SkeletonLoader } from './EmptyStates'
-import '../styles/design-tokens.css'
+import { Globe, ShieldCheck, Zap, Activity, Cpu, Server, Signal, HardDrive } from 'lucide-react'
 
 export default function SwarmObservatory() {
     const [workers, setWorkers] = useState([])
@@ -9,7 +8,7 @@ export default function SwarmObservatory() {
 
     useEffect(() => {
         loadWorkers()
-        const interval = setInterval(loadWorkers, 10000) // Refresh every 10s
+        const interval = setInterval(loadWorkers, 10000)
         return () => clearInterval(interval)
     }, [])
 
@@ -29,162 +28,115 @@ export default function SwarmObservatory() {
         }
     }
 
-    const getHealthColor = (health) => {
-        if (health >= 95) return 'rgba(0,255,100,1)'
-        if (health >= 80) return 'rgba(255,200,0,1)'
-        return 'rgba(255,100,100,1)'
-    }
-
     const isOnline = (lastPulse) => {
         const pulseTime = new Date(lastPulse)
         const now = new Date()
-        const diffMinutes = (now - pulseTime) / 1000 / 60
-        return diffMinutes < 2 // Online if pulsed in last 2 minutes
+        return (now - pulseTime) / 1000 / 60 < 2
     }
 
-    const totalNodes = workers.length
     const onlineNodes = workers.filter(w => isOnline(w.last_pulse)).length
-    const avgHealth = workers.reduce((sum, w) => sum + (w.stealth_health || 0), 0) / (totalNodes || 1)
+    const avgHealth = workers.reduce((sum, w) => sum + (w.stealth_health || 0), 0) / (workers.length || 1)
 
     return (
-        <div style={{
-            background: 'rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '16px',
-            padding: '2rem',
-            border: '1px solid rgba(255,255,255,0.05)'
-        }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1rem', color: 'hsl(var(--pearl-primary))' }}>
-                🛰️ SWARM OBSERVATORY
-            </h2>
-            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', marginBottom: '2rem' }}>
-                Global residential node network monitoring
-            </p>
+        <div className="space-y-8 animate-slide-up">
 
-            {/* Global Stats */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2rem'
-            }}>
-                <div style={{
-                    background: 'rgba(0,255,100,0.05)',
-                    border: '1px solid rgba(0,255,100,0.2)',
-                    borderRadius: '12px',
-                    padding: '1.5rem',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'rgba(0,255,100,1)' }}>
-                        {onlineNodes}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: 'rgba(0,255,100,0.7)', fontWeight: 700 }}>
-                        ONLINE NODES
+            {/* HUD Header */}
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-8">
+                <div className="space-y-1">
+                    <h2 className="text-3xl font-display font-black text-white tracking-widest flex items-center gap-4">
+                        SWARM <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">OBSERVATORY</span>
+                    </h2>
+                    <div className="flex items-center gap-2 text-[0.55rem] font-mono text-slate-500 uppercase tracking-widest">
+                        <Globe size={12} className="text-pearl animate-spin-slow" />
+                        <span>GLOBAL RESIDENTIAL MESH // ACTIVE_TELEMETRY_STREAM</span>
                     </div>
                 </div>
-                <div style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    borderRadius: '12px',
-                    padding: '1.5rem',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'hsl(var(--pearl-primary))' }}>
-                        {totalNodes}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>
-                        TOTAL WORKERS
-                    </div>
-                </div>
-                <div style={{
-                    background: 'rgba(147,51,234,0.05)',
-                    border: '1px solid rgba(147,51,234,0.2)',
-                    borderRadius: '12px',
-                    padding: '1.5rem',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: 'rgba(147,51,234,1)' }}>
-                        {avgHealth.toFixed(1)}%
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: 'rgba(147,51,234,0.7)', fontWeight: 700 }}>
-                        AVG STEALTH
+
+                <div className="flex gap-4 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                    <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-3">
+                        <Signal size={14} className="text-emerald-500 animate-pulse" />
+                        <span className="text-[0.65rem] font-black text-emerald-500 tracking-widest uppercase">{onlineNodes} NODES_ONLINE</span>
                     </div>
                 </div>
             </div>
 
-            {/* Worker Grid */}
-            {loading ? (
-                <SkeletonLoader type="list-item" count={3} />
-            ) : workers.length === 0 ? (
-                <EmptyStates type="no-workers" />
-            ) : (
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    {workers.map(worker => {
-                        const online = isOnline(worker.last_pulse)
-                        const health = worker.stealth_health || 0
+            {/* Global Stealth HUD */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatMetric icon={Globe} label="TOTAL_WORKERS" value={workers.length} color="text-pearl" />
+                <StatMetric icon={ShieldCheck} label="MEAN_STEALTH" value={`${avgHealth.toFixed(1)}%`} color="text-emerald-400" />
+                <StatMetric icon={Cpu} label="ACTIVE_TASKS" value={workers.reduce((s, w) => s + (w.active_missions || 0), 0)} color="text-amber-400" />
+            </div>
 
-                        return (
-                            <div key={worker.worker_id} style={{
-                                background: online ? 'rgba(0,0,0,0.3)' : 'rgba(255,100,100,0.05)',
-                                borderRadius: '12px',
-                                padding: '1.5rem',
-                                border: `1px solid ${online ? 'rgba(255,255,255,0.05)' : 'rgba(255,100,100,0.2)'}`,
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr auto',
-                                gap: '1.5rem',
-                                alignItems: 'center'
-                            }}>
-                                {/* Status Indicator */}
-                                <div style={{
-                                    width: '12px',
-                                    height: '12px',
-                                    borderRadius: '50%',
-                                    background: online ? getHealthColor(health) : 'rgba(255,100,100,1)',
-                                    boxShadow: `0 0 12px ${online ? getHealthColor(health) : 'rgba(255,100,100,1)'}`,
-                                    animation: online ? 'pulse 2s infinite' : 'none'
-                                }} />
+            {/* Node List Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {workers.map(worker => (
+                    <NodeSlab key={worker.worker_id} worker={worker} online={isOnline(worker.last_pulse)} />
+                ))}
+            </div>
+        </div>
+    )
+}
 
-                                {/* Worker Info */}
-                                <div>
-                                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>
-                                        {worker.worker_id}
-                                    </div>
-                                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                                        <span>🌍 {worker.geo_city}, {worker.geo_country}</span>
-                                        <span>🔒 {worker.node_type || 'residential'}</span>
-                                        <span>⚡ {worker.active_missions || 0} missions</span>
-                                    </div>
-                                </div>
+function StatMetric({ icon: Icon, label, value, color }) {
+    return (
+        <div className="glass-panel p-6 bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center text-center group hover:border-pearl/20 transition-all">
+            <div className={`p-2 rounded-lg bg-white/5 ${color} mb-3 group-hover:scale-110 transition-transform`}>
+                <Icon size={18} />
+            </div>
+            <div className={`text-2xl font-display font-black text-white tracking-widest mb-1`}>{value}</div>
+            <div className="text-[0.55rem] font-mono font-bold text-slate-600 uppercase tracking-widest">{label}</div>
+        </div>
+    )
+}
 
-                                {/* Health Badge */}
-                                <div style={{
-                                    background: getHealthColor(health) + '15',
-                                    border: `1px solid ${getHealthColor(health)}`,
-                                    borderRadius: '8px',
-                                    padding: '0.5rem 1rem',
-                                    textAlign: 'center',
-                                    minWidth: '80px'
-                                }}>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 900, color: getHealthColor(health) }}>
-                                        {health.toFixed(1)}%
-                                    </div>
-                                    <div style={{ fontSize: '0.6rem', color: getHealthColor(health), fontWeight: 700 }}>
-                                        STEALTH
-                                    </div>
-                                </div>
-                            </div>
-                        )
-                    })}
+function NodeSlab({ worker, online }) {
+    const health = worker.stealth_health || 0
+    const healthColor = health >= 90 ? 'text-emerald-500' : health >= 70 ? 'text-amber-500' : 'text-red-500'
+    const healthBg = health >= 90 ? 'bg-emerald-500' : health >= 70 ? 'bg-amber-500' : 'bg-red-500'
+
+    return (
+        <div className={`p-6 rounded-2xl bg-black/40 border transition-all duration-300 group relative overflow-hidden flex flex-col sm:flex-row items-center gap-6 ${online ? 'border-white/5 hover:border-pearl/40' : 'border-red-500/20 opacity-60 grayscale'
+            }`}>
+            {/* Background Texture */}
+            <div className="absolute inset-0 bg-scanline opacity-[0.03] pointer-events-none"></div>
+
+            {/* Status Pulse */}
+            <div className="relative flex-shrink-0">
+                <div className={`w-12 h-12 rounded-full border border-white/5 flex items-center justify-center bg-white/[0.02] relative z-10`}>
+                    <Server size={20} className={online ? 'text-pearl' : 'text-slate-600'} />
                 </div>
-            )}
+                {online && (
+                    <>
+                        <div className="absolute inset-0 rounded-full border border-pearl/20 animate-ping"></div>
+                        <div className="absolute top-0 right-0 w-3 h-3 rounded-full bg-emerald-500 shadow-neon-sm border-2 border-black"></div>
+                    </>
+                )}
+            </div>
 
-            {/* Pulse Animation CSS */}
-            <style>{`
-                @keyframes pulse {
-                    0%, 100% { transform: scale(1); opacity: 1; }
-                    50% { transform: scale(1.2); opacity: 0.8; }
-                }
-            `}</style>
+            <div className="flex-1 space-y-3 relative z-10 w-full sm:w-auto">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="text-xs font-display font-black text-white tracking-widest uppercase mb-1">{worker.worker_id}</div>
+                        <div className="flex items-center gap-3 text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">
+                            <span className="flex items-center gap-1"><Globe size={10} /> {worker.geo_city}, {worker.geo_country}</span>
+                            <span className="flex items-center gap-1"><HardDrive size={10} /> {worker.node_type || 'RESIDENTIAL'}</span>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <div className={`text-lg font-display font-black ${healthColor} tracking-tighter`}>{health.toFixed(1)}%</div>
+                        <div className={`text-[0.5rem] font-mono font-bold ${healthColor} uppercase opacity-60 tracking-widest`}>STEALTH_INDEX</div>
+                    </div>
+                </div>
+
+                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className={`h-full ${healthBg} shadow-glow transition-all duration-1000`} style={{ width: `${health}%` }}></div>
+                </div>
+
+                <div className="flex justify-between items-center text-[0.5rem] font-mono text-slate-700 uppercase tracking-widest">
+                    <span>Active_Missions: {worker.active_missions || 0}</span>
+                    <span>Last_Pulse: {online ? 'LIVE' : new Date(worker.last_pulse).toLocaleTimeString()}</span>
+                </div>
+            </div>
         </div>
     )
 }
