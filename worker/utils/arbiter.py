@@ -92,9 +92,35 @@ class ArbiterAgent:
         """
         CLARITY PEARL: DATA POLISHER
         Standardizes names, titles, and companies for a 'Pure' outreach experience.
+        CRITICAL: Preserves arrays (phones, emails, socials) from scrapers
         """
         cleaned = lead_data.copy()
         
+        # === DATA PRESERVATION: Ensure arrays survive polishing ===
+        # Problem: Google Maps returns 'phones' array, but vault expects 'phone' string
+        # Solution: Preserve array AND populate primary field
+        
+        # Phones: Preserve array, populate primary
+        if not cleaned.get('phone') and cleaned.get('phones'):
+            phones_list = cleaned['phones']
+            if isinstance(phones_list, list) and len(phones_list) > 0:
+                cleaned['phone'] = phones_list[0]  # Primary phone
+            elif isinstance(phones_list, str):
+                cleaned['phone'] = phones_list
+        
+        # Emails: Preserve array, populate primary
+        if not cleaned.get('email') and cleaned.get('emails'):
+            emails_list = cleaned['emails']
+            if isinstance(emails_list, list) and len(emails_list) > 0:
+                cleaned['email'] = emails_list[0]  # Primary email
+            elif isinstance(emails_list, str):
+                cleaned['email'] = emails_list
+        
+        # Socials: Ensure dict preserved
+        if not cleaned.get('socials'):
+            cleaned['socials'] = {}
+        
+        # === Original polishing logic ===
         # 1. Clean Person Name
         if cleaned.get('name'):
             name = cleaned['name'].strip()

@@ -283,7 +283,7 @@ class LinkedInEngine:
             print(f"[{self.platform}] ❌ DDG Error: {e}")
             return []
 
-    def _get_mock_data(self, query):
+    async def _get_mock_data(self, query):
         print(f"[{self.platform}] 🔧 Specific person search exhausted. Attempting broad Company Page sweep...")
         # Fallback 4: Broad Company Search (Never fail completely)
         try:

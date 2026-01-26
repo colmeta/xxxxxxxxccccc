@@ -24,14 +24,24 @@ class GeminiClient:
         self.gemini_key = os.getenv("GEMINI_API_KEY")
         self.groq_key = os.getenv("GROQ_API_KEY")
         
+        # AI Availability Check (ONE TIME - no spam)
+        self.ai_available = bool(
+            (self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE") or 
+            self.groq_key
+        )
+        
+        if not self.ai_available:
+            print("⚠️ AI models unavailable (zero tokens). Using heuristic intelligence only.")
+        
         # MODEL HEALTH MAP (Dynamic failure tracking)
         self.health_map = {} # {model_id: {"last_fail": timestamp, "fail_type": "429"|"404"|"error"}}
         self.cooldown_period = 300 # 5 minutes for 429s
         
-        # Better API key status logging
-        gemini_status = "Active" if self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE" else "Missing/Invalid"
-        groq_status = "Active" if self.groq_key else "Missing"
-        print(f"AI Integration Status: Gemini {gemini_status}, Groq {groq_status}")
+        # Better API key status logging (only if available)
+        if self.ai_available:
+            gemini_status = "Active" if self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE" else "Missing/Invalid"
+            groq_status = "Active" if self.groq_key else "Missing"
+            print(f"AI Integration Status: Gemini {gemini_status}, Groq {groq_status}")
         
         # Correct Gemini model IDs (Updated for GenAI SDK compatibility)
         # Correct Gemini model IDs (Updated for GenAI SDK compatibility)
@@ -175,6 +185,11 @@ class GeminiClient:
 
     def _smart_call(self, prompt, image_path=None):
         """PRIMARY: Groq (faster, better free tier). BACKUP: Gemini."""
+        
+        # ZERO-BUDGET OPTIMIZATION: Fast fail if no AI available
+        if not self.ai_available:
+            return None
+        
         # Images MUST use Gemini (Groq doesn't support vision)
         if image_path:
             print("🖼️ Vision request detected, using Gemini...")
@@ -182,19 +197,12 @@ class GeminiClient:
         
         # Text: Try Groq FIRST (Primary AI)
         if self.groq_key:
-            print("🧠 Attempting Groq AI (Primary)...")
             res = self._call_groq(prompt)
             if res: 
-                print("✓ Groq AI succeeded")
                 return res
-            print("⚠️ Groq failed, falling back to Gemini...")
-        else:
-            print("⚠️ No Groq key available, trying Gemini...")
         
         # Fallback to Gemini only if Groq unavailable/failed
         result = self._call_gemini(prompt)
-        if not result:
-            print("⚠️ All AI models failed. Engaging Heuristic Intelligence.")
         return result
 
     async def analyze_visuals(self, query, image_path):
