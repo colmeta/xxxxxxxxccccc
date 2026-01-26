@@ -90,7 +90,8 @@
   }
 
   .badge-pearl {
-    @apply bg-pearl/10 text-pearl border-pearl/30 shadow-[0_0_15px_rgba(0, 240, 255, 0.15)];
+    @apply bg-pearl/10 text-pearl border-pearl/30;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
   }
 
   .badge-error {

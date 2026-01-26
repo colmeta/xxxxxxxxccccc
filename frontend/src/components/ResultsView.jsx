@@ -31,7 +31,7 @@ export default function ResultsView() {
     const downloadResultsAsCSV = () => {
         if (results.length === 0) return
 
-        const headers = ["Name", "Title", "Company", "Industry", "Location", "Email", "Clarity Score", "Intent Score", "LinkedIn", "Status"]
+        const headers = ["Name", "Title", "Company", "Industry", "Location", "Email", "Phone", "Clarity Score", "Intent Score", "LinkedIn", "Status"]
         const csvRows = [headers.join(",")]
 
         results.forEach(res => {
@@ -43,6 +43,7 @@ export default function ResultsView() {
                 `"${(data.industry || "General").replace(/"/g, '""')}"`,
                 `"${(data.location || "USA").replace(/"/g, '""')}"`,
                 `"${data.email || ""}"`,
+                `"${data.phone || ""}"`,
                 res.clarity_score || 0,
                 res.intent_score || 0,
                 `"${data.source_url || ""}"`,
@@ -186,6 +187,18 @@ export default function ResultsView() {
                                                     <Mail size={12} />
                                                 </div>
                                                 <span className="text-slate-400 font-mono truncate max-w-[150px]">{r.data_payload?.email || 'OFFLINE'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-xs group/link">
+                                                <div className="p-1.5 rounded bg-white/5 text-slate-600 group-hover/link:text-blue-500 transition-colors">
+                                                    <Smartphone size={12} />
+                                                </div>
+                                                <span className="text-slate-400 font-mono truncate max-w-[150px]">{r.data_payload?.phone || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-xs group/link">
+                                                <div className="p-1.5 rounded bg-white/5 text-slate-600 group-hover/link:text-amber-500 transition-colors">
+                                                    <Globe size={12} />
+                                                </div>
+                                                <span className="text-slate-400 font-mono truncate max-w-[150px]">{r.data_payload?.location || 'Unknown'}</span>
                                             </div>
                                             <div className="flex items-center gap-3 text-xs group/link">
                                                 <div className="p-1.5 rounded bg-white/5 text-slate-600 group-hover/link:text-pearl transition-colors">
