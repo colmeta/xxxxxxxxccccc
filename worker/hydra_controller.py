@@ -351,10 +351,22 @@ class HydraController:
                             engine = AcademicResearchEngine(page)
                             data_results = await engine.scrape(query)
                         elif platform == "generic" and not query.startswith("http"):
-                            from scrapers.base_dork_engine import BaseDorkEngine
-                            # Use Global Radar for general search queries to find a list of candidates
-                            engine = BaseDorkEngine(page, "Global Radar")
-                            data_results = await engine.run_dork_search(query, "")
+                            # INTELLIGENT ROUTING: Detect if query is for a LIST or a SPECIFIC COMPANY
+                            query_lower = query.lower()
+                            list_indicators = ["companies", "agencies", "firms", "startups", "providers", "services", " in ", " near ", "list of", "top "]
+                            is_list_query = any(ind in query_lower for ind in list_indicators)
+                            
+                            if is_list_query:
+                                print(f"[{self.worker_id}] 🔀 Routing 'generic' list query to Google Maps Engine: {query}")
+                                from scrapers.google_maps_engine import GoogleMapsEngine
+                                engine = GoogleMapsEngine(page)
+                                # Maps engine expects "scrape(query)"
+                                data_results = await engine.scrape(query)
+                            else:
+                                print(f"[{self.worker_id}] 🎯 Routing 'generic' specific query to Global Radar: {query}")
+                                from scrapers.base_dork_engine import BaseDorkEngine
+                                engine = BaseDorkEngine(page, "Global Radar")
+                                data_results = await engine.run_dork_search(query, "")
                         else:
                             from scrapers.website_engine import WebsiteEngine
                             engine = WebsiteEngine(page)
