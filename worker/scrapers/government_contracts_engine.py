@@ -30,7 +30,7 @@ class GovernmentContractsEngine:
             # URL structure for search:
             search_url = f"https://sam.gov/search/?index=opp&page=1&sort=-modifiedDate&pageSize=25&sfm%5BsimpleSearch%5D%5BkeywordRadio%5D=ALL&sfm%5BsimpleSearch%5D%5BkeywordTags%5D={keyword}&sfm%5Bstatus%5D%5Bis_active%5D=true"
             
-            await self.page.goto(search_url, timeout=60000)
+            await self.page.goto(search_url, timeout=15000)
             await self.page.wait_for_load_state("networkidle")
             
             # Wait for results to load

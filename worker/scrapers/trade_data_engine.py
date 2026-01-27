@@ -36,7 +36,7 @@ class TradeDataEngine:
         url = "https://api.census.gov/data/timeseries/intltrade/imports/hs"
         
         params = {
-            "get": "I_COMMODITY,CTY_CODE,GEN_VAL_MO,I_COMMODITY_LD",
+            "get": "I_COMMODITY,CTY_CODE,GEN_VAL_MO",
             "time": f"{year}-12", # Latest full year end
             "COMM_LVL": "HS2", # 2-digit level for breadth
             "I_COMMODITY": hs_code

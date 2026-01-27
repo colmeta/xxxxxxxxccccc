@@ -42,7 +42,7 @@ class LinkedInEngine:
             if results: return results
 
         print(f"[{self.platform}] 🔧 All strategies exhausted. Using Mock Data.")
-        return self._get_mock_data(query)
+        return await self._fallback_company_search(query)
 
     async def _search_via_scraper_api(self, query):
         """Uses ScraperAPI to fetch LinkedIn search results if local worker is throttled."""
