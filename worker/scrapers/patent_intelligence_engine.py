@@ -22,8 +22,10 @@ class PatentIntelligenceEngine:
         """
         await self.log(f"Querying USPTO live database for: '{keyword}'")
         
-        # USPTO PatentsView API Endpoint
-        url = "https://api.patentsview.org/patents/query"
+        # USPTO PatentsView API Endpoint (Updated)
+        # Note: The legacy query endpoint is deprecated (410). 
+        # We will attempt the new one, but prioritize Google Patents if this fails.
+        url = "https://search.patentsview.org/api/v1/patent/"
         
         # Constuct Query: Title OR Abstract contains keyword
         query_json = {
