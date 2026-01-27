@@ -2,7 +2,9 @@ import asyncio
 import json
 import os
 import aiohttp
+import random
 from datetime import datetime
+from utils.humanizer import Humanizer
 
 class CapitalGrowthEngine:
     """
@@ -13,9 +15,18 @@ class CapitalGrowthEngine:
     def __init__(self, page=None):
         self.page = page
         self.cik_map = {}
+        self.platform = "capital_growth"
         
     async def log(self, msg):
         print(f"   💰 [CapitalEngine] {msg}")
+
+    async def _hard_reset(self):
+        """Memory & State Isolation."""
+        try:
+            if self.page:
+                await self.page.goto("about:blank")
+                await asyncio.sleep(2)
+        except Exception: pass
 
     async def _init_sec_map(self):
         """
@@ -117,11 +128,18 @@ class CapitalGrowthEngine:
         try:
             url = f"https://find-and-update.company-information.service.gov.uk/search?q={company_name}"
             
-            await self.page.goto(url, timeout=30000)
+            try:
+                await self.page.goto(url, timeout=30000)
+            except Exception as nav_err:
+                 await self.log(f"   -> Companies House Nav Failed: {nav_err}")
+                 await self._hard_reset()
+                 return []
             
+            await Humanizer.random_sleep(2, 5)
+
             # Selector for result list
             try:
-                await self.page.wait_for_selector("#results li", timeout=5000)
+                await self.page.wait_for_selector("#results li", timeout=10000)
             except:
                 return []
                 

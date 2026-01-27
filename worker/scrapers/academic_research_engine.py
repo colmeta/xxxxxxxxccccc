@@ -15,7 +15,7 @@ class AcademicResearchEngine:
         self.page = page
         
     async def log(self, msg):
-        print(f"   🔬 [AcademicEngine] {msg}")
+        print(f"   [AcademicEngine] {msg}")
 
     async def scrape_pubmed(self, keyword):
         """

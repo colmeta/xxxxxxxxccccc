@@ -1,7 +1,9 @@
 import asyncio
 import json
 import os
+import random
 from datetime import datetime
+from utils.humanizer import Humanizer
 
 class EventsNetworkingEngine:
     """
@@ -11,9 +13,18 @@ class EventsNetworkingEngine:
     
     def __init__(self, page=None):
         self.page = page
+        self.platform = "events_networking"
         
     async def log(self, msg):
         print(f"   🥂 [EventsEngine] {msg}")
+
+    async def _hard_reset(self):
+        """Memory & State Isolation (The Iron Wall)."""
+        try:
+            if self.page:
+                await self.page.goto("about:blank")
+                await asyncio.sleep(2)
+        except Exception: pass
 
     async def scrape_eventbrite(self, keyword):
         """
@@ -26,7 +37,14 @@ class EventsNetworkingEngine:
             # Eventbrite Search URL
             url = f"https://www.eventbrite.com/d/online/{keyword.replace(' ', '-')}/"
             
-            await self.page.goto(url, timeout=60000)
+            try:
+                await self.page.goto(url, timeout=60000)
+            except Exception as nav_err:
+                 await self.log(f"   -> Eventbrite Navigation Falied: {nav_err}")
+                 await self._hard_reset()
+                 return []
+
+            await Humanizer.random_sleep(3, 7)
             
             # Wait for event cards
             try:

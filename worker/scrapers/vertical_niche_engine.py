@@ -16,7 +16,7 @@ class VerticalNicheEngine:
         """
         Signals from Avvo, Martindale, Justia.
         """
-        print(f"[Niche Engine] ⚖️  Probing Legal Hubs for '{company_or_person}'...")
+        print(f"[Niche Engine] Probing Legal Hubs for '{company_or_person}'...")
         # Check Avvo
         avvo_query = f'site:avvo.com/attorney "{company_or_person}"'
         results = await self.dork_engine.run_dork_search(avvo_query, "")
@@ -40,7 +40,7 @@ class VerticalNicheEngine:
         """
         Signals from Healthgrades, Doximity.
         """
-        print(f"[Niche Engine] 🩺 Probing Medical Hubs for '{entity_name}'...")
+        print(f"[Niche Engine] Probing Medical Hubs for '{entity_name}'...")
         query = f'site:healthgrades.com/physician "{entity_name}"'
         results = await self.dork_engine.run_dork_search(query, "")
         
@@ -60,11 +60,45 @@ class VerticalNicheEngine:
             "industry_vertical": "Medical"
         }
 
+    async def scrape_findlaw(self, company_name):
+        """
+        Signals from FindLaw (Legal).
+        """
+        print(f"[Niche Engine] Checking FindLaw for '{company_name}'...")
+        query = f'site:lawyers.findlaw.com "{company_name}"'
+        results = await self.dork_engine.run_dork_search(query, "")
+        
+        if not results: return None
+        
+        best = results[0]
+        return {
+            "findlaw_url": best.get('source_url'),
+            "industry_vertical": "Legal",
+            "source": "FindLaw (Dork)"
+        }
+
+    async def scrape_webmd(self, company_name):
+        """
+        Signals from WebMD (Medical).
+        """
+        print(f"[Niche Engine] Checking WebMD for '{company_name}'...")
+        query = f'site:doctor.webmd.com "{company_name}"'
+        results = await self.dork_engine.run_dork_search(query, "")
+        
+        if not results: return None
+        
+        best = results[0]
+        return {
+            "webmd_url": best.get('source_url'),
+            "industry_vertical": "Medical",
+            "source": "WebMD (Dork)"
+        }
+
     async def scrape_construction(self, company_name):
         """
         Signals from BuildZoom, Contractors.com.
         """
-        print(f"[Niche Engine] 🏗️  Probing Construction Hubs for '{company_name}'...")
+        print(f"[Niche Engine] Probing Construction Hubs for '{company_name}'...")
         query = f'site:buildzoom.com/contractor "{company_name}"'
         results = await self.dork_engine.run_dork_search(query, "")
         

@@ -20,28 +20,27 @@ class GeminiClient:
     Now with persistent model fallback and detailed logging.
     """
     
+    
     def __init__(self):
         self.gemini_key = os.getenv("GEMINI_API_KEY")
         self.groq_key = os.getenv("GROQ_API_KEY")
         
-        # AI Availability Check (ONE TIME - no spam)
+        # ZERO BUDGET / FREE TIER DETECTION
+        # If keys are missing or placeholders, we default to "Heuristic Mode" automatically.
         self.ai_available = bool(
-            (self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE") or 
-            self.groq_key
+            (self.gemini_key and "YOUR_GEMINI" not in self.gemini_key) or 
+            (self.groq_key and "gsk_" in self.groq_key)
         )
         
         if not self.ai_available:
-            print("⚠️ AI models unavailable (zero tokens). Using heuristic intelligence only.")
-        
+            print("⚠️ Zero-Token Mode: AI keys missing. Swapping to Heuristic Intelligence (Free Tier).")
+        else:
+             print(f"AI Status: Gemini {'Active' if self.gemini_key else 'Missing'}, Groq {'Active' if self.groq_key else 'Missing'}")
+
         # MODEL HEALTH MAP (Dynamic failure tracking)
-        self.health_map = {} # {model_id: {"last_fail": timestamp, "fail_type": "429"|"404"|"error"}}
-        self.cooldown_period = 300 # 5 minutes for 429s
-        
-        # Better API key status logging (only if available)
-        if self.ai_available:
-            gemini_status = "Active" if self.gemini_key and self.gemini_key != "YOUR_GEMINI_API_KEY_HERE" else "Missing/Invalid"
-            groq_status = "Active" if self.groq_key else "Missing"
-            print(f"AI Integration Status: Gemini {gemini_status}, Groq {groq_status}")
+        self.health_map = {} 
+        self.cooldown_period = 300 
+
         
         # Correct Gemini model IDs (Updated for GenAI SDK compatibility)
         # Correct Gemini model IDs (Updated for GenAI SDK compatibility)

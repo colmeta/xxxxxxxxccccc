@@ -171,6 +171,12 @@ class HydraController:
         if not launch_args:
             launch_args = ["--no-sandbox"]
 
+        # FREE TIER OPTIMIZATION: Disable screenshots to save ~50MB RAM per context
+        enable_visuals = os.getenv("FREE_TIER", "true").lower() != "true"
+        if not enable_visuals:
+             print(f"[{self.worker_id}] 📉 Free Tier: Visuals/Screenshots disabled to save RAM.")
+
+
         # --- IMPERIAL STRATEGY: DATA VAULT LEVERAGE ---
         # Check if we already have verified leads in the vault for this query
         print(f"📡 Vault Search: Scanning local intelligence for '{query}'...")
@@ -398,15 +404,18 @@ class HydraController:
                         print(f"   ⚠️ Persistence Loop Error: {loop_err}")
                     finally:
                         # VISION-X: Capture screenshot for image-heavy results or instagram
-                        if platform in ['instagram', 'ecommerce']:
+                        if enable_visuals and platform in ['instagram', 'ecommerce']:
                             os.makedirs("screenshots", exist_ok=True)
                             try:
                                 await page.screenshot(path=shot_path)
                             except: pass
                         
+                        # AGGRESSIVE CLEANUP (512MB RAM Survival)
                         await page.close()
                         await context.close()
                         await browser.close()
+                        import gc
+                        gc.collect()
             except Exception as outer_err:
                 print(f"   ❌ Persistence Attempt Failed: {outer_err}")
 

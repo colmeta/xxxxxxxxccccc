@@ -2,7 +2,9 @@ import asyncio
 import json
 import os
 import aiohttp
+import random
 from datetime import datetime
+from utils.humanizer import Humanizer
 
 class PatentIntelligenceEngine:
     """
@@ -12,9 +14,18 @@ class PatentIntelligenceEngine:
     
     def __init__(self, page=None):
         self.page = page
+        self.platform = "patent_intelligence"
         
     async def log(self, msg):
         print(f"   💡 [PatentEngine] {msg}")
+
+    async def _hard_reset(self):
+        """Memory & State Isolation (The Iron Wall)."""
+        try:
+            if self.page:
+                await self.page.goto("about:blank")
+                await asyncio.sleep(2)
+        except Exception: pass
 
     async def scrape_uspto(self, keyword):
         """
@@ -91,11 +102,19 @@ class PatentIntelligenceEngine:
         results = []
         try:
             url = f"https://patents.google.com/?q={keyword}&sort=new"
-            await self.page.goto(url, timeout=60000)
+            
+            try:
+                await self.page.goto(url, timeout=60000)
+            except Exception as nav_err:
+                await self.log(f"   -> Google Patents Navigation Interrupted: {nav_err}")
+                await self._hard_reset()
+                return []
+
+            await Humanizer.random_sleep(3, 7) # Patience Protocol
             
             # Wait for results
             try:
-                await self.page.wait_for_selector("search-result-item", timeout=10000)
+                await self.page.wait_for_selector("search-result-item", timeout=15000)
             except:
                 await self.log("   -> No results on Google Patents")
                 return []
@@ -111,9 +130,11 @@ class PatentIntelligenceEngine:
                     title = await title_el.inner_text()
                     assignee = "Unknown"
                     if meta_el:
-                        meta_text = await meta_el.inner_text() 
-                        # Basic parsing of metadata line
-                        assignee = meta_text.split("\n")[0] if meta_text else "Unknown"
+                        try:
+                            meta_text = await meta_el.inner_text() 
+                            # Basic parsing of metadata line
+                            assignee = meta_text.split("\n")[0] if meta_text else "Unknown"
+                        except: pass
                         
                     results.append({
                         "source": "Google Patents (Live)",
@@ -129,6 +150,7 @@ class PatentIntelligenceEngine:
             
         except Exception as e:
             await self.log(f"   -> Google Patents Scraping Error: {e}")
+            await self._hard_reset()
             return []
 
     async def scrape(self, query):

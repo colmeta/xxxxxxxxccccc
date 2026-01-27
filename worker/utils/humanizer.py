@@ -36,9 +36,16 @@ class Humanizer:
                 await asyncio.sleep(random.uniform(1.0, 3.0))
 
     @staticmethod
-    async def random_sleep(min_seconds=1, max_seconds=3):
-        """Jittered sleep."""
-        await asyncio.sleep(random.uniform(min_seconds, max_seconds))
+    async def random_sleep(min_seconds=3, max_seconds=7): # Increased for Free Tier Patience
+        """
+        Simulates human-like reading/thinking pauses.
+        Free Tier: Slower is better to avoid rate limits.
+        """
+        import random
+        # Optional: Add small micro-variance
+        base = random.uniform(min_seconds, max_seconds)
+        await asyncio.sleep(base)
+
 
     @staticmethod
     async def mouse_jitter(page):

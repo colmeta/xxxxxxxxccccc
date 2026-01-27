@@ -2,7 +2,9 @@ import asyncio
 import json
 import os
 import aiohttp
+import random
 from datetime import datetime
+from utils.humanizer import Humanizer
 
 class GovernmentContractsEngine:
     """
@@ -13,9 +15,18 @@ class GovernmentContractsEngine:
     def __init__(self, page=None):
         self.page = page
         self.sam_api_key = os.getenv("SAM_API_KEY") 
-        
+        self.platform = "gov_contracts"
+
     async def log(self, msg):
         print(f"   🏛️ [GovEngine] {msg}")
+
+    async def _hard_reset(self):
+        """Memory & State Isolation (The Iron Wall)."""
+        try:
+            if self.page:
+                await self.page.goto("about:blank")
+                await asyncio.sleep(2)
+        except Exception: pass
 
     async def scrape_sam_gov(self, keyword):
         """
@@ -30,12 +41,19 @@ class GovernmentContractsEngine:
             # URL structure for search:
             search_url = f"https://sam.gov/search/?index=opp&page=1&sort=-modifiedDate&pageSize=25&sfm%5BsimpleSearch%5D%5BkeywordRadio%5D=ALL&sfm%5BsimpleSearch%5D%5BkeywordTags%5D={keyword}&sfm%5Bstatus%5D%5Bis_active%5D=true"
             
-            await self.page.goto(search_url, timeout=15000)
+            try:
+                await self.page.goto(search_url, timeout=30000) # Increased timeout for Free Tier
+            except Exception as nav_err:
+                await self.log(f"   -> SAM.gov Navigation Interrupted: {nav_err}")
+                await self._hard_reset()
+                return []
+
+            await Humanizer.random_sleep(3, 7) # Patience Protocol
             await self.page.wait_for_load_state("networkidle")
             
             # Wait for results to load
             try:
-                await self.page.wait_for_selector(".usa-card__body", timeout=10000)
+                await self.page.wait_for_selector(".usa-card__body", timeout=15000)
             except:
                 await self.log("   -> No results found or timeout on SAM.gov")
                 return []
@@ -53,7 +71,9 @@ class GovernmentContractsEngine:
                     agency = "Unknown Agency"
                     desc_el = await card.query_selector(".usa-card__body p")
                     if desc_el:
-                        agency = await desc_el.inner_text()
+                        try:
+                            agency = await desc_el.inner_text()
+                        except: pass
 
                     results.append({
                         "source": "SAM.gov (Live Scrape)",
@@ -69,6 +89,7 @@ class GovernmentContractsEngine:
             
         except Exception as e:
             await self.log(f"   -> SAM.gov Scraping Failed: {e}")
+            await self._hard_reset()
             return []
 
     async def scrape_usaspending(self, keyword):

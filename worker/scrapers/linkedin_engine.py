@@ -13,36 +13,81 @@ class LinkedInEngine:
 
     async def scrape(self, query):
         """
-        Executes a targeted search on LinkedIn using a 'Multi-Headed' approach.
-        Tries Google (Standard + Basic) -> Bing -> DuckDuckGo.
+        Executes a targeted search on LinkedIn using the 'Total Recall' Protocol.
+        Aggregates results from Google -> Bing -> DDG (Sequential Multi-Source).
         """
-        print(f"[{self.platform}] 🚀 Launching 'Unshakable' Search for: {query}")
+        print(f"[{self.platform}] 🚀 Launching 'Total Recall' Search for: {query}")
         
-        results = []
+        all_results = []
+        seen_urls = set()
+
+        # Helper to deduplicate and add
+        def add_unique(new_results, source_name):
+            count = 0
+            for res in new_results:
+                url = res.get('source_url') or res.get('linkedin_url')
+                if url and url not in seen_urls:
+                    seen_urls.add(url)
+                    all_results.append(res)
+                    count += 1
+            if count > 0:
+                print(f"[{self.platform}] ✅ {source_name} added {count} unique leads.")
+
+        # 1. Google Search
+        try:
+            google_results = await self._search_google(query)
+            add_unique(google_results, "Google")
+        except Exception as e:
+            print(f"[{self.platform}] ⚠️ Google failed: {e}")
+
+        # ISO-BLAST: Clear context before next engine
+        await self._hard_reset()
         
-        # 1. Google Search (Priority)
-        results = await self._search_google(query)
-        if results: return results
-        
-        # 2. Bing Search (Fallback 1)
-        print(f"[{self.platform}] ⚠️ Google dry/blocked. engaging BING fallback...")
-        results = await self._search_bing(query)
-        if results: return results
+        # 2. Bing Search
+        try:
+            print(f"[{self.platform}] 🔎 Engaging BING for additional coverage...")
+            bing_results = await self._search_bing(query)
+            add_unique(bing_results, "Bing")
+        except Exception as e:
+            print(f"[{self.platform}] ⚠️ Bing failed: {e}")
 
-        # 3. DuckDuckGo (Last Resort)
-        print(f"[{self.platform}] ⚠️ Bing dry. Engaging DUCKDUCKGO...")
-        results = await self._search_ddg(query)
-        if results: return results
+        # ISO-BLAST: Clear context
+        await self._hard_reset()
 
-        # 4. ScraperAPI Fallback (The Force Multiplier)
-        from utils.scraper_api_bridge import scraper_api_bridge
-        if os.getenv("SCRAPER_API_KEY"):
-            print(f"[{self.platform}] 🚀 Local engines blocked. Engaging ScraperAPI Proxy Search...")
-            results = await self._search_via_scraper_api(query)
-            if results: return results
+        # 3. DuckDuckGo Search
+        try:
+            print(f"[{self.platform}] 🦆 Engaging DUCKDUCKGO for deep web coverage...")
+            ddg_results = await self._search_ddg(query)
+            add_unique(ddg_results, "DuckDuckGo")
+        except Exception as e:
+            print(f"[{self.platform}] ⚠️ DDG failed: {e}")
 
-        print(f"[{self.platform}] 🔧 All strategies exhausted. Using Mock Data.")
-        return await self._fallback_company_search(query)
+        # 4. Fallback if ABSOLUTELY nothing found
+        if not all_results:
+             print(f"[{self.platform}] 🔧 All strategies exhausted. Using Broad Company Sweep.")
+             return await self._fallback_company_search(query)
+
+        print(f"[{self.platform}] 🏁 Total Recall Complete. Aggregated {len(all_results)} unique leads.")
+        return all_results
+
+    async def _hard_reset(self):
+        """
+        Memory & State Isolation (The Iron Wall).
+        Prevents cross-engine contamination and frees RAM.
+        """
+        try:
+            # Navigate to blank to stop all network requests
+            await self.page.goto("about:blank")
+            # Clear cookies/storage if possible (context-dependent)
+            try:
+                await self.page.context.clear_cookies()
+            except: pass
+            
+            # Brief cool-down for memory release
+            await asyncio.sleep(2)
+        except Exception as e:
+            print(f"⚠️ Hard Reset Warning: {e}")
+
 
     async def _search_via_scraper_api(self, query):
         """Uses ScraperAPI to fetch LinkedIn search results if local worker is throttled."""
@@ -80,7 +125,13 @@ class LinkedInEngine:
                 url = f"https://www.google.com/search?q={encoded_query}&num=100"
             
             print(f"[{self.platform}] 📡 Google: {url}")
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            except Exception as nav_err:
+                print(f"[{self.platform}] ⚠️ Google Navigation Interrupted: {nav_err}")
+                await self._hard_reset()
+                return [] # Fail gracefully for this engine
+
             await Humanizer.random_sleep(2, 3)
             
             # Re-check page state before selecting
@@ -211,7 +262,12 @@ class LinkedInEngine:
             encoded_query = urllib.parse.quote(f"site:linkedin.com/in/ {query}")
             url = f"https://www.bing.com/search?q={encoded_query}"
             
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            except Exception as nav_err:
+                 print(f"[{self.platform}] ⚠️ Bing Navigation Interrupted: {nav_err}")
+                 return []
+
             await Humanizer.random_sleep(2, 3)
             
             # Re-check page state before selecting
@@ -252,7 +308,12 @@ class LinkedInEngine:
             encoded_query = urllib.parse.quote(f"site:linkedin.com/in/ {query}")
             url = f"https://duckduckgo.com/?q={encoded_query}&t=hp&ia=web"
             
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            except Exception as nav_err:
+                 print(f"[{self.platform}] ⚠️ DDG Navigation Interrupted: {nav_err}")
+                 return []
+
             await Humanizer.random_sleep(2, 3)
             
             # Re-check page state before selecting
@@ -266,14 +327,14 @@ class LinkedInEngine:
                 title_text = await link.inner_text()
                 
                 if href and "linkedin.com/in/" in href:
-                     results.append({
+                    results.append({
                         "name": title_text.split("-")[0].strip(),
                         "title": "Professional", # DDG titles are often cleaner/shorter
                         "company": "LinkedIn",
                         "source_url": href,
                         "verified": True,
                         "snippet": "Via DDG Fallback"
-                     })
+                    })
             
             if results:
                  print(f"[{self.platform}] ✅ DDG found {len(results)} leads.")

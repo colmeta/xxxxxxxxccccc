@@ -87,6 +87,16 @@ class ReputationEngine:
                 "glassdoor_url": best.get('source_url'),
                 "employee_rating": stars.group(1) if stars else None
             })
+
+        # Indeed Dork
+        ind_results = await self.dork_engine.run_dork_search(f'site:indeed.com/cmp "{company_name}" reviews', "")
+        if ind_results:
+             trust_data["indeed_url"] = ind_results[0].get('source_url')
+
+        # GetApp Dork
+        ga_results = await self.dork_engine.run_dork_search(f'site:getapp.com/software "{company_name}" reviews', "")
+        if ga_results:
+             trust_data["getapp_url"] = ga_results[0].get('source_url')
             
         return trust_data
 

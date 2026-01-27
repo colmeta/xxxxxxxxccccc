@@ -12,37 +12,73 @@ class BaseDorkEngine:
         self.platform = platform_name
 
     async def run_dork_search(self, query, site_filter):
-        print(f"[{self.platform}] 🚀 Launching Radar for: {query} (site:{site_filter})")
+        print(f"[{self.platform}] Launching 'Total Recall' Radar for: {query} (site:{site_filter})")
         
+        all_results = []
+        seen_urls = set()
+
+        def add_unique(new_results, source_name):
+            count = 0
+            for res in new_results:
+                url = res.get('source_url')
+                if url and url not in seen_urls:
+                    seen_urls.add(url)
+                    all_results.append(res)
+                    count += 1
+            if count > 0:
+                print(f"[{self.platform}] [OK] {source_name} added {count} unique leads.")
+
         # 1. Google
-        results = await self._search_google(query, site_filter)
-        if results: return results
+        try:
+            google_results = await self._search_google(query, site_filter)
+            add_unique(google_results, "Google")
+        except Exception as e:
+            print(f"[{self.platform}] [ERR] Google failed: {e}")
+
+        # ISO-BLAST
+        await self._hard_reset()
         
         # 2. Bing
-        print(f"[{self.platform}] ⚠️ Google dry. Engaging BING...")
-        results = await self._search_bing(query, site_filter)
-        if results: return results
+        try:
+            print(f"[{self.platform}] Engaging BING for additional coverage...")
+            bing_results = await self._search_bing(query, site_filter)
+            add_unique(bing_results, "Bing")
+        except Exception as e:
+            print(f"[{self.platform}] [ERR] Bing failed: {e}")
+
+        # ISO-BLAST
+        await self._hard_reset()
         
         # 3. DDG
-        print(f"[{self.platform}] ⚠️ Bing dry. Engaging DUCKDUCKGO...")
-        results = await self._search_ddg(query, site_filter)
-        if results: return results
+        try:
+            print(f"[{self.platform}] Engaging DUCKDUCKGO for deep web coverage...")
+            ddg_results = await self._search_ddg(query, site_filter)
+            add_unique(ddg_results, "DuckDuckGo")
+        except Exception as e:
+             print(f"[{self.platform}] [ERR] DDG failed: {e}")
 
-        # 4. ScraperAPI (The Unshakable Fallback)
-        import os
-        if os.getenv("SCRAPER_API_KEY"):
-            print(f"[{self.platform}] 🚀 Local engines blocked. Engaging ScraperAPI Proxy Search...")
-            results = await self._search_google(query, site_filter, use_proxy=True)
-            if results: return results
+        if not all_results:
+             print(f"[{self.platform}] All strategies exhausted. Returning fallback.")
+             return [{
+                "name": f"Search: {query}",
+                "company": self.platform.capitalize(),
+                "source_url": f"https://www.google.com/search?q={query}",
+                "verified": False,
+                "snippet": "No direct leads found via automated channels. Manual check recommended."
+             }]
 
-        print(f"[{self.platform}] 🔧 All strategies exhausted. Returning fallback.")
-        return [{
-            "name": f"Search: {query}",
-            "company": self.platform.capitalize(),
-            "source_url": f"https://www.google.com/search?q={query}",
-            "verified": False,
-            "snippet": "No direct leads found via automated channels. Manual check recommended."
-        }]
+        print(f"[{self.platform}] Total Recall Complete. Aggregated {len(all_results)} leads.")
+        return all_results
+
+    async def _hard_reset(self):
+        """Memory & State Isolation"""
+        try:
+            await self.page.goto("about:blank")
+            try: await self.page.context.clear_cookies()
+            except: pass
+            await asyncio.sleep(2)
+        except: pass
+
 
     async def _search_google(self, query, site_filter, use_proxy=False):
         try:
@@ -55,8 +91,14 @@ class BaseDorkEngine:
                 url = f"http://api.scraperapi.com?api_key={api_key}&url=https://www.google.com/search?q={encoded_val}&num=10"
             else:
                 url = f"https://www.google.com/search?q={encoded_val}&num=10"
-            
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            print(f"[{self.platform}] Google API: {url}")
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            except Exception as nav_err:
+                 print(f"[{self.platform}] [ERR] Google Navigation Interrupted: {nav_err}")
+                 await self._hard_reset()
+                 return []
+                 
             await Humanizer.random_sleep(2, 3)
             
             # Re-check page state
@@ -67,7 +109,7 @@ class BaseDorkEngine:
             
             results = []
             if is_basic:
-                print(f"[{self.platform}] 🔦 Basic HTML Detected on Google. Bypassing...")
+                print(f"[{self.platform}] Basic HTML Detected on Google. Bypassing...")
                 items = await self.page.query_selector_all("div.ZINbbc")
                 for item in items:
                     link_handle = await item.query_selector("a[href*='/url?q=']")
@@ -109,7 +151,7 @@ class BaseDorkEngine:
             
             return results
         except Exception as e:
-            print(f"[{self.platform}] ❌ Google Error: {e}")
+            print(f"[{self.platform}] [ERR] Google Error: {e}")
             return []
 
     async def _search_bing(self, query, site_filter):
@@ -117,7 +159,12 @@ class BaseDorkEngine:
             encoded = urllib.parse.quote(f"site:{site_filter} {query}")
             url = f"https://www.bing.com/search?q={encoded}"
             
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=15000)
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=15000)
+            except Exception as nav_err:
+                 print(f"[{self.platform}] [ERR] Bing Navigation Interrupted: {nav_err}")
+                 return []
+                 
             await asyncio.sleep(1) # Extra stability for Bing context
             await Humanizer.natural_scroll(self.page)
             
@@ -145,7 +192,12 @@ class BaseDorkEngine:
             encoded = urllib.parse.quote(f"site:{site_filter} {query}")
             url = f"https://duckduckgo.com/?q={encoded}&t=hp&ia=web"
             
-            await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            try:
+                await self.page.goto(url, wait_until="domcontentloaded", timeout=20000)
+            except Exception as nav_err:
+                 print(f"[{self.platform}] [ERR] DDG Navigation Interrupted: {nav_err}")
+                 return []
+            
             await Humanizer.random_sleep(2, 3)
             
             # Re-check page state
