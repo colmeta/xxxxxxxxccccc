@@ -128,3 +128,54 @@ def get_job_status(job_id: str, user: dict = Depends(get_current_user)):
         if isinstance(e, HTTPException):
             raise e
         raise HTTPException(status_code=500, detail="Failed to retrieve job status. Please try again.")
+
+@router.post("/{job_id}/cancel", response_model=JobStatusResponse)
+def cancel_job(job_id: str, user: dict = Depends(get_current_user)):
+    """
+    Cancels a specific job.
+    """
+    supabase = get_supabase()
+    if not supabase:
+        raise HTTPException(status_code=503, detail="Service temporarily unavailable.")
+        
+    try:
+        org_id = user.get("org_id")
+        
+        # Verify ownership and current status
+        res = supabase.table('jobs').select('status').eq('id', job_id).eq('org_id', org_id).execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Job not found in your workspace")
+            
+        current_status = res.data[0].get('status')
+        if current_status in ['completed', 'failed', 'cancelled']:
+             return JobStatusResponse(
+                job_id=job_id,
+                status=current_status,
+                progress="Job already finished.",
+                data=res.data[0]
+            )
+
+        # Update status to cancelled
+        update_res = supabase.table('jobs').update({
+            'status': 'cancelled',
+            'completed_at': 'now()',  # Mark as finished
+            'progress_message': 'Cancelled by user'
+        }).eq('id', job_id).eq('org_id', org_id).execute()
+        
+        if not update_res.data:
+             raise HTTPException(status_code=500, detail="Failed to cancel job.")
+
+        job_data = update_res.data[0]
+        return JobStatusResponse(
+            job_id=job_id,
+            status="cancelled",
+            progress="Cancellation requested.",
+            data=job_data
+        )
+
+    except Exception as e:
+        error_type = type(e).__name__
+        print(f"⚠️  Job cancellation failed: {error_type}")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail="Failed to cancel job.")

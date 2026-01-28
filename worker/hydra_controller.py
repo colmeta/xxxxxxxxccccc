@@ -419,21 +419,27 @@ class HydraController:
             except Exception as outer_err:
                 print(f"   ❌ Persistence Attempt Failed: {outer_err}")
 
+            # --- PHASE Z: CANCELLATION CHECK ---
+            # Check if job was cancelled during this scrape attempt
+            if self.supabase:
+                try:
+                    refresh_res = self.supabase.table('jobs').select('status').eq('id', job_id).execute()
+                    if refresh_res.data and refresh_res.data[0]['status'] == 'cancelled':
+                        print(f"[{self.worker_id}] 🛑 Job {job_id} was cancelled by user. Terminating mission.")
+                        return # Exit the function completely
+                except Exception as e:
+                    pass # Don't crash on check failure
+
+
         # Aggressive Memory Cleanup
         import gc
         gc.collect()
 
         
         # --- PHASE 10: BULK DATA VAULTING WITH DEDUPLICATION ---
-        if not data_results:
-            print(f"   ⚠️ No data found for mission {job_id}. Skipping vault.")
-            if self.supabase:
-                self.supabase.table('jobs').update({
-                    'status': 'completed',
-                    'result_count': 0,
-                    'completed_at': datetime.now().isoformat()
-                }).eq('id', job_id).execute()
-            return
+        # --- PHASE 10: STREAMING DATA VAULTING WITH DEDUPLICATION ---
+        # Instead of waiting, we now stream leads directly into the vault
+        print(f"   🚀 Mission {job_id[:8]} streaming into Vault...")
         
         # Auto-detect category from search query
         category = job_data.get('search_metadata', {}).get('category')
@@ -443,37 +449,33 @@ class HydraController:
         elif not category:
             category = "Uncategorized"
         
-        # Filter duplicates if requested
         org_id = job_data.get('org_id')
         exclude_delivered = job_data.get('exclude_delivered') or job_data.get('search_metadata', {}).get('exclude_delivered', False)
         
-        if exclude_delivered and self.dedup_service and org_id:
-            print(f"🔍 Checking for duplicates in category: {category}")
-            data_results, duplicate_count = self.dedup_service.filter_duplicates(org_id, data_results, category)
-            if duplicate_count > 0:
-                print(f"✅ Filtered {duplicate_count} duplicates, {len(data_results)} new leads remaining")
-
-        print(f"   💾 Vaulting {len(data_results)} leads...")
+        # We'll use a local 'seen' set to prevent duplicates WITHIN the same run
+        seen_leads = set()
         saved_count = 0
-        seen_leads = set() # Mission-level deduplication
-        
-        for lead in data_results:
+
+        async def process_and_save_lead(lead):
+            nonlocal saved_count
             try:
-                # --- PHASE 11: DATA PURITY (ClarityPearl) ---
-                # 1. Deduplication
-                lead_id = lead.get('email') or lead.get('source_url') or lead.get('linkedin_url')
-                if lead_id in seen_leads:
-                    continue
+                # 1. Deduplication (Same-Run)
+                lead_id = lead.get('email') or lead.get('source_url') or lead.get('linkedin_url') or lead.get('name')
+                if lead_id in seen_leads: return
                 seen_leads.add(lead_id)
+
+                # 1b. Deduplication (Cros-Job / Delivered)
+                if exclude_delivered and self.dedup_service and org_id:
+                    if self.dedup_service.is_duplicate(org_id, lead.get('name') or lead.get('company'), lead.get('website'), category):
+                        print(f"   🔄 Skipping global duplicate: {lead.get('name') or 'Unnamed'}")
+                        return
 
                 # 2. Data Polishing (Standardization)
                 polished_lead = arbiter.polish_lead(lead)
                 
-                # 3. Verification & Scoring via Arbiter
-                if platform in ['instagram', 'ecommerce'] and os.path.exists(shot_path):
-                     clarity_score, verdict = await arbiter.score_visual_lead(query, shot_path)
-                else:
-                     clarity_score, verdict = await arbiter.score_lead(query, polished_lead)
+                # 3. Verification & Scoring
+                # Short-circuit visuals if not enabled
+                clarity_score, verdict = await arbiter.score_lead(query, polished_lead)
                 
                 # 4. Triple-Verification Protocol
                 is_verified = lead.get('verified', False)
@@ -484,18 +486,61 @@ class HydraController:
                     polished_lead['triple_verified'] = True
                     print(f"   💎 TRIPLE-VERIFIED Lead Detected: {polished_lead.get('name')}")
 
-                # 5. Predictive Intent Scoring
+                # 5. Predictive Intent Scoring (Includes Marketing Need detection)
                 intent_data = {"intent_score": 0, "oracle_signal": "Baseline Intelligence"}
                 if is_verified and clarity_score > 70:
                     intent_data = await arbiter.predict_intent(polished_lead)
                 
-                # 6. Save individual result
+                # 6. Save individual result IMMEDIATELY
                 await self._save_single_result(job_data, polished_lead, is_verified, verdict, final_url, clarity_score, intent_data)
                 saved_count += 1
+                
+                # Update Job Progress Count in DB
+                if self.supabase and saved_count % 5 == 0:
+                     self.supabase.table('jobs').update({'result_count': saved_count}).eq('id', job_id).execute()
+
             except Exception as loop_err:
                 print(f"   ⚠️ Failed to save lead: {loop_err}")
 
+        # Execute Bridge with Streaming
+        needs_enrichment = any(not lead.get('email') for lead in data_results[:10])
+        is_person_platform = platform in ['linkedin', 'twitter', 'instagram']
+        
+        if (needs_enrichment and not is_person_platform) or platform in ['google_maps', 'duckduckgo']:
+             print(f"🌉 Bridge: Running Streaming Enrichment for {len(data_results)} entities...")
+             bridge = EnrichmentBridge(page)
+             # Process top 50 (Self-Healing)
+             async for enriched_lead in bridge.enrich_business_leads(data_results[:50]):
+                  # Check for cancellation between each lead
+                  try:
+                      refresh_res = self.supabase.table('jobs').select('status').eq('id', job_id).execute()
+                      if refresh_res.data and refresh_res.data[0]['status'] == 'cancelled':
+                          print(f"[{self.worker_id}] 🛑 Mission cancelled during enrichment. Saving progress and exiting.")
+                          break
+                  except: pass
+                  
+                  await process_and_save_lead(enriched_lead)
+             
+             # Save remaining non-enriched leads if any (less likely to be useful but keeps parity)
+             for lead in data_results[50:]:
+                  await process_and_save_lead(lead)
+        else:
+             # Just process raw results
+             for lead in data_results:
+                  await process_and_save_lead(lead)
+
+        if saved_count == 0:
+            print(f"   ⚠️ No valid data preserved for mission {job_id}.")
+            if self.supabase:
+                self.supabase.table('jobs').update({
+                    'status': 'completed',
+                    'result_count': 0,
+                    'completed_at': datetime.now().isoformat()
+                }).eq('id', job_id).execute()
+            return
+
         # 4. Finalize Job Status with Data Quality Metrics
+
         if self.supabase:
             # Calculate data quality stats
             quality_stats = {
@@ -593,6 +638,7 @@ class HydraController:
                 "verified": verified,
                 "clarity_score": clarity_score,
                 "intent_score": intent_data.get('intent_score', 0) if intent_data else 0,
+                "marketing_need_score": intent_data.get('marketing_need_score', 0) if intent_data else 0,
                 "oracle_signal": intent_data.get('oracle_signal', 'Baseline') if intent_data else 'Baseline',
                 "predictive_growth_score": intent_data.get('predictive_growth_score', 0) if intent_data else 0,
                 "reasoning": intent_data.get('reasoning', '') if intent_data else '',

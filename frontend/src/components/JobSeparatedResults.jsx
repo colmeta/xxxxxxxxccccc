@@ -46,13 +46,38 @@ export default function JobSeparatedResults() {
                         .select('*')
                         .eq('job_id', job.id)
                         .order('clarity_score', { ascending: false })
-                        .limit(50)
+                    // .limit(50) // Removed limit to show all results
                     return { ...job, results: results || [] }
                 })
             )
-            setJobGroups(jobsWithResults.filter(j => j.results.length > 0))
+            setJobGroups(jobsWithResults.filter(j => j.results.length > 0 || job.status === 'processing' || job.status === 'queued'))
         }
         setLoading(false)
+    }
+
+    // Auto-refresh active jobs
+    useEffect(() => {
+        const interval = setInterval(() => {
+            // Only refresh if we have active jobs in the view or if we want to catch new ones
+            // For simplicity, we'll refresh if the user is looking at the list to show "streaming" effect
+            fetchJobGroups()
+        }, 5000)
+        return () => clearInterval(interval)
+    }, [selectedCategory]) // Refresh when category changes or on interval
+
+    const cancelJob = async (jobId) => {
+        try {
+            const { error } = await supabase
+                .from('jobs')
+                .update({ status: 'cancelled' })
+                .eq('id', jobId)
+
+            if (error) throw error
+            fetchJobGroups() // Immediate refresh
+        } catch (err) {
+            console.error("Failed to cancel job:", err)
+            alert("Failed to cancel job. Please try again.")
+        }
     }
 
     const exportJobCSV = (job) => {
@@ -127,17 +152,35 @@ export default function JobSeparatedResults() {
                         {/* Slab Header */}
                         <div className="flex flex-col lg:flex-row justify-between items-start gap-6 border-b border-white/5 pb-6 mb-8">
                             <div className="space-y-1">
-                                <div className="text-xl font-display font-black text-white tracking-widest uppercase">
+                                <div className="text-xl font-display font-black text-white tracking-widest uppercase flex items-center gap-3">
                                     {job.category || job.target_query}
+                                    {['queued', 'processing'].includes(job.status) && (
+                                        <span className="flex h-2 w-2 relative">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-4 text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">
                                     <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(job.created_at).toLocaleDateString()}</span>
                                     <span className="flex items-center gap-1"><Zap size={10} className="text-pearl" /> {job.results.length} NODES</span>
                                     <span className="flex items-center gap-1"><Target size={10} /> {job.target_platform.toUpperCase()}</span>
+                                    <span className={`flex items-center gap-1 ${job.status === 'cancelled' ? 'text-red-400' : ''}`}>
+                                        {job.status === 'processing' ? <RefreshCw size={10} className="animate-spin" /> : null}
+                                        {job.status.toUpperCase()}
+                                    </span>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-3">
+                                {['queued', 'processing'].includes(job.status) && (
+                                    <button
+                                        onClick={() => cancelJob(job.id)}
+                                        className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-[0.65rem] font-black tracking-widest text-red-400 hover:text-white hover:bg-red-500/80 transition-all flex items-center gap-2 uppercase"
+                                    >
+                                        STOP_MISSION
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => exportJobCSV(job)}
                                     className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[0.65rem] font-black tracking-widest text-slate-400 hover:text-pearl hover:border-pearl/40 hover:bg-pearl/5 transition-all flex items-center gap-2 uppercase"

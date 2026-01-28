@@ -108,7 +108,6 @@ class EnrichmentBridge:
         website_engine = WebsiteEngine(self.page)
         
         print(f"🌉 Bridge: Enriching {len(leads)} leads with 13-Layer Sovereignty...")
-        enriched_leads = []
         
         # Default Keywords if none provided
         if not target_industry_keywords:
@@ -117,7 +116,11 @@ class EnrichmentBridge:
             negative_keywords = ["trucking", "logistics", "shipping", "freight", "loan", "lending", "insurance", "real estate", "cleaning"]
 
         for lead in leads:
+            # Check for cancellation signal (if possible, though bridge doesn't have job_id here)
+            # We'll rely on the controller to stop iterating
+            
             company_name = lead.get('name', '').strip()
+
             
             # PHASE 16 HARDENING: Ignore junk leads without names
             if not company_name:
@@ -381,9 +384,10 @@ class EnrichmentBridge:
             lead['status'] = 'SOVEREIGN' if layer_count >= 6 else 'VERIFIED' if layer_count >= 3 else 'PARTIAL'
             
             print(f"   🎯 {company_name}: {layer_count}/13 layers activated - {lead['status']}")
-            enriched_leads.append(lead)
+            yield lead
                 
-        return enriched_leads
+        return
+
         """
         CLARITY PHASE: The "Bouncer" & "Gold Miner" Workflow.
         1. Filter by Name (Bouncer)

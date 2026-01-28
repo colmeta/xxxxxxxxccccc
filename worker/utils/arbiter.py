@@ -218,21 +218,22 @@ class ArbiterAgent:
             
             SCORING CRITERIA:
             1. Intent Score (0-100): Immediate need for outreach.
-            2. Predictive Growth Score (0-100): Likelihood of massive scaling, hiring, or funding in next 6 months.
+            2. Marketing Need Score (0-100): How badly does this business need better digital marketing (missing socials, outdated site, low visibility)?
+            3. Predictive Growth Score (0-100): Likelihood of massive scaling in next 6 months.
             
             LOOK FOR:
-            - Growth hiring (e.g., 'We are hiring', 'Team expansion')
+            - Growth hiring (e.g., 'We are hiring', 'Team expansion').
+            - Marketing Gaps (e.g., missing LinkedIn, no 'Contact' page, low reputation scores).
             - New product launches or expansion markers.
-            - Funding rumors or recent rounds.
-            - Tech stack upgrades or adoption of mature tools.
             
             Return ONLY a JSON object: 
             {{
                 "intent_score": int,
+                "marketing_need_score": int,
                 "predictive_growth_score": int,
-                "oracle_signal": "string (The narrative signal, e.g., 'Viral Growth Spike')",
+                "oracle_signal": "string",
                 "confidence": float,
-                "reasoning": "string (Why did you give these scores?)"
+                "reasoning": "string"
             }}
             """
             ai_response_text = await gemini_client.generate_content(prompt)
@@ -251,11 +252,18 @@ class ArbiterAgent:
         snippet = str(lead_data).lower()
         intent_score = 50
         growth_score = 40
+        marketing_need = 30
         
-        # High intent keywords
+        # High intent/need keywords
         if any(w in snippet for m, w in [("hire", "hiring"), ("expansion", "expanding"), ("new", "launch")]):
             intent_score += 20
             growth_score += 20
+        
+        # Specific Marketing Need signals
+        if not lead_data.get('website') or "google" in str(lead_data.get('website')):
+            marketing_need += 40
+        if not lead_data.get('socials') or len(lead_data.get('socials', {})) < 2:
+            marketing_need += 20
         
         # Seniority boost
         if any(r in snippet for r in ["ceo", "founder", "director", "cto"]):
@@ -263,6 +271,7 @@ class ArbiterAgent:
         
         return {
             "intent_score": min(intent_score, 100), 
+            "marketing_need_score": min(marketing_need, 100),
             "predictive_growth_score": min(growth_score, 100), 
             "oracle_signal": "Heuristic Intent (Baseline)", 
             "confidence": 0.6,
