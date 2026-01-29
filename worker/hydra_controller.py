@@ -223,6 +223,68 @@ class HydraController:
         data_results = []
         final_url = ""
 
+        # Auto-detect category from search query
+        category = job_data.get('search_metadata', {}).get('category')
+        if not category and self.dedup_service:
+            category = self.dedup_service.auto_detect_category(query)
+            print(f"📂 Auto-detected category: {category}")
+        elif not category:
+            category = "Uncategorized"
+        
+        org_id = job_data.get('org_id')
+        exclude_delivered = job_data.get('exclude_delivered') or job_data.get('search_metadata', {}).get('exclude_delivered', False)
+        
+        # We'll use a local 'seen' set to prevent duplicates WITHIN the same run
+        seen_leads = set()
+        saved_count = 0
+
+        async def process_and_save_lead(lead):
+            nonlocal saved_count
+            try:
+                # 1. Deduplication (Same-Run)
+                lead_id = lead.get('email') or lead.get('source_url') or lead.get('linkedin_url') or lead.get('name')
+                if lead_id in seen_leads: return
+                seen_leads.add(lead_id)
+
+                # 1b. Deduplication (Cros-Job / Delivered)
+                if exclude_delivered and self.dedup_service and org_id:
+                    if self.dedup_service.is_duplicate(org_id, lead.get('name') or lead.get('company'), lead.get('website'), category):
+                        print(f"   🔄 Skipping global duplicate: {lead.get('name') or 'Unnamed'}")
+                        return
+
+                # 2. Data Polishing (Standardization)
+                polished_lead = arbiter.polish_lead(lead)
+                
+                # 3. Verification & Scoring
+                # Short-circuit visuals if not enabled
+                clarity_score, verdict = await arbiter.score_lead(query, polished_lead)
+                
+                # 4. Triple-Verification Protocol
+                is_verified = lead.get('verified', False)
+                has_site = bool(lead.get('website'))
+                has_email = bool(lead.get('email') or lead.get('decision_maker_email'))
+                
+                if is_verified and has_site and has_email and clarity_score > 85:
+                    polished_lead['triple_verified'] = True
+                    print(f"   💎 TRIPLE-VERIFIED Lead Detected: {polished_lead.get('name')}")
+
+                # 5. Predictive Intent Scoring (Includes Marketing Need detection)
+                intent_data = {"intent_score": 0, "oracle_signal": "Baseline Intelligence"}
+                if is_verified and clarity_score > 70:
+                    intent_data = await arbiter.predict_intent(polished_lead)
+                
+                # 6. Save individual result IMMEDIATELY
+                await self._save_single_result(job_data, polished_lead, is_verified, verdict, final_url, clarity_score, intent_data)
+                saved_count += 1
+                
+                # Update Job Progress Count in DB
+                if self.supabase and saved_count % 5 == 0:
+                     self.supabase.table('jobs').update({'result_count': saved_count}).eq('id', job_id).execute()
+
+            except Exception as loop_err:
+                print(f"   ⚠️ Failed to save lead: {loop_err}")
+
+
         from playwright.async_api import async_playwright
 
         for attempt_profile in stealth_profiles:
@@ -378,26 +440,74 @@ class HydraController:
                             engine = WebsiteEngine(page)
                             data_results = await engine.scrape(target_url)
 
+
                         if data_results:
                             # Success!
                             print(f"[{self.worker_id}] ✨ Persistence Success! Found {len(data_results)} leads.")
                             
-                            # --- PHASE 16: VALUE HARDENING (The Bridge) ---
-                            # Aggressively enrich business-oriented results to find DMs and Emails
+                             # --- PHASE 10: STREAMING DATA VAULTING WITH DEDUPLICATION ---
+                            # Instead of waiting, we now stream leads directly into the vault
+                            print(f"   🚀 Mission {job_id[:8]} streaming into Vault...")
+                            print(f"📂 Auto-detected category: {category}")
+                            
+                            # Execute Bridge with Streaming WITHIN BROWSER CONTEXT
+                            needs_enrichment = any(not lead.get('email') for lead in data_results[:10])
                             is_person_platform = platform in ['linkedin', 'twitter', 'instagram']
                             
-                            # If we have leads without emails, or it's a discovery platform, trigger the bridge
-                            needs_enrichment = any(not lead.get('email') for lead in data_results[:10])
-                            
                             if (needs_enrichment and not is_person_platform) or platform in ['google_maps', 'duckduckgo']:
-                                # print(f"🌉 Bridge: Hardening Lead Value for {len(data_results)} entities...")
-                                # bridge = EnrichmentBridge(page)
-                                # # Enrich top 50 (Self-Healing increased from 10)
-                                # enriched = await bridge.enrich_business_leads(data_results[:50])
-                                # data_results = enriched + data_results[50:]
-                                pass
+                                 print(f"🌉 Bridge: Running Streaming Enrichment for {len(data_results)} entities...")
+                                 bridge = EnrichmentBridge(page)
+                                 # Process top 50 (Self-Healing)
+                                 async for enriched_lead in bridge.enrich_business_leads(data_results[:50]):
+                                      # Check for cancellation between each lead
+                                      try:
+                                          if self.supabase:
+                                              refresh_res = self.supabase.table('jobs').select('status').eq('id', job_id).execute()
+                                              if refresh_res.data and refresh_res.data[0]['status'] == 'cancelled':
+                                                  print(f"[{self.worker_id}] 🛑 Mission cancelled during enrichment. Saving progress and exiting.")
+                                                  break
+                                      except: pass
+                                      
+                                      await process_and_save_lead(enriched_lead)
+                                 
+                                 # Save remaining non-enriched leads if any (less likely to be useful but keeps parity)
+                                 for lead in data_results[50:]:
+                                      await process_and_save_lead(lead)
+                            else:
+                                 # Just process raw results
+                                 for lead in data_results:
+                                      await process_and_save_lead(lead)
+
+                            # 4. Finalize Job Status with Data Quality Metrics
+                            if self.supabase:
+                                # Calculate data quality stats
+                                quality_stats = {
+                                    'total_leads': saved_count,
+                                    'with_email': sum(1 for lead in data_results if lead.get('email') or lead.get('decision_maker_email')),
+                                    'with_phone': sum(1 for lead in data_results if lead.get('phone') or (lead.get('phones') and len(lead.get('phones')) > 0)),
+                                    'with_location': sum(1 for lead in data_results if lead.get('location') and lead.get('location') not in ['Unknown', 'Remote / USA', None]),
+                                    'with_socials': sum(1 for lead in data_results if lead.get('socials') and len(lead.get('socials')) > 0)
+                                }
+                                
+                                self.supabase.table('jobs').update({
+                                    'status': 'completed',
+                                    'result_count': saved_count,
+                                    'completed_at': datetime.now().isoformat()
+                                }).eq('id', job_id).execute()
+                                
+                                # Log data quality summary
+                                print(f"\n📊 Mission {job_id[:8]} Data Quality Report:")
+                                print(f"   Total Leads: {quality_stats['total_leads']}")
+                                if quality_stats['total_leads'] > 0:
+                                    print(f"   ✉️  With Email: {quality_stats['with_email']} ({quality_stats['with_email']/quality_stats['total_leads']*100:.1f}%)")
+                                    print(f"   📱 With Phone: {quality_stats['with_phone']} ({quality_stats['with_phone']/quality_stats['total_leads']*100:.1f}%)")
+                                    print(f"   📍 With Location: {quality_stats['with_location']} ({quality_stats['with_location']/quality_stats['total_leads']*100:.1f}%)")
+                                    print(f"   🔗 With Social Media: {quality_stats['with_socials']} ({quality_stats['with_socials']/quality_stats['total_leads']*100:.1f}%)")
                             
-                            break
+                            print(f"🏁 Mission {job_id} Complete. {saved_count} flags planted in the Vault.")
+                            
+                            # SUCCESSFUL EXIT - Browser will be closed by finally block
+                            return
                         else:
                             print(f"[{self.worker_id}] ⚠️ {attempt_profile.upper()} failed to yield results. Re-cloaking...")
 
@@ -437,137 +547,15 @@ class HydraController:
         gc.collect()
 
         
-        # --- PHASE 10: BULK DATA VAULTING WITH DEDUPLICATION ---
-        # --- PHASE 10: STREAMING DATA VAULTING WITH DEDUPLICATION ---
-        # Instead of waiting, we now stream leads directly into the vault
-        print(f"   🚀 Mission {job_id[:8]} streaming into Vault...")
-        
-        # Auto-detect category from search query
-        category = job_data.get('search_metadata', {}).get('category')
-        if not category and self.dedup_service:
-            category = self.dedup_service.auto_detect_category(query)
-            print(f"📂 Auto-detected category: {category}")
-        elif not category:
-            category = "Uncategorized"
-        
-        org_id = job_data.get('org_id')
-        exclude_delivered = job_data.get('exclude_delivered') or job_data.get('search_metadata', {}).get('exclude_delivered', False)
-        
-        # We'll use a local 'seen' set to prevent duplicates WITHIN the same run
-        seen_leads = set()
-        saved_count = 0
-
-        async def process_and_save_lead(lead):
-            nonlocal saved_count
-            try:
-                # 1. Deduplication (Same-Run)
-                lead_id = lead.get('email') or lead.get('source_url') or lead.get('linkedin_url') or lead.get('name')
-                if lead_id in seen_leads: return
-                seen_leads.add(lead_id)
-
-                # 1b. Deduplication (Cros-Job / Delivered)
-                if exclude_delivered and self.dedup_service and org_id:
-                    if self.dedup_service.is_duplicate(org_id, lead.get('name') or lead.get('company'), lead.get('website'), category):
-                        print(f"   🔄 Skipping global duplicate: {lead.get('name') or 'Unnamed'}")
-                        return
-
-                # 2. Data Polishing (Standardization)
-                polished_lead = arbiter.polish_lead(lead)
-                
-                # 3. Verification & Scoring
-                # Short-circuit visuals if not enabled
-                clarity_score, verdict = await arbiter.score_lead(query, polished_lead)
-                
-                # 4. Triple-Verification Protocol
-                is_verified = lead.get('verified', False)
-                has_site = bool(lead.get('website'))
-                has_email = bool(lead.get('email') or lead.get('decision_maker_email'))
-                
-                if is_verified and has_site and has_email and clarity_score > 85:
-                    polished_lead['triple_verified'] = True
-                    print(f"   💎 TRIPLE-VERIFIED Lead Detected: {polished_lead.get('name')}")
-
-                # 5. Predictive Intent Scoring (Includes Marketing Need detection)
-                intent_data = {"intent_score": 0, "oracle_signal": "Baseline Intelligence"}
-                if is_verified and clarity_score > 70:
-                    intent_data = await arbiter.predict_intent(polished_lead)
-                
-                # 6. Save individual result IMMEDIATELY
-                await self._save_single_result(job_data, polished_lead, is_verified, verdict, final_url, clarity_score, intent_data)
-                saved_count += 1
-                
-                # Update Job Progress Count in DB
-                if self.supabase and saved_count % 5 == 0:
-                     self.supabase.table('jobs').update({'result_count': saved_count}).eq('id', job_id).execute()
-
-            except Exception as loop_err:
-                print(f"   ⚠️ Failed to save lead: {loop_err}")
-
-        # Execute Bridge with Streaming
-        needs_enrichment = any(not lead.get('email') for lead in data_results[:10])
-        is_person_platform = platform in ['linkedin', 'twitter', 'instagram']
-        
-        if (needs_enrichment and not is_person_platform) or platform in ['google_maps', 'duckduckgo']:
-             print(f"🌉 Bridge: Running Streaming Enrichment for {len(data_results)} entities...")
-             bridge = EnrichmentBridge(page)
-             # Process top 50 (Self-Healing)
-             async for enriched_lead in bridge.enrich_business_leads(data_results[:50]):
-                  # Check for cancellation between each lead
-                  try:
-                      refresh_res = self.supabase.table('jobs').select('status').eq('id', job_id).execute()
-                      if refresh_res.data and refresh_res.data[0]['status'] == 'cancelled':
-                          print(f"[{self.worker_id}] 🛑 Mission cancelled during enrichment. Saving progress and exiting.")
-                          break
-                  except: pass
-                  
-                  await process_and_save_lead(enriched_lead)
-             
-             # Save remaining non-enriched leads if any (less likely to be useful but keeps parity)
-             for lead in data_results[50:]:
-                  await process_and_save_lead(lead)
-        else:
-             # Just process raw results
-             for lead in data_results:
-                  await process_and_save_lead(lead)
-
         if saved_count == 0:
-            print(f"   ⚠️ No valid data preserved for mission {job_id}.")
+            print(f"   ⚠️ No valid data preserved for mission {job_id} (All strategies exhausted).")
             if self.supabase:
                 self.supabase.table('jobs').update({
                     'status': 'completed',
                     'result_count': 0,
                     'completed_at': datetime.now().isoformat()
                 }).eq('id', job_id).execute()
-            return
 
-        # 4. Finalize Job Status with Data Quality Metrics
-
-        if self.supabase:
-            # Calculate data quality stats
-            quality_stats = {
-                'total_leads': saved_count,
-                'with_email': sum(1 for lead in data_results if lead.get('email') or lead.get('decision_maker_email')),
-                'with_phone': sum(1 for lead in data_results if lead.get('phone') or (lead.get('phones') and len(lead.get('phones')) > 0)),
-                'with_location': sum(1 for lead in data_results if lead.get('location') and lead.get('location') not in ['Unknown', 'Remote / USA', None]),
-                'with_socials': sum(1 for lead in data_results if lead.get('socials') and len(lead.get('socials')) > 0)
-            }
-            
-            self.supabase.table('jobs').update({
-                'status': 'completed',
-                'result_count': saved_count,
-                'completed_at': datetime.now().isoformat()
-            }).eq('id', job_id).execute()
-            
-            # Log data quality summary
-            print(f"\n📊 Mission {job_id[:8]} Data Quality Report:")
-            print(f"   Total Leads: {quality_stats['total_leads']}")
-            if quality_stats['total_leads'] > 0:
-                print(f"   ✉️  With Email: {quality_stats['with_email']} ({quality_stats['with_email']/quality_stats['total_leads']*100:.1f}%)")
-                print(f"   📱 With Phone: {quality_stats['with_phone']} ({quality_stats['with_phone']/quality_stats['total_leads']*100:.1f}%)")
-                print(f"   📍 With Location: {quality_stats['with_location']} ({quality_stats['with_location']/quality_stats['total_leads']*100:.1f}%)")
-                print(f"   🔗 With Social Media: {quality_stats['with_socials']} ({quality_stats['with_socials']/quality_stats['total_leads']*100:.1f}%)")
-        
-        print(f"🏁 Mission {job_id} Complete. {saved_count} flags planted in the Vault.")
 
     async def check_opt_out(self, identifier):
         """
