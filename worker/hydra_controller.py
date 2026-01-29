@@ -40,6 +40,8 @@ except ImportError:
     pass # Handled in process_job_with_browser
 
 load_dotenv()
+load_dotenv("zero_cost.env") # Ensure Zero-Cost settings are loaded
+
 
 class HydraController:
     def __init__(self, worker_id=None):

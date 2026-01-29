@@ -22,18 +22,31 @@ class GeminiClient:
     
     
     def __init__(self):
+        # Load Zero-Cost Configuration explicitly
+        load_dotenv("zero_cost.env")
+        load_dotenv("../zero_cost.env") # Try parent dir if running from subdir
+        
+        self.ai_enabled_config = os.getenv("AI_VALIDATION_ENABLED", "true").lower() == "true"
+        
         self.gemini_key = os.getenv("GEMINI_API_KEY")
         self.groq_key = os.getenv("GROQ_API_KEY")
         
         # ZERO BUDGET / FREE TIER DETECTION
-        # If keys are missing or placeholders, we default to "Heuristic Mode" automatically.
-        self.ai_available = bool(
-            (self.gemini_key and "YOUR_GEMINI" not in self.gemini_key) or 
-            (self.groq_key and "gsk_" in self.groq_key)
-        )
+        if not self.ai_enabled_config:
+            print("⚠️ Zero-Cost Mode Active: AI Validation Disabled via Configuration.")
+            self.ai_available = False
+            self.gemini_key = None
+            self.groq_key = None
+        else:
+            # Normal key check
+            self.ai_available = bool(
+                (self.gemini_key and "YOUR_GEMINI" not in self.gemini_key) or 
+                (self.groq_key and "gsk_" in self.groq_key)
+            )
         
         if not self.ai_available:
-            print("⚠️ Zero-Token Mode: AI keys missing. Swapping to Heuristic Intelligence (Free Tier).")
+            if self.ai_enabled_config:
+                print("⚠️ Zero-Token Mode: AI keys missing. Swapping to Heuristic Intelligence (Free Tier).")
         else:
              print(f"AI Status: Gemini {'Active' if self.gemini_key else 'Missing'}, Groq {'Active' if self.groq_key else 'Missing'}")
 
