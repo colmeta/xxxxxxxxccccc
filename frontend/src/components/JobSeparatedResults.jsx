@@ -50,7 +50,7 @@ export default function JobSeparatedResults() {
                     return { ...job, results: results || [] }
                 })
             )
-            setJobGroups(jobsWithResults.filter(j => j.results.length > 0 || job.status === 'processing' || job.status === 'queued'))
+            setJobGroups(jobsWithResults) // Show all jobs, even empty ones, for clarity
         }
         setLoading(false)
     }
@@ -111,7 +111,7 @@ export default function JobSeparatedResults() {
             {/* Header HUD */}
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-pearl/10 pb-8">
                 <div className="space-y-1">
-                    <h2 className="text-3xl font-display font-black text-white tracking-widest flex items-center gap-4">
+                    <h2 className="text-3xl font-display font-black text-white tracking-wide flex items-center gap-4">
                         DATA <span className="text-transparent bg-clip-text bg-gradient-to-r from-pearl to-white">SETS</span>
                     </h2>
                     <div className="flex items-center gap-2 text-[0.55rem] font-mono text-slate-500 uppercase tracking-widest">
@@ -150,9 +150,9 @@ export default function JobSeparatedResults() {
                         </div>
 
                         {/* Slab Header */}
-                        <div className="flex flex-col lg:flex-row justify-between items-start gap-6 border-b border-white/5 pb-6 mb-8">
-                            <div className="space-y-1">
-                                <div className="text-xl font-display font-black text-white tracking-widest uppercase flex items-center gap-3">
+                        <div className="flex flex-col xl:flex-row justify-between items-start gap-6 border-b border-white/5 pb-6 mb-8">
+                            <div className="space-y-1 w-full xl:w-auto">
+                                <div className="text-xl font-display font-black text-white tracking-wide uppercase flex flex-wrap items-center gap-3">
                                     {job.category || job.target_query}
                                     {['queued', 'processing'].includes(job.status) && (
                                         <span className="flex h-2 w-2 relative">
@@ -161,34 +161,34 @@ export default function JobSeparatedResults() {
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-4 text-[0.6rem] font-mono text-slate-500 uppercase tracking-widest">
-                                    <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(job.created_at).toLocaleDateString()}</span>
-                                    <span className="flex items-center gap-1"><Zap size={10} className="text-pearl" /> {job.results.length} NODES</span>
-                                    <span className="flex items-center gap-1"><Target size={10} /> {job.target_platform.toUpperCase()}</span>
-                                    <span className={`flex items-center gap-1 ${job.status === 'cancelled' ? 'text-red-400' : ''}`}>
+                                <div className="flex flex-wrap items-center gap-4 text-[0.6rem] font-mono text-slate-500 uppercase tracking-wide">
+                                    <span className="flex items-center gap-1 whitespace-nowrap"><Calendar size={10} /> {new Date(job.created_at).toLocaleDateString()}</span>
+                                    <span className="flex items-center gap-1 whitespace-nowrap"><Zap size={10} className="text-pearl" /> {job.results.length} NODES</span>
+                                    <span className="flex items-center gap-1 whitespace-nowrap"><Target size={10} /> {job.target_platform.toUpperCase()}</span>
+                                    <span className={`flex items-center gap-1 whitespace-nowrap ${job.status === 'cancelled' ? 'text-red-400' : ''}`}>
                                         {job.status === 'processing' ? <RefreshCw size={10} className="animate-spin" /> : null}
                                         {job.status.toUpperCase()}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
                                 {['queued', 'processing'].includes(job.status) && (
                                     <button
                                         onClick={() => cancelJob(job.id)}
-                                        className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-[0.65rem] font-black tracking-widest text-red-400 hover:text-white hover:bg-red-500/80 transition-all flex items-center gap-2 uppercase"
+                                        className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-[0.65rem] font-black tracking-wide text-red-400 hover:text-white hover:bg-red-500/80 transition-all flex items-center gap-2 uppercase whitespace-nowrap"
                                     >
                                         STOP_MISSION
                                     </button>
                                 )}
                                 <button
                                     onClick={() => exportJobCSV(job)}
-                                    className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[0.65rem] font-black tracking-widest text-slate-400 hover:text-pearl hover:border-pearl/40 hover:bg-pearl/5 transition-all flex items-center gap-2 uppercase"
+                                    className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-[0.65rem] font-black tracking-wide text-slate-400 hover:text-pearl hover:border-pearl/40 hover:bg-pearl/5 transition-all flex items-center gap-2 uppercase whitespace-nowrap"
                                 >
                                     <Download size={14} /> EXPORT_CSV
                                 </button>
                                 {job.delivery_metadata?.delivered_at && (
-                                    <div className="px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[0.65rem] font-black text-emerald-500 tracking-widest uppercase flex items-center gap-2">
+                                    <div className="px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[0.65rem] font-black text-emerald-500 tracking-wide uppercase flex items-center gap-2 whitespace-nowrap">
                                         <CheckCircle2 size={14} /> DELIVERED
                                     </div>
                                 )}

@@ -344,28 +344,65 @@ class EnrichmentBridge:
             else:
                 print(f"   ⏭️ Layer 13: DISABLED (arXiv noise)")
 
-            # === DECISION MAKER EXTRACTION (LinkedIn - Optional, don't block) ===
-            roles = ["Founder", "CEO", "Head of Marketing"]
-            for role in roles:
-                try:
-                    search_query = f'{role} "{company_name}"'
-                    person_results = await self.linkedin.scrape(search_query)
-                    
-                    if person_results and len(person_results) > 0:
-                        person = person_results[0]
-                        p_company = person.get('company', '').lower()
+            # === UNIVERSAL X-RAY (HYDRA ENHANCED) ===
+            # Aggressive multi-platform dorking to find Decision Makers & Direct Emails
+            # Strategy: "{Company}" ("CEO" OR "Founder") ("email" OR "gmail.com" OR "contact") -site:job_board
+            
+            print(f"   🦴 Engaging Universal X-Ray for {company_name}...")
+            from utils.hydra_client import hydra_client
+            
+            # 1. The "Golden Query" - Attempts to get Name + Title + Email in one shot
+            # Uses Serper/Hydra to scan snippets from LinkedIn, Facebook, Instagram, or direct site matches
+            xray_query = f'"{company_name}" ("CEO" OR "Founder" OR "Owner" OR "Director") ("@gmail.com" OR "@yahoo.com" OR "email" OR "contact")'
+            
+            try:
+                # We ask for more results (num=10) to scan more snippets
+                xray_results = await hydra_client.search(xray_query, type="search", num=10)
+                
+                if xray_results:
+                    for res in xray_results:
+                        snippet = res.get('snippet', '').lower()
+                        title = res.get('name', '')
+                        link = res.get('source_url', '')
                         
-                        if company_name.lower() in p_company or p_company in company_name.lower():
-                            lead['decision_maker_name'] = person.get('name')
-                            lead['decision_maker_title'] = person.get('title')
-                            lead['decision_maker_linkedin'] = person.get('source_url')
-                            if person.get('email'):
-                                lead['decision_maker_email'] = person.get('email')
-                            print(f"   💎 Found Decision Maker: {lead['decision_maker_name']}")
-                            break
-                except Exception as dm_err:
-                    print(f"   ⚠️ Decision maker search skipped: {dm_err}")
-                    continue
+                        # Email Extraction (Regex-lite)
+                        import re
+                        found_emails = re.findall(r'[\w.+-]+@[\w-]+\.[\w.-]+', snippet + " " + title)
+                        
+                        # Detect Decision Maker Name
+                        # Look for patterns like "John Doe - CEO" or "Jane Doe (Founder)"
+                        possible_name = None
+                        if " - " in title:
+                            possible_name = title.split(" - ")[0]
+                        elif "|" in title:
+                            possible_name = title.split(" | ")[0]
+                            
+                        # Validate Role
+                        roles = ["ceo", "founder", "owner", "director", "partner", "president"]
+                        has_role = any(r in title.lower() or r in snippet for r in roles)
+                        
+                        if has_role and (possible_name or found_emails):
+                             if possible_name and not lead.get('decision_maker_name'):
+                                 lead['decision_maker_name'] = possible_name
+                                 lead['decision_maker_title'] = "Decision Maker (X-Ray)" # Generic until parsed better
+                                 lead['decision_maker_linkedin'] = link if "linkedin" in link else lead.get('decision_maker_linkedin')
+                                 print(f"   💎 X-Ray Identity: {possible_name}")
+                                 
+                             if found_emails and not lead.get('decision_maker_email'):
+                                 # Filter out generic emails if possible, prioritize gmail/personal for DM
+                                 valid_email = found_emails[0]
+                                 # Basic cleanup
+                                 if valid_email.endswith('.'): valid_email = valid_email[:-1]
+                                 
+                                 lead['decision_maker_email'] = valid_email
+                                 lead['email'] = valid_email # Also set main email if missing
+                                 print(f"   📧 X-Ray Direct Contact: {valid_email}")
+
+                        if lead.get('decision_maker_email') and lead.get('decision_maker_name'):
+                            break # We got the jackpot
+
+            except Exception as e:
+                print(f"   ⚠️ Universal X-Ray error: {e}")
 
             # Calculate enrichment depth
             layer_count = 0

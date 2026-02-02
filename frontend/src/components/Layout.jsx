@@ -134,7 +134,7 @@ export default function Layout({ children, session }) {
                 </header>
 
                 {/* SCROLLABLE VIEWPORT */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth relative">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth relative w-full max-w-full">
                     {/* BENTO GRID DECORATIONS CAN GO HERE */}
                     {children}
                 </div>

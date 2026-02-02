@@ -4,15 +4,15 @@
 
 @layer base {
   body {
-    @apply bg-background text-white font-sans antialiased overflow-x-hidden selection:bg-pearl selection:text-black;
+    @apply bg-background text-white font-sans antialiased overflow-x-hidden selection:bg-pearl selection:text-black w-screen max-w-[100vw];
     /* Deep Space Gradient + Noise Texture handled via background-image if needed, or simple CSS radial */
     background: radial-gradient(circle at 50% 0%, #0a0a0a, #000000);
   }
 
   /* Custom Scrollbar - Sleek & Minimal */
   ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
