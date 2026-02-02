@@ -19,7 +19,7 @@ class HydraClient:
             "hasdata": os.getenv("HASDATA_API_KEY"),
             "scrapingdog": os.getenv("SCRAPINGDOG_API_KEY"),
             "serpapi": os.getenv("SERPAPI_API_KEY"), # SerpApi (250/mo)
-            # ScraperAPI is exhausted/excluded per user request
+            "scraperapi": os.getenv("SCRAPER_API_KEY"), # ScraperAPI (1000/mo free)
         }
         
         # ENRICHMENT PROVIDERS (Clarity Layer)
@@ -43,7 +43,8 @@ class HydraClient:
             "searchapi": 100, # 100 total free
             "hasdata": 100, # 100 credits
             "scrapingdog": 1000, # 1000 requests
-            "serpapi": 100 # Approx limit (actually 250/mo, conservative)
+            "serpapi": 100, # Approx limit (actually 250/mo, conservative)
+            "scraperapi": 1000 # 1000 free credits usually
         }
 
     async def search(self, query, type="search", num=10):
@@ -75,7 +76,13 @@ class HydraClient:
             res = await self._query_serpapi(query, type, num)
             if res: return res
              
-        # 5. HasData (Web Scraping API)
+        # 5. ScraperAPI (If available, good volume)
+        if self._can_use("scraperapi") and type == "search":
+             print(f"   🐍 Hydra: Engaging ScraperAPI for '{query}'...")
+             res = await self._query_scraperapi(query, num)
+             if res: return res
+
+        # 6. HasData (Web Scraping API)
         if self._can_use("hasdata") and type == "search":
             print(f"   🐍 Hydra: Engaging HasData for '{query}'...")
             res = await self._query_hasdata(query, num)
@@ -307,6 +314,18 @@ class HydraClient:
     def _parse_scrapingdog(self, data):
         results = []
         # Normalizing ScrapingDog structure (varies, assuming 'organic_results' list)
+        for item in data.get("organic_results", []):
+             results.append({
+                "name": item.get("title"),
+                "source_url": item.get("link"),
+                "snippet": item.get("snippet"),
+                "company": "Google Search",
+                "verified": True
+            })
+        return results
+
+    def _parse_scraperapi(self, data):
+        results = []
         for item in data.get("organic_results", []):
              results.append({
                 "name": item.get("title"),

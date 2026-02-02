@@ -2,10 +2,19 @@ services:
   - type: web
     name: clarity-pearl-api
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port 10000
+    buildCommand: "pip install -r requirements.txt && playwright install chromium"
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port 10000"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: FREE_TIER
         value: "true"
+
+  - type: worker
+    name: hydra-worker
+    env: python
+    buildCommand: "pip install -r requirements.txt && playwright install chromium"
+    startCommand: "python -m worker.hydra_controller"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
