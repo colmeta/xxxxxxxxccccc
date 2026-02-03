@@ -20,6 +20,10 @@ class HydraClient:
             "scrapingdog": os.getenv("SCRAPINGDOG_API_KEY"),
             "serpapi": os.getenv("SERPAPI_API_KEY"), # SerpApi (250/mo)
             "scraperapi": os.getenv("SCRAPER_API_KEY"), # ScraperAPI (1000/mo free)
+            "zenserp": os.getenv("ZENSERP_API_KEY"), # Zenserp (50/mo)
+            "serpstack": os.getenv("SERPSTACK_API_KEY"), # Serpstack (100/mo)
+            "google_cse": os.getenv("GOOGLE_CSE_API_KEY"), # Google CSE (100/day)
+            "google_cx": os.getenv("GOOGLE_CSE_CX"), # Google CSE CX ID
         }
         
         # ENRICHMENT PROVIDERS (Clarity Layer)
@@ -39,7 +43,10 @@ class HydraClient:
             "hasdata": 100, # 100 credits
             "scrapingdog": 1000, # 1000 requests
             "serpapi": 100, # Approx limit (actually 250/mo, conservative)
-            "scraperapi": 1000 # 1000 free credits usually
+            "scraperapi": 1000, # 1000 free credits usually
+            "zenserp": 50,
+            "serpstack": 100,
+            "google_cse": 100
         }
 
     async def search(self, query, type="search", num=10):
@@ -82,6 +89,24 @@ class HydraClient:
             print(f"   🐍 Hydra: Engaging HasData for '{query}'...")
             res = await self._query_hasdata(query, num)
             if res: return res
+
+        # 7. Zenserp
+        if self._can_use("zenserp"):
+             print(f"   🐍 Hydra: Engaging Zenserp for '{query}'...")
+             res = await self._query_zenserp(query, num)
+             if res: return res
+
+        # 8. Serpstack
+        if self._can_use("serpstack"):
+             print(f"   🐍 Hydra: Engaging Serpstack for '{query}'...")
+             res = await self._query_serpstack(query, num)
+             if res: return res
+
+        # 9. Google CSE (Highly reliable, 100/day free)
+        if self._can_use("google_cse") and self.api_keys.get("google_cx"):
+             print(f"   🐍 Hydra: Engaging Google CSE for '{query}'...")
+             res = await self._query_google_cse(query, num)
+             if res: return res
 
         print("   ⚠️ Hydra: All fast APIs exhausted or failed. Returning None (Controller will fallback to browser).")
         return None
@@ -357,6 +382,65 @@ class HydraClient:
                 "company": "Google Search",
                 "verified": True
             })
+        return results
+
+    async def _query_zenserp(self, query, num):
+        params = {'apikey': self.api_keys["zenserp"], 'q': query, 'num': num}
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://app.zenserp.com/api/v2/search", params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self.usage["zenserp"] += 1
+                        return self._parse_zenserp(data)
+        except Exception as e: print(f"   [Zenserp] Exception: {e}")
+        return None
+
+    async def _query_serpstack(self, query, num):
+        params = {'access_key': self.api_keys["serpstack"], 'query': query, 'num': num}
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("http://api.serpstack.com/search", params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self.usage["serpstack"] += 1
+                        return self._parse_serpstack(data)
+        except Exception as e: print(f"   [Serpstack] Exception: {e}")
+        return None
+
+    async def _query_google_cse(self, query, num):
+        params = {
+            'key': self.api_keys["google_cse"],
+            'cx': self.api_keys["google_cx"],
+            'q': query,
+            'num': num
+        }
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://www.googleapis.com/customsearch/v1", params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self.usage["google_cse"] += 1
+                        return self._parse_google_cse(data)
+        except Exception as e: print(f"   [GoogleCSE] Exception: {e}")
+        return None
+
+    def _parse_zenserp(self, data):
+        results = []
+        for item in data.get("organic", []):
+             results.append({"name": item.get("title"), "source_url": item.get("url"), "snippet": item.get("description"), "company": "Google Search", "verified": True})
+        return results
+
+    def _parse_serpstack(self, data):
+        results = []
+        for item in data.get("organic_results", []):
+             results.append({"name": item.get("title"), "source_url": item.get("url"), "snippet": item.get("snippet"), "company": "Google Search", "verified": True})
+        return results
+
+    def _parse_google_cse(self, data):
+        results = []
+        for item in data.get("items", []):
+             results.append({"name": item.get("title"), "source_url": item.get("link"), "snippet": item.get("snippet"), "company": "Google Search", "verified": True})
         return results
 
     def _parse_hasdata(self, data):
