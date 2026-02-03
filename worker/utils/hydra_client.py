@@ -30,12 +30,7 @@ class HydraClient:
         }
 
         # Usage tracking (simple in-memory for this session)
-        self.usage = {
-            "serper": 0,
-            "searchapi": 0,
-            "hasdata": 0,
-            "scrapingdog": 0
-        }
+        self.usage = {k: 0 for k in self.api_keys.keys()}
         
         # Free Tier Limits (Approximate daily/monthly safe limits)
         self.limits = {
@@ -93,7 +88,13 @@ class HydraClient:
 
     def _can_use(self, provider):
         """Check if provider has key and is under limit"""
-        if not self.api_keys.get(provider): return False
+        key = self.api_keys.get(provider)
+        if not key or key.strip() == "": return False
+        
+        # Ensure provider exists in usage/limits to prevent KeyError
+        if provider not in self.usage or provider not in self.limits:
+             return False
+
         if self.usage[provider] >= self.limits[provider]: 
             # print(f"   [Limit] {provider} exhausted.")
             return False
@@ -181,6 +182,28 @@ class HydraClient:
                           return self._parse_scrapingdog(data)
         except Exception as e:
              print(f"   [ScrapingDog] Exception: {e}")
+        return None
+        
+    async def _query_scraperapi(self, query, num):
+        # ScraperAPI Structured Google Search endpoint
+        url = "https://api.scraperapi.com/structured/google/search"
+        params = {
+            'api_key': self.api_keys["scraperapi"],
+            'query': query,
+            'num': num
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        self.usage["scraperapi"] += 1
+                        return self._parse_scraperapi(data)
+                    else:
+                        print(f"   [ScraperAPI] Error {response.status}: {await response.text()}")
+        except Exception as e:
+            print(f"   [ScraperAPI] Exception: {e}")
         return None
         
     async def _query_hasdata(self, query, num):
